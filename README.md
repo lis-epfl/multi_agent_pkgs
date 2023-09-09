@@ -18,6 +18,16 @@ At the end of this documentation you can find:
 * [References](#References): references used throughout this text.
 
 ## Getting Started
+### Install gurobi
+Download gurobi 10.0.* from this [link](https://www.gurobi.com/downloads/gurobi-software/). Follow the installation instructions in this [link](https://support.gurobi.com/hc/en-us/articles/4534161999889-How-do-I-install-Gurobi-Optimizer-). Finally, install the license by going to this [link](https://portal.gurobi.com/), creating a license and installing it (instructions on how to install it are shown when you create it).
+
+Then, build gurobi and copy the library:
+``` shell script
+cd /opt/gurobi1002/linux64/src/build  #Note that the name of the folder gurobi1002 changes according to the Gurobi version
+sudo make
+sudo cp libgurobi_c++.a ../../lib/
+```
+
 ### Create and build workspace
 Create a ROS2 workspace and clone the repo inside the `src` folder of the workspace (or simply clone it inside an existing workspace), then build it: 
 ``` shell script

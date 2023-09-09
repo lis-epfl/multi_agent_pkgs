@@ -22,7 +22,7 @@ set(DEPENDENCIES
 include_directories(include/env_builder ${VOXEL_GRID_UTIL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 add_library(environment_builder src/environment_builder.cpp)
-target_link_libraries(environment_builder ${VOXEL_GRID_UTIL_LIBRARIES} voxel_grid) 
+target_link_libraries(environment_builder ${VOXEL_GRID_UTIL_LIBRARIES}) 
 ament_target_dependencies(environment_builder ${DEPENDENCIES})
 
 add_executable(env_builder_node src/env_builder_node.cpp)

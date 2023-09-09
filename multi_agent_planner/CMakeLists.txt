@@ -27,9 +27,6 @@ find_package(voxel_grid_util REQUIRED)
 find_package(path_finding_util REQUIRED)
 find_package(mapping_util REQUIRED)
 
-message("CONVEX_DECOMP_UTIL_LIBRARIES: " ${CONVEX_DECOMP_UTIL_INCLUDE_DIRS})
-message("CONVEX_DECOMP_UTIL_LIBRARIES: " ${CONVEX_DECOMP_UTIL_LIBRARIES})
-
 set(DEPENDENCIES
   pcl_conversions
   rclcpp

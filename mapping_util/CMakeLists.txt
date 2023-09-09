@@ -24,7 +24,7 @@ set(DEPENDENCIES
 include_directories(include/mapping_util ${VOXEL_GRID_UTIL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 add_library(map_builder src/map_builder.cpp)
-target_link_libraries(map_builder ${VOXEL_GRID_UTIL_LIBRARIES} voxel_grid) 
+target_link_libraries(map_builder ${VOXEL_GRID_UTIL_LIBRARIES}) 
 ament_target_dependencies(map_builder ${DEPENDENCIES})
 
 add_executable(map_builder_node src/map_builder_node.cpp)
