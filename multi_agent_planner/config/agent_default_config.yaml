@@ -36,7 +36,7 @@
     max_jerk: 30.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
-    goal: [42.0, 42.0, 1.5] # goal of the agent
+    goal: [42.15, 42.15, 1.5] # goal of the agent
     planner_verbose: false # if true display planner diagnostics
     save_stats: false # if true, save computation time statistics and state history
     gurobi_verbose: false # if true, display gurobi optimization information  
