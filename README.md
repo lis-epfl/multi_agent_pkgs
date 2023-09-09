@@ -37,7 +37,7 @@ git clone https://github.com/lis-epfl/multi_agent_pkgs
 cd ..
 colcon build --symlink-install --packages-select jps3d decomp_util decomp_ros_msgs convex_decomp_util path_finding_util voxel_grid_util env_builder_msgs env_builder mapping_util multi_agent_planner_msgs multi_agent_planner
 ```
-For the visualization of the Safe Corridor in rviz2, you need in addition to build  `decomp_ros_util` but it has issues for now (conflicting OGRE installations between the vendor version used by rviz2 and the system wide installation). **It is not necessary for the functioning of all the other packages**.
+For the visualization of the Safe Corridor in rviz2, you need in addition to build  `decomp_ros_util` which may not work depending on your system (conflicting OGRE installations between the vendor version used by rviz2 and the system wide installation). **It is not necessary for the functioning of all the other packages**.
 ``` shell script
 colcon build --symlink-install --packages-select decomp_ros_utils 
 ```
