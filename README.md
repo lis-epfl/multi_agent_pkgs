@@ -1,5 +1,6 @@
 # Multi-Agent Planning Packages
 **IMPORTANT: this code base is not to be shared with anyone outside the lab.**
+
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
 * [convex_decomp_util](#convex_decomp_util): package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
