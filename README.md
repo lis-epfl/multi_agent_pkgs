@@ -23,7 +23,7 @@ Create a ROS2 workspace and clone the repo inside the `src` folder of the worksp
 ``` shell script
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
-git clone git@github.com:lis-epfl/multi_agent_pkgs.git
+git clone https://github.com/lis-epfl/multi_agent_pkgs
 cd ..
 colcon build --symlink-install --packages-select jps3d decomp_util decomp_ros_msgs convex_decomp_util path_finding_util voxel_grid_util env_builder_msgs env_builder mapping_util multi_agent_planner_msgs multi_agent_planner
 ```
