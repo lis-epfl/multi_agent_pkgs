@@ -49,6 +49,7 @@ You can change the following config files or use them as a basis to create other
 
 When you launch `env_builder.launch` it uses `env_default_config.yaml` and when you launch any launch file from the package `multi_agent_planner` it uses `agent_default_config.yaml`. Some parameters are then changed in each launch file according to its purpose.
 
+## Running the simulation
 ### Single agent
 Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
 ``` shell script
