@@ -1,0 +1,7 @@
+/**: 
+  ros__parameters:
+    env_vg_topic: "env_builder_node/environment_voxel_grid" # topic on which env_builder is publishing the environment 
+    id: 0 # id of the agent; needs to be modified in the launch file in case we have multiple agents
+    voxel_grid_range: [14.0, 14.0, 6.0] # voxel grid size centered around the agent position
+    world_frame: "world" # frame for publishing the voxel grid in
+    free_grid: true # if true set all non occupied voxels to free
