@@ -39,7 +39,7 @@ colcon build --symlink-install --packages-select jps3d decomp_util decomp_ros_ms
 ```
 For the visualization of the Safe Corridor in rviz2, you need in addition to build  `decomp_ros_util` but it has issues for now (conflicting OGRE installations between the vendor version used by rviz2 and the system wide installation). **It is not necessary for the functioning of all the other packages**.
 ``` shell script
-colcon build --symlink-install --packages-select decomp_ros_util 
+colcon build --symlink-install --packages-select decomp_ros_utils 
 ```
 
 ## Running the simulation
