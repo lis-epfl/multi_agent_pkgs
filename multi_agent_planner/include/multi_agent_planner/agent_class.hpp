@@ -439,6 +439,8 @@ private:
 
   // state history variable
   ::std::vector<::std::vector<double>> state_hist_;
+  // state history stamp variable (the wall time of each state of state_hist_)
+  ::std::vector<double> state_hist_stamp_;
 };
 
 } // namespace multi_agent_planner

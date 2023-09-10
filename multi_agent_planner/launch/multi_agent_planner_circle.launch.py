@@ -24,9 +24,9 @@ def generate_launch_description():
     radius = 10  
     center_x = 25
     center_y = 25
-    n_rob = 8 
-    # use_mapping_util = True
-    use_mapping_util = False
+    n_rob = 10 
+    use_mapping_util = True
+    # use_mapping_util = False
 
     # calculate equidistant start and goal positions on the circle
     start_positions = []

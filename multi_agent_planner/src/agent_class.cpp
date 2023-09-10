@@ -204,6 +204,21 @@ void Agent::TrajPlanningIteration() {
     ::std::this_thread::sleep_for(
         ::std::chrono::milliseconds(int(remaining_sleep_time_ms)));
 
+    // update current state according to step_plan_ which indicates how many
+    // MPC steps to skip (in case no external simulator)
+    t_wall = ::std::chrono::high_resolution_clock::now();
+    t_wall_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    t_wall.time_since_epoch())
+                    .count();
+    state_curr_.clear();
+    for (int i = 0; i < n_x_; i++) {
+      state_curr_.push_back(traj_curr_[step_plan_][i]);
+    }
+    state_hist_stamp_.push_back(double(t_wall_ms)*1e-3);
+
+    // save the current state
+    state_hist_.push_back(state_curr_);
+
     /* publish for rviz visualization */
     // publish current position
     PublishCurrentPosition();
@@ -217,18 +232,6 @@ void Agent::TrajPlanningIteration() {
     PublishPolyhedra();
     // publish the traversed trajectory so far
     PublishTrajectoryHistory();
-
-    // update current state according to step_plan_ which indicates how many
-    // MPC steps to skip (in case no external simulator)
-    state_curr_.clear();
-    for (int i = 0; i < n_x_; i++) {
-      state_curr_.push_back(traj_curr_[step_plan_][i]);
-    }
-
-    // save the current state
-    state_hist_.push_back(state_curr_);
-
-    /* ::std::this_thread::sleep_for(::std::chrono::milliseconds(10000)); */
   }
 }
 
@@ -1492,14 +1495,16 @@ void Agent::SaveAndDisplayCompTime(::std::vector<double> &comp_time,
 
 void Agent::SaveStateHistory() {
   if (save_stats_) {
-    // save file
+    // one each row, first save the time then the state
     ::std::string filename = "state_hist_" + ::std::to_string(id_) + ".csv";
     ::std::ofstream myfile;
     myfile.open(filename);
-    for (auto state : state_hist_) {
-      for (int i = 0; i < int(state.size()); i++) {
-        myfile << ::std::fixed << state[i];
-        if (i != int(state.size()) - 1) {
+    for (int i = 0; i < int(state_hist_.size()); i++) {
+      ::std::vector<double> state = state_hist_[i];
+      myfile << ::std::fixed << state_hist_stamp_[i] << ",";
+      for (int j = 0; j < int(state.size()); j++) {
+        myfile << ::std::fixed << state[j];
+        if (j != int(state.size()) - 1) {
           myfile << ",";
         }
       }
