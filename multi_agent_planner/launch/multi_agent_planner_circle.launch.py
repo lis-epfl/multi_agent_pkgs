@@ -40,7 +40,23 @@ def generate_launch_description():
         goal = start_positions[(i + n_rob // 2) % n_rob]
         goal_positions.append((goal[0], goal[1], goal[2]))
 
-    # create nodes
+        # create mapping nodes
+    if use_mapping_util:
+        for i in range(n_rob):
+            params_sub = [{'id': i}]
+            node_mapper = Node(
+                package='mapping_util',
+                executable='map_builder_node',
+                name='map_builder_node_{}'.format(i),
+                parameters=[config_mapper] + params_sub,
+                # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+                # prefix=['xterm -fa default -fs 10 -hold -e'],
+                output='screen',
+                emulate_tty=True,
+            )
+            ld.add_action(node_mapper)
+
+    # create planner nodes
     for i in range(n_rob):
         params_sub = [{'state_ini': list(start_positions[i])},
                       {'n_rob': n_rob},
@@ -59,18 +75,5 @@ def generate_launch_description():
         )
         ld.add_action(node_planner)
 
-        if use_mapping_util:
-            params_sub = [{'id': i}]
-            node_mapper = Node(
-                package='mapping_util',
-                executable='map_builder_node',
-                name='map_builder_node_{}'.format(i),
-                parameters=[config_mapper] + params_sub,
-                # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
-                # prefix=['xterm -fa default -fs 10 -hold -e'],
-                output='screen',
-                emulate_tty=True,
-            )
-            ld.add_action(node_mapper)
 
     return ld

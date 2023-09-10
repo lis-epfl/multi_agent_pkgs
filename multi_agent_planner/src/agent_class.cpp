@@ -214,7 +214,7 @@ void Agent::TrajPlanningIteration() {
     for (int i = 0; i < n_x_; i++) {
       state_curr_.push_back(traj_curr_[step_plan_][i]);
     }
-    state_hist_stamp_.push_back(double(t_wall_ms)*1e-3);
+    state_hist_stamp_.push_back(double(t_wall_ms) * 1e-3);
 
     // save the current state
     state_hist_.push_back(state_curr_);
@@ -831,6 +831,8 @@ void Agent::SolveOptimizationProblem() {
 
   // optimize model
   optimization_failed_ = false;
+  ::std::vector<::std::vector<double>> traj_curr = traj_curr_;
+  ::std::vector<::std::vector<double>> control_curr = control_curr_;
   try {
     model_.optimize();
     /* save the result of the optimization to the member variables */
@@ -868,6 +870,27 @@ void Agent::SolveOptimizationProblem() {
   } catch (...) {
     optimization_failed_ = true;
     ::std::cout << "Exception during optimization" << ::std::endl;
+  }
+
+  // if optimization failed, use the last generated trajectory to update the
+  // current trajectory as well as the current control; the polyhedra that are
+  // used are kept the same as the previous iteration
+  if (optimization_failed_) {
+    if (!traj_curr.empty()) {
+      // Remove the first element
+      traj_curr.erase(traj_curr.begin());
+      control_curr.erase(control_curr.begin());
+
+      // Duplicate the last element and append it
+      ::std::vector<double> last_state = traj_curr.back();
+      traj_curr.push_back(last_state);
+      ::std::vector<double> last_control = control_curr.back();
+      control_curr.push_back(last_control);
+
+      // save the vectors
+      traj_curr_ = traj_curr;
+      control_curr_ = control_curr;
+    }
   }
 
   // save computation time
