@@ -876,6 +876,8 @@ void Agent::SolveOptimizationProblem() {
   // current trajectory as well as the current control; the polyhedra that are
   // used are kept the same as the previous iteration
   if (optimization_failed_) {
+    int64_t stamp_ms = now().nanoseconds() / 1e6;
+    ::std::cout << "stamp optimization fail: " << stamp_ms << ::std::endl;
     if (!traj_curr.empty()) {
       // Remove the first element
       traj_curr.erase(traj_curr.begin());
@@ -945,12 +947,36 @@ void Agent::GenerateTimeAwareSafeCorridor() {
     for (int j = 0; j < n_rob_; j++) {
       // get the last trajectory of the agent
       traj_other_mtx_[j].lock();
+      auto stamp_other = traj_other_agents_[j].stamp;
       ::multi_agent_planner_msgs::msg::Trajectory traj = traj_other_agents_[j];
       traj_other_mtx_[j].unlock();
+
+      int64_t stamp_now = now().nanoseconds() / 1e6;
+
+      // get the stamp in milliseconds from the trajectory
+      int64_t stamp_ms = stamp_other.sec * 1e3 + stamp_other.nanosec / 1e6;
+
+      // compute the iteration number/difference
+      long long it_other = ::std::floor(stamp_ms / (dt_ * step_plan_ * 1e3));
+      long long it_now = ::std::floor(stamp_now / (dt_ * step_plan_ * 1e3));
+      long long it_diff = it_now - it_other;
+
+      int64_t stamp_diff = stamp_now - stamp_ms;
 
       // if j == id_, the trajectory size will be 0 so no need to check
       // that condition as well
       if (traj.states.size() != 0) {
+        /* if (it_diff != 1) && i == 0) { */
+        /*   ::std::cout << "stamp problem: " << stamp_diff << ::std::endl; */
+        /*   ::std::cout << "stamp_now: " << stamp_now << ::std::endl; */
+        /*   ::std::cout << "stamp_traj: " << stamp_ms << ::std::endl; */
+        /*   ::std::cout << "stamp_traj_sec: " << stamp_other.sec <<
+         * ::std::endl; */
+        /*   ::std::cout << "stamp_traj_nanosec: " << stamp_other.nanosec */
+        /*               << ::std::endl; */
+        /*   ::std::cout << "agent id: " << j << ::std::endl; */
+        /*   ::std::cout << "it_diff: " << it_diff << ::std::endl; */
+        /* } */
         // get the position of the other robot
         Vec3f pos_other(traj.states[i + 1].position[0],
                         traj.states[i + 1].position[1],
@@ -986,7 +1012,11 @@ void Agent::GenerateTimeAwareSafeCorridor() {
         // compute perturbation based on time; it is based on the quotient
         // of the division of the time in milliseconds by the planning step
         long long pert_int = (t_wall_ms) / (dt_ * step_plan_ * 1e3);
-        double pert = pert_int % 50 / 1000;
+        // the perturbation variable need to account for the fact that every new
+        // iteration, it is changing the previous hyperplanes of all the
+        // trajectory which may render the trajectory infeasible; need
+        // modification to account for that
+        double pert = 0; // pert_int % 50 / 1000;
         // compute the final plane normal by adding the perturbations to
         // the original plane normal
         Vec3f plane_normal_final = (var_tmp + pert) * right +

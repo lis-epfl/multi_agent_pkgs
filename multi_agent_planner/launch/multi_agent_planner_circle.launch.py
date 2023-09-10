@@ -21,12 +21,12 @@ def generate_launch_description():
     )
 
     # define params
-    radius = 10  
+    radius = 10.05
     center_x = 25
     center_y = 25
     n_rob = 10 
-    use_mapping_util = True
-    # use_mapping_util = False
+    # use_mapping_util = True
+    use_mapping_util = False
 
     # calculate equidistant start and goal positions on the circle
     start_positions = []
@@ -62,7 +62,8 @@ def generate_launch_description():
                       {'n_rob': n_rob},
                       {'id': i},
                       {'goal': list(goal_positions[i])},
-                      {'use_mapping_util': use_mapping_util}]
+                      {'use_mapping_util': use_mapping_util},
+                      {'voxel_grid_update_period': 7.0}]
         node_planner = Node(
             package='multi_agent_planner',
             executable='agent_node',

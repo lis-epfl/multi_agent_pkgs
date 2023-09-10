@@ -1,9 +1,9 @@
 /**: 
   ros__parameters:
     get_grid_service_name: "/env_builder_node/get_voxel_grid" # origin frame of the published poinctloud
-    voxel_grid_range: [20.0, 20.0, 6.0] # voxel grid size to request from env_builder; if we are using the mapping util, this should be specified in the config file of the mapping_util
+    voxel_grid_range: [40.0, 40.0, 6.0] # voxel grid size to request from env_builder; if we are using the mapping util, this should be specified in the config file of the mapping_util
     publish_voxel_grid: true # if true, publish the local voxel grid of each agent
-    voxel_grid_update_period: 0.2 # voxel grid update period in seconds for requests from env_builder; if we are using the mapping_util, the publishing rate of the env_builder will be the update rate of the voxel grid
+    voxel_grid_update_period: 0.2 # voxel grid update period in seconds for requests from env_builder; if we are using the mapping_util, the publishing rate of the env_builder will be the update rate of the voxel grid; there are ros topic messages drops everytime we call the voxel grid service that should be looked at
     use_mapping_util: false # whether to use mapping_util as a voxel grid source or env_builder
     topic_name: "agent" # topic prefix for publishing trajectory
     world_frame: "world" # frame for publishing the trajectories, position, path ...
@@ -16,7 +16,7 @@
     path_vel: 6.0 # discretization velocity of the path
     path_vel_dec: 1.0 # deceleration of discretization velocity of the path after every time step
     rk4: false # whether to use rk4 or euler
-    step_plan: 1 # number of mpc steps to skip during planning
+    step_plan: 1 # number of mpc steps to skip during planning; not tested yet - TODO
     thresh_dist: 1.0 # threshold distance to move forward the reference trajectory on the path
     poly_hor: 3 # number of polyhedra per planning iteration
     n_it_decomp: 42 # number of decomposition iterations for polyhedra generation
