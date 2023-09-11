@@ -144,6 +144,9 @@ private:
   // save traversed trajectory at the end of the node life (on shutdown)
   void SaveStateHistory();
 
+  // save and display the communication latency statistics between agents
+  void SaveAndDisplayCommunicationLatency();
+
   // publish the full generated trajectory for other agents
   void PublishTrajectoryFull();
 
@@ -441,6 +444,10 @@ private:
   ::std::vector<::std::vector<double>> state_hist_;
   // state history stamp variable (the wall time of each state of state_hist_)
   ::std::vector<double> state_hist_stamp_;
+
+  // communication latency history for the full trajectory communication in
+  // milliseconds
+  ::std::vector<::std::vector<double>> com_latency_ms_;
 };
 
 } // namespace multi_agent_planner

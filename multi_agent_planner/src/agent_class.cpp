@@ -22,6 +22,9 @@ Agent::Agent()
   // initialize trajectories of other agents
   traj_other_agents_.resize(n_rob_);
 
+  // initialize communication latency of other agents
+  com_latency_ms_.resize(n_rob_);
+
   // create gurobi model
   CreateGurobiModel();
 
@@ -558,6 +561,13 @@ void Agent::TrajectoryOtherAgentsCallback(
   traj_other_mtx_[id].lock();
   traj_other_agents_[id] = *msg;
   traj_other_mtx_[id].unlock();
+
+  // compute the communication time
+  auto stamp_other = traj_other_agents_[id].stamp;
+  int64_t stamp_ns = stamp_other.sec * 1e9 + stamp_other.nanosec;
+  int64_t stamp_now = now().nanoseconds();
+  int64_t stamp_diff = stamp_now - stamp_ns;
+  com_latency_ms_[id].push_back(stamp_diff / 1e6);
 }
 
 void Agent::PublishTrajectoryFull() {
@@ -956,7 +966,7 @@ void Agent::GenerateTimeAwareSafeCorridor() {
       // get the stamp in milliseconds from the trajectory
       int64_t stamp_ms = stamp_other.sec * 1e3 + stamp_other.nanosec / 1e6;
 
-      // compute the iteration number/difference
+      // compute the iteration number/difference; it should be 1
       long long it_other = ::std::floor(stamp_ms / (dt_ * step_plan_ * 1e3));
       long long it_now = ::std::floor(stamp_now / (dt_ * step_plan_ * 1e3));
       long long it_diff = it_now - it_other;
@@ -1583,6 +1593,57 @@ void Agent::SaveStateHistory() {
   std::cout << std::endl << "max: " << vel_max << std::endl;
 }
 
+void Agent::SaveAndDisplayCommunicationLatency() {
+  // go through all agents and compute the average and max communication latency
+  ::std::vector<double> com_latency_mean;
+  com_latency_mean.resize(n_rob_);
+  ::std::vector<double> com_latency_max;
+  com_latency_max.resize(n_rob_);
+
+  double total_mean = 0;
+  double total_max = 0;
+  for (int i = 0; i < n_rob_; i++) {
+    if (i != id_) {
+      ::std::vector<double> com_latency_i = com_latency_ms_[i];
+      double lat_mean = 0;
+      double lat_max = 0;
+      for (auto lat : com_latency_i) {
+        lat_mean = lat_mean + lat;
+        if (lat > lat_max) {
+          lat_max = lat;
+        }
+      }
+      com_latency_mean[i] = lat_mean / double(com_latency_i.size());
+      com_latency_max[i] = lat_max;
+      total_mean = total_mean + com_latency_mean[i];
+      if (com_latency_max[i] > total_max) {
+        total_max = com_latency_max[i];
+      }
+    }
+  }
+  total_mean = total_mean / (n_rob_ - 1);
+
+  ::std::cout << "communication latency (ms) for agent " << id_
+              << ": mean: " << total_mean << " max: " << total_max
+              << ::std::endl;
+
+  if (save_stats_) {
+    ::std::string filename = "com_latency_" + ::std::to_string(id_) + ".csv";
+    ::std::ofstream myfile;
+    myfile.open(filename);
+    for (int i = 0; i < n_rob_; i++) {
+      if (i != id_) {
+        ::std::vector<double> com_latency_i = com_latency_ms_[i];
+        for (auto lat : com_latency_i) {
+          myfile << ::std::fixed << lat << ",";
+        }
+        myfile << ::std::endl;
+      }
+    }
+    myfile.close();
+  }
+}
+
 GRBModel Agent::InitializeGurobi(GRBEnv &env) {
   if (gurobi_verbose_) {
     env.set(GRB_IntParam_OutputFlag, 0);
@@ -1951,5 +2012,8 @@ void Agent::OnShutdown() {
 
   // save state history
   SaveStateHistory();
+
+  // save and display communication latency
+  SaveAndDisplayCommunicationLatency();
 }
 } // namespace multi_agent_planner
