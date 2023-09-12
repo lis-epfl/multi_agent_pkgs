@@ -25,6 +25,7 @@ def generate_launch_description():
     center_x = 21.1
     center_y = 21.1
     n_rob = 10 
+    voxel_grid_range = [18.0, 18.0, 6.0]
     use_mapping_util = True
     # use_mapping_util = False
 
@@ -43,7 +44,8 @@ def generate_launch_description():
         # create mapping nodes
     if use_mapping_util:
         for i in range(n_rob):
-            params_sub = [{'id': i}]
+            params_sub = [{'id': i},
+                          {'voxel_grid_range': voxel_grid_range}]
             node_mapper = Node(
                 package='mapping_util',
                 executable='map_builder_node',
@@ -66,9 +68,10 @@ def generate_launch_description():
                       {'id': i},
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
-                      {'voxel_grid_update_period': 10.0}]
-        if i == 8:
-            params_sub = params_sub + [{'planner_verbose': True}]
+                      {'voxel_grid_update_period': 10.0},
+                      {'voxel_grid_range': voxel_grid_range}]
+        # if i == 8:
+        #     params_sub = params_sub + [{'planner_verbose': True}]
         node_planner = Node(
             package='multi_agent_planner',
             executable='agent_node',

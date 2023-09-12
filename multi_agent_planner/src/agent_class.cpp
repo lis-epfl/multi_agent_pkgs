@@ -291,8 +291,22 @@ void Agent::UpdatePath() {
         }
       }
     } else if (!traj_ref_curr.empty()) {
-      // if the MIQP/MPC planner has planned at least once take the last point
-      // of the reference trajectory as the starting point for the path planning
+      // if the MIQP/MPC planner has planned at least once; remove the last
+      // points of traj_ref_curr that are not free and then take the last point
+      // of the free points as the starting point; not that traj_ref_curr is
+      // later used to be concatenated with the generated path so it is
+      // essential to remove all the points that are occupied
+      ::std::vector<::std::vector<double>> traj_tmp;
+      int i = 0;
+      while (vg_util.GetVoxelGlobal(
+                 ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_OCC) {
+        traj_tmp.push_back(traj_ref_curr[i]);
+        i = ::std::min(int(traj_ref_curr.size()) - 1, i + 1);
+        if (i == int(traj_ref_curr.size()) - 1)
+          break;
+      }
+      traj_ref_curr = traj_tmp;
       start = traj_ref_curr.back();
     } else if (!state_ini_.empty()) {
       // if the planner has not planned the first iteration yet
@@ -482,7 +496,6 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   }
 
   // first check if the path isn't empty or the planning didn't fail
-  // TODO: needs to be checked further on why the path is failing in some cases
   if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
     return false;
   }
@@ -1334,8 +1347,6 @@ void Agent::GenerateReferenceTrajectory() {
 
   // sample from the path the reference trajectory
   ::std::vector<::std::vector<double>> traj_ref_curr = SamplePath(path_samp);
-
-  // TODO - remove points of the traj_ref_curr that are occupied
 
   // generate velocity reference from the reference path
   if (traj_ref_curr.size() > 1) {
