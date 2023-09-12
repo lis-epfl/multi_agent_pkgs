@@ -21,9 +21,9 @@ def generate_launch_description():
     )
 
     # define params
-    radius = 22
-    center_x = 21.1
-    center_y = 21.1
+    radius = 10 
+    center_x = 20 
+    center_y = 20
     n_rob = 10 
     use_mapping_util = True
     # use_mapping_util = False
@@ -58,17 +58,12 @@ def generate_launch_description():
 
     # create planner nodes
     for i in range(n_rob):
-        # prefix_tmp = []
-        # if i == 6:
-        #     prefix_tmp = ['xterm -fa default -fs 5 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args']
         params_sub = [{'state_ini': list(start_positions[i])},
                       {'n_rob': n_rob},
                       {'id': i},
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
                       {'voxel_grid_update_period': 10.0}]
-        if i == 8:
-            params_sub = params_sub + [{'planner_verbose': True}]
         node_planner = Node(
             package='multi_agent_planner',
             executable='agent_node',
@@ -76,7 +71,6 @@ def generate_launch_description():
             parameters=[config_planner] + params_sub,
             # prefix=['xterm -fa default -fs 5 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
             # prefix=['xterm -fa default -fs 10 -hold -e'],
-            # prefix=prefix_tmp,
             output='screen',
             emulate_tty=True,
         )

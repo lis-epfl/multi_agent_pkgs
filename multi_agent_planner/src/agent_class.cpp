@@ -315,66 +315,70 @@ void Agent::UpdatePath() {
 
     if (!valid_path) {
       RCLCPP_ERROR(get_logger(), "Couldn't find valid path using JPS/DMP");
-    }
+    } else {
 
-    // build the initial path from the start of the reference trajectory to the
-    // last point of the reference trajectory if we are not resetting the path
-    // (not included in the final path because it is the first point of
-    // path_out)
-    ::std::vector<::std::vector<double>> path_ini;
-    if (traj_ref_curr.size() > 0 && !reset_path_) {
-      int path_ini_start_idx = 0;
-      int path_ini_end_idx = 0;
-      // go through the previous path to see where we should start
-      for (int i = 0; i < int(path_curr_.size() - 1); i++) {
-        ::std::vector<double> s_1 = path_curr_[i];
-        ::std::vector<double> s_2 = path_curr_[i + 1];
-        if (IsOnSegment(traj_ref_curr[0], s_1, s_2)) {
-          path_ini_start_idx = i + 1;
-          break;
+      // build the initial path from the start of the reference trajectory to
+      // the last point of the reference trajectory if we are not resetting the
+      // path (not included in the final path because it is the first point of
+      // path_out)
+      ::std::vector<::std::vector<double>> path_ini;
+      if (traj_ref_curr.size() > 0 && !reset_path_) {
+        int path_ini_start_idx = 0;
+        int path_ini_end_idx = 0;
+        // go through the previous path to see where we should start
+        for (int i = 0; i < int(path_curr_.size() - 1); i++) {
+          ::std::vector<double> s_1 = path_curr_[i];
+          ::std::vector<double> s_2 = path_curr_[i + 1];
+          if (IsOnSegment(traj_ref_curr[0], s_1, s_2)) {
+            path_ini_start_idx = i + 1;
+            break;
+          }
+        }
+        // go through the previous path to see where we should end
+        for (int i = 0; i < int(path_curr_.size() - 1); i++) {
+          ::std::vector<double> s_1 = path_curr_[i];
+          ::std::vector<double> s_2 = path_curr_[i + 1];
+          if (IsOnSegment(traj_ref_curr.back(), s_1, s_2)) {
+            path_ini_end_idx = i;
+            break;
+          }
+        }
+        // build path ini
+        path_ini.push_back(traj_ref_curr[0]);
+        for (int i = path_ini_start_idx; i <= path_ini_end_idx; i++) {
+          path_ini.push_back(path_curr_[i]);
         }
       }
-      // go through the previous path to see where we should end
-      for (int i = 0; i < int(path_curr_.size() - 1); i++) {
-        ::std::vector<double> s_1 = path_curr_[i];
-        ::std::vector<double> s_2 = path_curr_[i + 1];
-        if (IsOnSegment(traj_ref_curr.back(), s_1, s_2)) {
-          path_ini_end_idx = i;
-          break;
-        }
+
+      // join the reference trajectory to the planned path and update the final
+      // path used for planning
+      path_mtx_.lock();
+      path_curr_.clear();
+      path_curr_.insert(path_curr_.begin(), path_ini.begin(), path_ini.end());
+      path_curr_.insert(path_curr_.end(), path_out.begin(), path_out.end());
+      // remove segments points that give acute angles in the path
+      path_curr_ = RemoveZigZagSegments(path_curr_);
+
+      path_mtx_.unlock();
+
+      // set the path_ready_ variable to true so we can start the trajectory
+      // planning/optimization
+      path_ready_ = true;
+
+      // compute the cpu computation time
+      double path_comp_time_cpu_ms =
+          (double)(clock() - t_start_cpu) / CLOCKS_PER_SEC * 1e3;
+      if (planner_verbose_) {
+        RCLCPP_INFO(get_logger(), "path planning time: %.3fms",
+                    path_comp_time_cpu_ms);
       }
-      // build path ini
-      path_ini.push_back(traj_ref_curr[0]);
-      for (int i = path_ini_start_idx; i <= path_ini_end_idx; i++) {
-        path_ini.push_back(path_curr_[i]);
-      }
+
+      // save the computation time of the planner for statistics
+      comp_time_path_.push_back(path_comp_time_cpu_ms);
+
+      // publish the generated path
+      PublishPath();
     }
-
-    // join the reference trajectory to the planned path and update the final
-    // path used for planning
-    path_mtx_.lock();
-    path_curr_.clear();
-    path_curr_.insert(path_curr_.begin(), path_ini.begin(), path_ini.end());
-    path_curr_.insert(path_curr_.end(), path_out.begin(), path_out.end());
-    path_mtx_.unlock();
-
-    // set the path_ready_ variable to true so we can start the trajectory
-    // planning/optimization
-    path_ready_ = true;
-
-    // compute the cpu computation time
-    double path_comp_time_cpu_ms =
-        (double)(clock() - t_start_cpu) / CLOCKS_PER_SEC * 1e3;
-    if (planner_verbose_) {
-      RCLCPP_INFO(get_logger(), "path planning time: %.3fms",
-                  path_comp_time_cpu_ms);
-    }
-
-    // save the computation time of the planner for statistics
-    comp_time_path_.push_back(path_comp_time_cpu_ms);
-
-    // publish the generated path
-    PublishPath();
 
     /* sleep for the remaining wall time */
     // compute wall computation time
@@ -477,16 +481,27 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
     path_dmp_final.push_back(path_pt);
   }
 
+  // first check if the path isn't empty or the planning didn't fail
+  // TODO: needs to be checked further on why the path is failing in some cases
+  if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
+    return false;
+  }
+
   // shorten the path
   ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
                                        dmp.getMap());
+
+  /* ::std::cout << "started planning" << ::std::endl; */
+  /* ::std::cout << "path_dmp_final size : " << path_dmp_final.size() */
+  /*             << ::std::endl; */
+  /* ::std::cout << "path_jps size : " << path_jps.size() << ::std::endl; */
 
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
   path_out = path_out_final;
 
-  // return true only if both jps and dmp are valid
-  return valid_jps && valid_dist;
+  /* RCLCPP_INFO(get_logger(), "finished planning"); */
+  return true;
 }
 
 void Agent::CheckReferenceTrajIncrement() {
@@ -503,6 +518,7 @@ void Agent::CheckReferenceTrajIncrement() {
   /* ::std::cout << "proj dist: " << proj_dist << ::std::endl; */
   /* ::std::cout << "path progress: " << path_progress << ::std::endl; */
   if (path_progress > 0 && proj_dist < thresh_dist_) {
+    starting_point_ = proj_point;
     increment_traj_ref_ = true;
   }
 
@@ -1250,24 +1266,33 @@ void Agent::GenerateReferenceTrajectory() {
 
   // find the starting point from the previous reference trajectory
   ::std::vector<double> starting_point;
+  ::std::vector<double> last_point;
+  int traj_ref_start_idx = 0;
   if (traj_ref_curr_.size() > 0 && !reset_path_) {
     traj_ref_mtx_.lock();
     if (increment_traj_ref_) {
       starting_point = traj_ref_curr_[1];
+      /* starting_point = starting_point_; */
     } else {
       starting_point = traj_ref_curr_[0];
     }
+    last_point = traj_ref_curr_.back();
     traj_ref_mtx_.unlock();
   } else {
     starting_point = path_curr[0];
+    last_point = path_curr[0];
+    traj_ref_start_idx = -1;
   }
 
-  /* ::std::cout << "starting point: " << starting_point[0] << " " */
-  /*             << starting_point[1] << " " << starting_point[2] <<
-   * ::std::endl; */
+  /* for (auto &pt : traj_ref_curr_) { */
+  /*   ::std::cout << "traj_ref before point: " << pt[0] << " " << pt[1] << " "
+   */
+  /*               << pt[2] << ::std::endl; */
+  /* } */
 
-  // find the segment of the path that contains the starting point
   int start_idx = 0;
+  /***** Option 1 - best option so far *****/
+  // find the segment of the path that contains the starting point
   for (int i = 0; i < int(path_curr.size() - 1); i++) {
     ::std::vector<double> s_1 = path_curr[i];
     ::std::vector<double> s_2 = path_curr[i + 1];
@@ -1276,7 +1301,6 @@ void Agent::GenerateReferenceTrajectory() {
       break;
     }
   }
-
   // remove first start_idx elements from the path_curr (better to use
   // deque structure but here the vector is small), and add the starting point
   // at the beginning
@@ -1286,8 +1310,32 @@ void Agent::GenerateReferenceTrajectory() {
     path_samp.push_back(path_curr[i]);
   }
 
+  /***** Option 2 *****/
+  // find the segment of the path that contains the last point
+  /* for (int i = 0; i < int(path_curr.size() - 1); i++) { */
+  /*   ::std::vector<double> s_1 = path_curr[i]; */
+  /*   ::std::vector<double> s_2 = path_curr[i + 1]; */
+  /*   if (IsOnSegment(last_point, s_1, s_2)) { */
+  /*     start_idx = i + 1; */
+  /*     break; */
+  /*   } */
+  /* } */
+  // build path from reference trajectory and start_idx
+  /* ::std::vector<::std::vector<double>> path_samp; */
+  /* if (traj_ref_start_idx >= 0 && traj_ref_curr_.size() > 1) { */
+  /*   path_samp.insert(path_samp.begin(), */
+  /*                    traj_ref_curr_.begin() + traj_ref_start_idx, */
+  /*                    traj_ref_curr_.end() - 1); */
+  /* } */
+  /* path_samp.push_back(last_point); */
+  /* for (int i = start_idx; i < int(path_curr.size()); i++) { */
+  /*   path_samp.push_back(path_curr[i]); */
+  /* } */
+
   // sample from the path the reference trajectory
   ::std::vector<::std::vector<double>> traj_ref_curr = SamplePath(path_samp);
+
+  // TODO - remove points of the traj_ref_curr that are occupied
 
   // generate velocity reference from the reference path
   if (traj_ref_curr.size() > 1) {
@@ -1312,10 +1360,36 @@ void Agent::GenerateReferenceTrajectory() {
     traj_ref_curr.back().insert(traj_ref_curr.back().end(), {v_x, v_y, v_z});
   }
 
+  /* for (auto &pt : traj_ref_curr_) { */
+  /*   ::std::cout << "traj_ref after point: " << pt[0] << " " << pt[1] << " "
+   */
+  /*               << pt[2] << ::std::endl; */
+  /* } */
+  /* RCLCPP_INFO(get_logger(), " finished"); */
+
   // save the reference trajectory
   traj_ref_mtx_.lock();
   traj_ref_curr_ = traj_ref_curr;
   traj_ref_mtx_.unlock();
+}
+
+::std::vector<::std::vector<double>>
+Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
+  // remove unnecessare points that are in the middle of 2 segments forming an
+  // acute angle
+  for (int i = 0; i < int(path.size()) - 2; i++) {
+    ::std::vector<double> sg_1 = {path[i][0] - path[i + 1][0],
+                                  path[i][1] - path[i + 1][1],
+                                  path[i][2] - path[i + 1][2]};
+    ::std::vector<double> sg_2 = {path[i + 1][0] - path[i + 2][0],
+                                  path[i + 1][1] - path[i + 2][1],
+                                  path[i + 1][2] - path[i + 2][2]};
+    if (DotProduct(sg_1, sg_2) <= 0) {
+      path.erase(path.begin() + i + 1);
+      i = ::std::max(0, i - 2);
+    }
+  }
+  return path;
 }
 
 ::std::vector<std::vector<double>>

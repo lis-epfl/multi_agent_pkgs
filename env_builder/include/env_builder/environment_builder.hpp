@@ -33,6 +33,9 @@ private:
   // inflate the obstacles by inflation_dist_
   void InflateObstacles();
 
+  // save obstacle pointcloud to file
+  void SaveObstacles();
+
   // create the environment pointcloud to publish it regularly
   void CreateEnvironmentPointCloud();
 
@@ -65,6 +68,8 @@ private:
   // if true, initialize grid to be free instead of unknown
   double free_grid_;
   double inflation_dist_;
+  // if true wirte obstacle positions and pointcloud to csv file
+  bool save_obstacles_;
 
   // obstacles parameters
   bool multi_obst_size_;

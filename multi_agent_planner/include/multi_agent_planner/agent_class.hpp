@@ -102,6 +102,11 @@ private:
   // we can move along the trajectory
   void CheckReferenceTrajIncrement();
 
+  // remove points that are the middle of two segments that have an acute angle
+  // between them since they are redundant
+  ::std::vector<::std::vector<double>>
+  RemoveZigZagSegments(::std::vector<::std::vector<double>> path);
+
   // sample path using path_vel and n_hor_
   ::std::vector<std::vector<double>>
   SamplePath(::std::vector<::std::vector<double>> &path);
@@ -383,6 +388,9 @@ private:
   // current reference trajectory for N discrete points (the first point does is
   // fixed and does not have a reference)
   ::std::vector<::std::vector<double>> traj_ref_curr_;
+  // starting point for the sampling of the reference trajectory; it can be
+  // updated using the path progress concept
+  ::std::vector<double> starting_point_;
   // current generated trajectory (concatenation of the following: position,
   // velocity, acceleration
   ::std::vector<::std::vector<double>> traj_curr_;
@@ -449,7 +457,6 @@ private:
   // milliseconds
   ::std::vector<::std::vector<double>> com_latency_ms_;
 };
-
 } // namespace multi_agent_planner
 
 #endif // MULTI_AGENT_PLANNER_AGENT_CLASS_H_

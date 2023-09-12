@@ -142,7 +142,7 @@ ShortenPath(const std::vector<Eigen::Vector3d> &path,
 // then we shorten
 ::std::vector<::std::vector<double>>
 ShortenDMPPath(::std::vector<::std::vector<double>> &path,
-               ::voxel_grid_util::VoxelGrid &vg);
+               ::voxel_grid_util::VoxelGrid &vg); 
 
 /**
  * @brief check if 2 paths are equivalent i.e. a homotopy in the grid frame
