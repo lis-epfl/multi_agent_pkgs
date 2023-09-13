@@ -504,11 +504,6 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
                                        dmp.getMap());
 
-  /* ::std::cout << "started planning" << ::std::endl; */
-  /* ::std::cout << "path_dmp_final size : " << path_dmp_final.size() */
-  /*             << ::std::endl; */
-  /* ::std::cout << "path_jps size : " << path_jps.size() << ::std::endl; */
-
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
   path_out = path_out_final;
@@ -1297,12 +1292,6 @@ void Agent::GenerateReferenceTrajectory() {
     traj_ref_start_idx = -1;
   }
 
-  /* for (auto &pt : traj_ref_curr_) { */
-  /*   ::std::cout << "traj_ref before point: " << pt[0] << " " << pt[1] << " "
-   */
-  /*               << pt[2] << ::std::endl; */
-  /* } */
-
   int start_idx = 0;
   /***** Option 1 - best option so far *****/
   // find the segment of the path that contains the starting point
@@ -1370,13 +1359,6 @@ void Agent::GenerateReferenceTrajectory() {
     }
     traj_ref_curr.back().insert(traj_ref_curr.back().end(), {v_x, v_y, v_z});
   }
-
-  /* for (auto &pt : traj_ref_curr_) { */
-  /*   ::std::cout << "traj_ref after point: " << pt[0] << " " << pt[1] << " "
-   */
-  /*               << pt[2] << ::std::endl; */
-  /* } */
-  /* RCLCPP_INFO(get_logger(), " finished"); */
 
   // save the reference trajectory
   traj_ref_mtx_.lock();
