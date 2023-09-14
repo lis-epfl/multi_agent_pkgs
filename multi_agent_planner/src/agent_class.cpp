@@ -618,6 +618,9 @@ void Agent::PublishTrajectoryFull() {
     traj_msg.states.push_back(state);
   }
 
+  // set the time step
+  traj_msg.dt = dt_;
+
   // publish the trajectory message
   traj_full_pub_->publish(traj_msg);
 }
@@ -730,7 +733,7 @@ void Agent::PublishCurrentPosition() {
   marker_msg.scale.x = 2 * drone_radius_;
   marker_msg.scale.y = 2 * drone_radius_;
   marker_msg.scale.z = 2 * drone_radius_;
-  marker_msg.color.a = 1.0;
+  marker_msg.color.a = 1;
   marker_msg.color.r = 0.0;
   marker_msg.color.g = 1.0;
   marker_msg.color.b = 0.0;
@@ -1275,7 +1278,6 @@ void Agent::GenerateReferenceTrajectory() {
   // find the starting point from the previous reference trajectory
   ::std::vector<double> starting_point;
   ::std::vector<double> last_point;
-  int traj_ref_start_idx = 0;
   if (traj_ref_curr_.size() > 0 && !reset_path_) {
     traj_ref_mtx_.lock();
     if (increment_traj_ref_) {
