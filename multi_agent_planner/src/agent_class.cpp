@@ -1279,6 +1279,7 @@ void Agent::GenerateReferenceTrajectory() {
   int traj_ref_start_idx = 0;
   ::std::vector<double> starting_point;
   ::std::vector<double> last_point;
+  int traj_ref_start_idx = 0;
   if (traj_ref_curr_.size() > 0 && !reset_path_) {
     traj_ref_mtx_.lock();
     if (increment_traj_ref_) {
