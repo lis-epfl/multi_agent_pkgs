@@ -496,8 +496,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   }
 
   // shorten the path
-  ::voxel_grid_util::VoxelGrid vg_util =
-      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
+  ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
+                                       dmp.getMap());
 
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
