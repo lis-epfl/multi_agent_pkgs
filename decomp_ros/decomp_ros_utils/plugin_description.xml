@@ -1,4 +1,4 @@
-<library path="libdecomp_rviz_plugins">
+<library path="decomp_rviz_plugins">
   <class name="decomp_rviz_plugins/EllipsoidArray"
     type="decomp_rviz_plugins::EllipsoidArrayDisplay"
     base_class_type="rviz_common::Display">

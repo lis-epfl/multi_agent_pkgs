@@ -262,13 +262,8 @@ void Agent::UpdatePath() {
     ::env_builder_msgs::msg::VoxelGrid voxel_grid =
         voxel_grid_stamped_.voxel_grid;
     voxel_grid_mtx_.unlock();
-    ::Eigen::Vector3d origin(voxel_grid.origin[0], voxel_grid.origin[1],
-                             voxel_grid.origin[2]);
-    ::Eigen::Vector3i dimension(voxel_grid.dimension[0],
-                                voxel_grid.dimension[1],
-                                voxel_grid.dimension[2]);
-    ::voxel_grid_util::VoxelGrid vg_util(
-        origin, dimension, voxel_grid.voxel_size, voxel_grid.data);
+    ::voxel_grid_util::VoxelGrid vg_util =
+        ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
     // mutex for the goal variable
     goal_mtx_.lock();
@@ -501,8 +496,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   }
 
   // shorten the path
-  ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
-                                       dmp.getMap());
+  ::voxel_grid_util::VoxelGrid vg_util =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
