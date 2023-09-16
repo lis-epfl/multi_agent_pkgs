@@ -1276,6 +1276,7 @@ void Agent::GenerateReferenceTrajectory() {
   path_mtx_.unlock();
 
   // find the starting point from the previous reference trajectory
+  int traj_ref_start_idx = 0;
   ::std::vector<double> starting_point;
   ::std::vector<double> last_point;
   if (traj_ref_curr_.size() > 0 && !reset_path_) {

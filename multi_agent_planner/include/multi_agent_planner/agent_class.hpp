@@ -13,7 +13,8 @@
 #include "path_tools.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "voxel_grid.hpp"
-#include <data_ros_utils.h>
+#include "decomp_ros_utils/data_ros_utils.h"
+#include "mapping_util/map_builder.hpp"
 
 #include <decomp_geometry/polyhedron.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>

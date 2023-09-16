@@ -37,8 +37,19 @@ install(DIRECTORY
 )
 
 install(TARGETS
+  map_builder
   map_builder_node
-  DESTINATION lib/${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
+
+ament_export_include_directories(include)
+ament_export_libraries(map_builder)
+ament_export_dependencies(${DEPENDENCIES})
 
 ament_package()

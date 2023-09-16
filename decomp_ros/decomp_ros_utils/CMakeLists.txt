@@ -63,9 +63,8 @@ add_library(decomp_rviz_plugins SHARED ${SOURCE_FILES})
 target_link_libraries(decomp_rviz_plugins ${QT_LIBRARIES} ${rviz_DEFAULT_PLUGIN_LIBRARIES} mesh_shape)
 ament_target_dependencies(decomp_rviz_plugins ${DEPENDENCIES})
 
-install(DIRECTORY include/decomp_ros_utils
-   DESTINATION include
-   FILES_MATCHING PATTERN "*.h"
+install(DIRECTORY include/
+   DESTINATION include/
 )
 
 install(TARGETS
@@ -79,5 +78,8 @@ install(TARGETS
 target_compile_definitions(decomp_rviz_plugins PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 pluginlib_export_plugin_description_file(rviz_common plugin_description.xml)
+
+ament_export_include_directories(include)
+ament_export_dependencies(${DEPENDENCIES})
 
 ament_package()
