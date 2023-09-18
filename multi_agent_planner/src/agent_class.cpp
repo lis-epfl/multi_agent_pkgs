@@ -352,7 +352,8 @@ void Agent::UpdatePath() {
             break;
           }
         }
-        // build path ini
+        // build path ini (without the last ref point because it is the start of
+        // the path planning algorithm)
         path_ini.push_back(traj_ref_curr[0]);
         for (int i = path_ini_start_idx; i <= path_ini_end_idx; i++) {
           path_ini.push_back(path_curr_[i]);
@@ -1274,7 +1275,6 @@ void Agent::GenerateReferenceTrajectory() {
   int traj_ref_start_idx = 0;
   ::std::vector<double> starting_point;
   ::std::vector<double> last_point;
-  int traj_ref_start_idx = 0;
   if (traj_ref_curr_.size() > 0 && !reset_path_) {
     traj_ref_mtx_.lock();
     if (increment_traj_ref_) {
