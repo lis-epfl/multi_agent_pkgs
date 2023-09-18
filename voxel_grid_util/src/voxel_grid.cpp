@@ -236,6 +236,8 @@ void VoxelGrid::InflateObstacles(double inflation_dist) {
   }
 }
 
+void VoxelGrid::CreatePotentialField(double potential_dist, int pow) {}
+
 Eigen::Vector3d VoxelGrid::GetOrigin() const { return origin_; }
 
 Eigen::Vector3i VoxelGrid::GetDim() const { return dim_; }

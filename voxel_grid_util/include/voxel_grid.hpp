@@ -151,6 +151,9 @@ public:
   // inflate the obstacle of the grid by a certain distance
   void InflateObstacles(double inflation_dist);
 
+  // create potential field
+  void CreatePotentialField(double potential_dist, int pow);
+
   // create mask to get the voxels whithin a certain distance of a center voxel
   ::std::vector<::std::pair<::Eigen::Vector3i, int8_t>>
   CreateMask(double mask_dist, double pow);
