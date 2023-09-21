@@ -236,7 +236,24 @@ void VoxelGrid::InflateObstacles(double inflation_dist) {
   }
 }
 
-void VoxelGrid::CreatePotentialField(double potential_dist, int pow) {}
+void VoxelGrid::CreatePotentialField(double potential_dist, int pow) {
+  ::std::vector<::std::pair<::Eigen::Vector3i, int8_t>> mask =
+      CreateMask(potential_dist, pow);
+
+  ::Eigen::Vector3i n;
+  for (n(0) = 0; n(0) < dim_(0); n(0)++) {
+    for (n(1) = 0; n(1) < dim_(1); n(1)++) {
+      for (n(2) = 0; n(2) < dim_(2); n(2)++) {
+        if (IsOccupied(n)) {
+          for (const auto &it : mask) {
+            const ::Eigen::Vector3i new_n = n + it.first;
+            SetVoxelInt(new_n, ::std::max(GetVoxelInt(new_n), it.second));
+          }
+        }
+      }
+    }
+  }
+}
 
 Eigen::Vector3d VoxelGrid::GetOrigin() const { return origin_; }
 

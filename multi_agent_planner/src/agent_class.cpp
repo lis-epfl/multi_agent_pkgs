@@ -471,7 +471,7 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // dmp planner
   // set up dmp planner
   t_start = clock();
-  IterativeDMPlanner3D dmp(false);
+  IterativeDMPlanner3D dmp(planner_verbose_);
   dmp.setPotentialRadius(Vec3f(dmp_pot_rad_, dmp_pot_rad_, dmp_pot_rad_));
   dmp.setSearchRadius(Vec3f(dmp_search_rad_, dmp_search_rad_, dmp_search_rad_));
   dmp.setMap(map_util, start);
@@ -493,6 +493,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // first check if the path isn't empty or the planning didn't fail
   if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
+    ::std::cout << int(valid_jps) << " " << int(valid_dist) << " "
+                << path_dmp_final.size() << ::std::endl;
     return false;
   }
 

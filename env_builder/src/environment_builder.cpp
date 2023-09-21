@@ -19,6 +19,9 @@ EnvironmentBuilder::EnvironmentBuilder()
   // inflate the obstacles by inflation_dist_
   InflateObstacles();
 
+  // generate potential field from potential_dist_ and potential_pow_
+  CreatePotentialField();
+
   // save obstacle positions and pointcloud to file if save_obstacles_ is true
   if (save_obstacles_) {
     SaveObstacles();
@@ -237,6 +240,10 @@ void EnvironmentBuilder::InflateObstacles() {
   voxel_grid_shared_ptr_->InflateObstacles(inflation_dist_);
 }
 
+void EnvironmentBuilder::CreatePotentialField() {
+  voxel_grid_shared_ptr_->CreatePotentialField(potential_dist_, potential_pow_);
+}
+
 void EnvironmentBuilder::SaveObstacles() {
   // save pointcloud to csv file
   ::voxel_grid_util::WriteGridToFile(voxel_grid_shared_ptr_, "map.csv");
@@ -256,6 +263,8 @@ void EnvironmentBuilder::DeclareRosParameters() {
   declare_parameter("vox_size", 0.3);
   declare_parameter("free_grid", true);
   declare_parameter("inflation_dist", 0.3);
+  declare_parameter("potential_dist", 0.0);
+  declare_parameter("potential_pow", 1.0);
   declare_parameter("save_obstacles", false);
 
   declare_parameter("multi_obst_size", false);
@@ -281,6 +290,8 @@ void EnvironmentBuilder::InitializeRosParameters() {
   vox_size_ = get_parameter("vox_size").as_double();
   free_grid_ = get_parameter("free_grid").as_bool();
   inflation_dist_ = get_parameter("inflation_dist").as_double();
+  potential_dist_ = get_parameter("potential_dist").as_double();
+  potential_pow_ = get_parameter("potential_pow").as_double();
   save_obstacles_ = get_parameter("save_obstacles").as_bool();
 
   multi_obst_size_ = get_parameter("multi_obst_size").as_bool();

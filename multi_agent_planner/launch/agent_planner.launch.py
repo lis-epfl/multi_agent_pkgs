@@ -13,8 +13,35 @@ def generate_launch_description():
         'agent_default_config.yaml'
     )
 
+    config_mapper = os.path.join(
+        get_package_share_directory('mapping_util'),
+        'config',
+        'map_builder_default_config.yaml'
+    )
+
+    # params
+    use_mapping_util = True
+    voxel_grid_range = [18.0, 18.0, 6.0]
+
+    if use_mapping_util:
+        params_sub = [{'id': 0},
+                      {'voxel_grid_range': voxel_grid_range}]
+        node_mapper = Node(
+            package='mapping_util',
+            executable='map_builder_node',
+            name='map_builder_node_0',
+            parameters=[config_mapper] + params_sub,
+            # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+            # prefix=['xterm -fa default -fs 10 -hold -e'],
+            output='screen',
+            emulate_tty=True,
+        )
+        ld.add_action(node_mapper)
+
     # create node
-    params_sub = [{'use_mapping_util': False}]
+    params_sub = [{'use_mapping_util': use_mapping_util},
+                  {'planner_verbose': False},
+                  {'voxel_grid_range': voxel_grid_range}]
     agent_node = Node(
         package='multi_agent_planner',
         executable='agent_node',

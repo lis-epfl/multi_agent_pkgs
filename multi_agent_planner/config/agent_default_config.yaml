@@ -40,7 +40,7 @@
     planner_verbose: false # if true display planner diagnostics
     save_stats: true # if true, save computation time statistics and state history
     gurobi_verbose: false # if true, display gurobi optimization information  
-    dmp_pot_rad: 1.2 # potential radius of the distance map planner (dmp)
-    dmp_search_rad: 1.2 # search radius for the dmp
+    dmp_pot_rad: 1.8 # potential radius of the distance map planner (dmp)
+    dmp_search_rad: 1.8 # search radius for the dmp
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.2 # path planning period

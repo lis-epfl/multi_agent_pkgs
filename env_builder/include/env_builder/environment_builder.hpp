@@ -33,6 +33,9 @@ private:
   // inflate the obstacles by inflation_dist_
   void InflateObstacles();
 
+  // generate potential field using potential_dist_ and potential_pow_
+  void CreatePotentialField();
+
   // save obstacle pointcloud to file
   void SaveObstacles();
 
@@ -68,6 +71,8 @@ private:
   // if true, initialize grid to be free instead of unknown
   double free_grid_;
   double inflation_dist_;
+  double potential_dist_;
+  double potential_pow_;
   // if true wirte obstacle positions and pointcloud to csv file
   bool save_obstacles_;
 
