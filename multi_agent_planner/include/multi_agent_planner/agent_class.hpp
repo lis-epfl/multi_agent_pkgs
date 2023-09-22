@@ -112,6 +112,15 @@ private:
   ::std::vector<std::vector<double>>
   SamplePath(::std::vector<::std::vector<double>> &path);
 
+  // compute the path sampling velocity based on path and the voxel
+  // grid/potential field; if the path is close to the obstacles, we wanna
+  // sample it at slower speeds
+  double ComputePathVelocity(::std::vector<::std::vector<double>> &path);
+
+  // compute the velocity limit using the voxel value and the distance to the
+  // start
+  double GetVoxelVelocityLimit(double voxel_val, double dist_start);
+
   // add hyperplane to a safe corridor
   ::std::vector<LinearConstraint3D>
   AddHyperplane(::std::vector<LinearConstraint3D> &poly_const_vec,
@@ -271,6 +280,14 @@ private:
   double dt_;
   // sampling path velocity
   double path_vel_;
+  // minimum sampling path velocity
+  double path_vel_min_;
+  // maximum sampling path velocity
+  double path_vel_max_;
+  // distance sensitivity when computing the path_vel in GetVoxelVelocityLimit
+  double sens_dist_;
+  // potential sensitivity when computing the path_vel in GetVoxelVelocityLimit
+  double sens_pot_;
   // sampling path velocity deceleration
   double path_vel_dec_;
   // whether to use rk4 or euler for integration
@@ -341,7 +358,8 @@ private:
   bool reset_path_ = false;
 
   /* create thread variables (if we don't use member variables and instead we
-   * use local variables in the constructor for the threads, we get an error) */
+   * use local variables in the constructor for the threads, we get an error)
+   */
   // path planning thread
   ::std::thread path_planning_thread_;
   // trajectory planning thread
@@ -386,8 +404,8 @@ private:
   ::std::vector<double> goal_curr_;
   // current generated path
   ::std::vector<::std::vector<double>> path_curr_;
-  // current reference trajectory for N discrete points (the first point does is
-  // fixed and does not have a reference)
+  // current reference trajectory for N discrete points (the first point does
+  // is fixed and does not have a reference)
   ::std::vector<::std::vector<double>> traj_ref_curr_;
   // starting point for the sampling of the reference trajectory; it can be
   // updated using the path progress concept

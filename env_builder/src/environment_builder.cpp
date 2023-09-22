@@ -75,6 +75,10 @@ EnvironmentBuilder::GenerateVoxelGridMSG(::std::array<float, 3> &position,
 
   vg_msg.voxel_grid.origin = origin;
 
+  // add the potential distance and potential power
+  vg_msg.voxel_grid.potential_dist = potential_dist_;
+  vg_msg.voxel_grid.potential_pow = potential_pow_;
+
   // find the range in integer dimensions
   ::std::array<uint32_t, 3> dim;
   dim[0] = floor(range[0] / vox_size_);
@@ -148,6 +152,10 @@ void EnvironmentBuilder::CreateEnvironmentVoxelGrid() {
   voxel_grid_stamped_msg_.voxel_grid.origin[0] = origin_grid_[0];
   voxel_grid_stamped_msg_.voxel_grid.origin[1] = origin_grid_[1];
   voxel_grid_stamped_msg_.voxel_grid.origin[2] = origin_grid_[2];
+
+  // add the potential distance and potential power
+  voxel_grid_stamped_msg_.voxel_grid.potential_dist = potential_dist_;
+  voxel_grid_stamped_msg_.voxel_grid.potential_pow = potential_pow_;
 
   // set the integer dimensions of the grid
   voxel_grid_stamped_msg_.voxel_grid.dimension[0] =

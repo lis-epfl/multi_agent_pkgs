@@ -246,7 +246,7 @@ void Agent::UpdatePath() {
                   "path thread: waiting for voxel grid to be ready");
     }
     ::std::this_thread::sleep_for(
-        ::std::chrono::milliseconds(int(path_planning_period_ * 1e3)));
+        ::std::chrono::milliseconds(int(10 * path_planning_period_ * 1e3)));
   }
 
   // while ros is running, plan a path at a constant frequency
@@ -1406,6 +1406,10 @@ Agent::SamplePath(::std::vector<::std::vector<double>> &path) {
     return traj_ref;
   }
 
+  // compute path sampling velocity using the path and the potential field
+  path_vel_ = ComputePathVelocity(path);
+  /* RCLCPP_INFO(get_logger(), "path_vel: %f", path_vel_); */
+
   // compute sampling distance from path velocity and time step
   double samp_dist = path_vel_ * dt_;
 
@@ -1454,6 +1458,84 @@ Agent::SamplePath(::std::vector<::std::vector<double>> &path) {
 
   // return reference trajectory
   return traj_ref;
+}
+
+double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
+  // define path velocity
+  double path_vel = path_vel_max_;
+
+  // path start eigen vector
+  ::Eigen::Vector3d path_start(path[0][0], path[0][1], path[0][2]);
+
+  // get the latest version of the voxel grid
+  voxel_grid_mtx_.lock();
+  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
+      voxel_grid_stamped_.voxel_grid;
+  voxel_grid_mtx_.unlock();
+  ::voxel_grid_util::VoxelGrid vg_util =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
+
+  // go through each segment of the path and compute its limit on the path
+  for (int i = 0; i < int(path.size()) - 1; i++) {
+    ::Eigen::Vector3d start = vg_util.GetCoordLocal(
+        ::Eigen::Vector3d(path[i][0], path[i][1], path[i][2]));
+    ::Eigen::Vector3d end = vg_util.GetCoordLocal(
+        ::Eigen::Vector3d(path[i + 1][0], path[i + 1][1], path[i + 1][2]));
+    ::Eigen::Vector3d collision_pt;
+    ::std::vector<::Eigen::Vector3d> visited_points;
+    double max_dist_raycast = (start - end).norm();
+    bool line_clear = ::path_finding_util::IsLineClear(
+        start, end, vg_util, max_dist_raycast, collision_pt, visited_points);
+
+    // add the start to the visited points
+    visited_points.push_back(start);
+    if (line_clear) {
+      /* go through each visited voxel (integer coordinates in the local grid)
+       and compute the path velocity limit of each one; if it's smaller than
+       path_vel, then set path_vel to the new minimum path velocity; this does
+       not include the start point  of the raycasting */
+      for (const ::Eigen::Vector3d &pt : visited_points) {
+        // get the value of the voxel/visited point and the distance of the
+        // voxel to the start point
+        /* ::std::cout << "visited pt: " << pt.transpose() << ::std::endl; */
+        double voxel_val = double(vg_util.GetVoxelInt(pt));
+        double dist_start = (path_start - pt).norm() * vg_util.GetVoxSize();
+
+        // use the heuristic to compute the path velocity limit
+        double path_vel_tmp = GetVoxelVelocityLimit(voxel_val, dist_start);
+
+        /* ::std::cout << "voxel_val: " << voxel_val << ::std::endl; */
+        /* ::std::cout << "dist_start: " << dist_start << ::std::endl; */
+        /* ::std::cout << "path_vel_tmp: " << path_vel_tmp << ::std::endl; */
+
+        // update the path_vel
+        if (path_vel_tmp < path_vel) {
+          path_vel = path_vel_tmp;
+        }
+      }
+    } else {
+      // look at the collision point and use it to limit the speed
+      int8_t voxel_val = vg_util.GetVoxelInt(collision_pt);
+      double dist_start = (start - collision_pt).norm();
+      double path_vel_tmp = GetVoxelVelocityLimit(voxel_val, dist_start);
+      if (path_vel_tmp < path_vel) {
+        path_vel = path_vel_tmp;
+      }
+
+      // stop the loop after the collision
+      break;
+    }
+  }
+
+  return path_vel;
+}
+
+double Agent::GetVoxelVelocityLimit(double voxel_val, double dist_start) {
+  // compute linear factor
+  double alpha = 1 - (1 - 1 / exp(sens_pot_ * voxel_val)) *
+                         (1 / exp(sens_dist_ * dist_start));
+  double path_vel = path_vel_min_ + (path_vel_max_ - path_vel_min_) * alpha;
+  return path_vel;
 }
 
 void Agent::ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
@@ -1857,7 +1939,10 @@ void Agent::DeclareRosParameters() {
   declare_parameter("n_u", 3);
   declare_parameter("n_hor", 7);
   declare_parameter("dt", 0.1);
-  declare_parameter("path_vel", 3.5);
+  declare_parameter("path_vel_min", 4.5);
+  declare_parameter("path_vel_max", 4.5);
+  declare_parameter("sens_dist", 1.0);
+  declare_parameter("sens_pot", 1.0);
   declare_parameter("path_vel_dec", 0.1);
   declare_parameter("rk4", false);
   declare_parameter("step_plan", 1);
@@ -1883,7 +1968,6 @@ void Agent::DeclareRosParameters() {
   declare_parameter("goal", ::std::vector<double>(3, 0.0));
   declare_parameter("planner_verbose", false);
   declare_parameter("save_stats", false);
-  declare_parameter("dmp_pot_rad", 0.0);
   declare_parameter("dmp_search_rad", 0.0);
   declare_parameter("dmp_n_it", 1);
   declare_parameter("path_planning_period", 0.1);
@@ -1908,7 +1992,10 @@ void Agent::InitializeRosParameters() {
   n_u_ = get_parameter("n_u").as_int();
   n_hor_ = get_parameter("n_hor").as_int();
   dt_ = get_parameter("dt").as_double();
-  path_vel_ = get_parameter("path_vel").as_double();
+  path_vel_min_ = get_parameter("path_vel_min").as_double();
+  path_vel_max_ = get_parameter("path_vel_max").as_double();
+  sens_dist_ = get_parameter("sens_dist").as_double();
+  sens_pot_ = get_parameter("sens_pot").as_double();
   path_vel_dec_ = get_parameter("path_vel_dec").as_double();
   rk4_ = get_parameter("rk4").as_bool();
   step_plan_ = get_parameter("step_plan").as_int();
@@ -1934,7 +2021,6 @@ void Agent::InitializeRosParameters() {
   goal_curr_ = get_parameter("goal").as_double_array();
   planner_verbose_ = get_parameter("planner_verbose").as_bool();
   save_stats_ = get_parameter("save_stats").as_bool();
-  dmp_pot_rad_ = get_parameter("dmp_pot_rad").as_double();
   dmp_search_rad_ = get_parameter("dmp_search_rad").as_double();
   dmp_n_it_ = get_parameter("dmp_n_it").as_int();
   path_planning_period_ = get_parameter("path_planning_period").as_double();
@@ -1948,6 +2034,7 @@ void Agent::VoxelGridResponseCallback(
     // store the data descriptions
     voxel_grid_mtx_.lock();
     voxel_grid_stamped_ = future.get()->voxel_grid_stamped;
+    dmp_pot_rad_ = voxel_grid_stamped_.voxel_grid.potential_dist;
     voxel_grid_mtx_.unlock();
     voxel_grid_ready_ = true;
     if (planner_verbose_) {
