@@ -54,7 +54,7 @@ if __name__ == "__main__":
     seed = 50
 
     ##################### Voxel Grid parameters
-    dimension = [10, 10, 10] # meters
+    dimension = [10.0, 10.0, 10.0] # meters
     voxel_size = 0.2 # meters
     origin = [0.0, 0.0, 0.0] # meters
 
