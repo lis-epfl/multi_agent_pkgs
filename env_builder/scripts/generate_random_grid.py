@@ -48,13 +48,13 @@ def write_config_file(filename, voxel_grid, seed):
 
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
-    config_filename = "new_config"
+    config_filename = "env_new_config"
     seed = 50
 
     ##################### Voxel Grid parameters
-    dimension = [10, 10, 10]
-    voxel_size = 0.5
-    origin = [-5.0, -5.0, -5.0]
+    dimension = [10, 10, 10] # meters
+    voxel_size = 1.0 # meters
+    origin = [-5.0, -5.0, -5.0] # meters
 
     voxel_grid = VoxelGrid(dimension, voxel_size, origin) # Create the voxel grid
 
@@ -68,14 +68,14 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(loop)
 
     ## Create a wall
-    # wall = Wall((80,0,0), direction1=(0.0,1.0,0.0), direction2 = (0.5, 0.0, 1.0), width=3)
-    # wall.add_square_gap((20,20),10,10)
+    # wall = Wall((80,0,0), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=3) # Two directions to define the plane
+    # wall.add_square_gap((3,3),3,3)
     # voxel_grid.add_shape(wall)
 
     ## Create a Random volume
-    # rd_volume_cylinders = RandomVolume([[0,0,0], [20,40,40]], seed)
-    # rd_volume_cylinders.add_random_cylinders(10)
-    # voxel_grid.add_shape(rd_volume_cylinders)
+    rd_volume_cylinders = RandomVolume([[-5.0,-5.0, -5.0], [5.0,5.0,5.0]], seed) # The containing volume of randomly generated cylinders.
+    rd_volume_cylinders.add_random_cylinders(10) # Choose to add 10 cylinders with parameters as default
+    voxel_grid.add_shape(rd_volume_cylinders)
 
     ## Or with loops (can do both in same volume)
     # rd_volume_loops = RandomVolume([[40, 0, 0], [60,40,40]], seed)
@@ -83,6 +83,6 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(rd_volume_loops)
 
     ########################### END OF PARAMETRIZING ##################################
-    write_config_file(config_filename, voxel_grid, seed)
+    write_config_file(config_filename, voxel_grid, seed) # Write the YAML config file
 
-    # voxel_grid.visualize()  # Visualize the voxel grid if you wish
+    # voxel_grid.visualize()  # Visualize the voxel grid if you wish (needs matplotlib)

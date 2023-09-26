@@ -12,16 +12,16 @@ class VoxelGrid:
         Initialize a VoxelGrid.
 
         Args:
-            dimension (tuple): 3D vector (size in all 3 directions).
+            dimension (tuple): 3D vector (size in all 3 directions) in meters .
             voxel_size (float): Scalar (size/side length of each voxel/cube).
-            origin (tuple): 3D vector (origin of the voxel grid relative to a world frame centered at 0,0,0).
+            origin (tuple): 3D vector (origin of the voxel grid relative to a world frame centered at 0.0,0.0,0.0).
         """
         self.dimension = dimension
         self.voxel_size = voxel_size
         self.origin = origin
         self.grid_size = self.to_voxel_coordinates(dimension[0] + self.origin[0], 
                                                    dimension[1] + self.origin[1], 
-                                                   dimension[2] + self.origin[2])
+                                                   dimension[2] + self.origin[2]) # Create the size of the grid
         self.data = [0] * (self.grid_size[0] * self.grid_size[1] * self.grid_size[2])
         self.obstacles = [] # List of shapes that will be obstacles. A random volume and a wall are also shapes.
 
@@ -151,13 +151,16 @@ class VoxelGrid:
                             break
 
     def get_occupied_voxels(self):
+        """
+        Returns two lists : a list of size of obstacles (voxel size) by triplets, and a list that will give the x,y,z positions of given obstacles. Function made to fill out the YAML file
+        """
         self.compute_occupancy()
         return [self.voxel_size]*len(self.occupied_voxels), self.occupied_voxels
 
 
 class Shape:
     """
-    Superclass to implement obstacles
+    Superclass to implement obstacles.
     """
     def __init__(self):
         pass
@@ -179,8 +182,8 @@ class Cylinder(Shape):
     Class that implements the cylinder shape
     """
     def __init__(self, axis_origin, axis_direction, radius, cylinder_height = float('Inf')):
-        self.axis_origin = np.array(axis_origin)
-        self.axis_direction = np.array(axis_direction)
+        self.axis_origin = np.array(axis_origin) # the starting point of the cylinder 
+        self.axis_direction = np.array(axis_direction) # its direction, need not to be a unit vector, but should not be null vector.
         self.axis_direction = self.axis_direction/np.linalg.norm(self.axis_direction)
         self.radius = radius
         self.cylinder_height = cylinder_height
@@ -200,7 +203,7 @@ class Cylinder(Shape):
         if 0 <= np.dot(OP, self.axis_direction) < self.cylinder_height : # point is not too far from origin
             projection = np.dot(OP, self.axis_direction) * self.axis_direction # projection on the cylinder axis
             distance_vector = OP - projection # distance to cylinder axis
-            if np.linalg.norm(distance_vector) <= self.radius : # distance to cylinder is smaller than radius
+            if np.linalg.norm(distance_vector) <= self.radius : # distance to cylinder is smaller than radius : point belongs to the cylinder.
                 return True
         return False
 
@@ -213,6 +216,7 @@ class Loop(Shape):
     def __init__(self, axis_origin, angle, inside_radius, outside_radius, thickness = 1):
         self.axis_origin = np.array(axis_origin)
         self.axis_direction = np.array([np.cos(angle), np.sin(angle), 0])
+        # A loop consists only of two cylinders of same thickness and same revolution axis
         self.inner_cylinder = Cylinder(self.axis_origin, self.axis_direction, inside_radius,thickness)
         self.outer_cylinder = Cylinder(self.axis_origin, self.axis_direction, outside_radius,thickness)
 
@@ -226,7 +230,7 @@ class Loop(Shape):
         Returns :
         boolean indicating if the loop includes this point
         """
-        return self.outer_cylinder.includes(point) and not(self.inner_cylinder.includes(point)) # Point belongs to loop if it belongs to the outer cylonder without belonging to inner cylinder.
+        return self.outer_cylinder.includes(point) and not(self.inner_cylinder.includes(point)) # Point belongs to loop if it belongs to the outer cylinder without belonging to inner cylinder.
 
                     
 class Wall(Shape):
@@ -247,16 +251,17 @@ class Wall(Shape):
         """
         self.origin = np.array(origin)
 
+        # Two directions define a plane, they should not be colinear
         self.direction1 = np.array(direction1)
         self.direction1 = self.direction1 / np.linalg.norm(self.direction1) # to make it a unit vector
 
         self.direction2 = np.array(direction2)
         self.direction2 = self.direction2 / np.linalg.norm(self.direction2) # to make it a unit vector
 
-        self.normal = np.cross(self.direction1, self.direction2)
+        self.normal = np.cross(self.direction1, self.direction2) # normal vector defined as the third dimension.
         self.normal = self.normal /np.linalg.norm(self.normal) # make it unit
 
-        self.direction2 = np.cross(self.normal, self.direction1)
+        self.direction2 = np.cross(self.normal, self.direction1) #make the base orthonormal for the wall.
 
         self.length = length
         self.width = width
@@ -277,7 +282,7 @@ class Wall(Shape):
         OP = point - self.origin
         if 0 <= np.dot(self.direction1, OP) < self.length and -self.width < np.dot(self.normal, OP) <= 0 and 0 <= np.dot(self.direction2, OP) < self.height : # is point in wall ?
             for gap in self.gaps :
-                if gap.includes(point): # is point on a gap ?
+                if gap.includes(point): # is point in a gap ?
                     return False
             return True
         return False
@@ -305,7 +310,7 @@ class RandomVolume(Shape):
         rd.seed(seed)
 
 
-    def add_random_cylinder(self, 
+    def add_random_cylinders(self, 
                             nb_cylinder, 
                             direction_range = [[-1.0,-1.0,-1.0], [1.0,1.0,1.0]], 
                             radius_range = [0.5, 2.0], 
@@ -350,9 +355,10 @@ class RandomVolume(Shape):
         Returns a random tuple from same length as the provided range.
         """
         bounds = np.array(bounds)
-        if bounds.ndim == 1 :
+        if bounds.ndim == 1 : # In that case, we have a single number to output. Example of input : [0.0,1.0]
             return rd.uniform(bounds[0], bounds[1])
         
+        # else, the input looks something like this : [[0.0, 0.0], [1.0, 1.0]] -> should output 2 random numbers.
         result = []
         for i in range(len(bounds[0])):
             result.append(rd.uniform(bounds[0,i], bounds[1,i]))
@@ -360,10 +366,10 @@ class RandomVolume(Shape):
 
 
     def includes(self, point):
-        if (self.origin_range[0, 0]<point[0]<self.origin_range[1,0] 
-            and self.origin_range[0, 1]<point[1]<self.origin_range[1,1]
-            and self.origin_range[0, 2]<point[2]<self.origin_range[1,2]): # Check if point is inside the volume defined by the random volume
-            for shape in self.shapes :
+        if (self.origin_range[0, 0] <= point[0] < self.origin_range[1,0] 
+            and self.origin_range[0, 1] <= point[1] < self.origin_range[1,1]
+            and self.origin_range[0, 2] <= point[2] < self.origin_range[1,2]): # Check if point is inside the volume defined by the random volume (x between x_min and x_max, y between ... etc)
+            for shape in self.shapes : # then tests whether point belongs a least too one of the shapes in the collection.
                 if shape.includes(point):
                     return True
         return False
