@@ -10,7 +10,8 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('multi_agent_planner'),
         'config',
-        'agent_default_config.yaml'
+        # 'agent_default_config.yaml'
+        'agent_agile_config.yaml'
     )
 
     config_mapper = os.path.join(
@@ -47,7 +48,7 @@ def generate_launch_description():
         executable='agent_node',
         name='agent_node_0',
         parameters=[config] + params_sub,
-        prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+        # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
         # prefix=["sudo \"PYTHONPATH=$PYTHONPATH\" \"LD_LIBRARY_PATH=$LD_LIBRARY_PATH\" \"PATH=$PATH\" \"USER=$USER\"  \"GUROBI_HOME=$GUROBI_HOME\" \"GRB_LICENSE_FILE=$GRB_LICENSE_FILE\" -u toumieh bash -c "],
         # shell=True
         output='screen',
