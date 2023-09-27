@@ -247,104 +247,52 @@ ShortenDMPPath(::std::vector<::std::vector<double>> &path,
   ::std::vector<::Eigen::Vector3d> path_eig_local =
       ::path_finding_util::PathGlobalToLocal(path_eig, vg);
 
-  // create path out eigen
-  ::std::vector<::Eigen::Vector3d> path_out_eig;
-
   // start from the first point of the path and walk until we reach a point that
   // is not occupied or in a potential field
-  int path_idx = 0;
-  /* ::std::cout << "path_eig_local: " << path_eig_local.size() << ::std::endl;
-   */
-  path_out_eig.push_back(path_eig_local[path_idx]);
-  /* ::std::cout << "inside the function 3" << ::std::endl; */
-  while (path_idx + 1 < int(path_eig_local.size())) {
-    ::Eigen::Vector3d start = path_eig_local[path_idx];
-    int path_idx_2 = path_idx + 1;
-    /* ::std::cout << "start: " << start.transpose() << ::std::endl; */
-    /* ::std::cout << "path_idx_2: " << path_idx_2 << ::std::endl; */
-    if (int(vg.GetVoxelInt(start)) <= 0) {
-      // it is not occupied or in a potential field consider it as a start of
-      // the path shortening; start looking for the next best point to shorten
-      // the path with
-      bool end_loop = false;
-      ::Eigen::Vector3d end = path_eig_local[path_idx_2];
-      /* ::std::cout << "start is free" << ::std::endl; */
-      /* ::std::cout << "end: " << end.transpose() << ::std::endl; */
-      while (path_idx_2 < int(path_eig_local.size())) {
-        ::Eigen::Vector3d end_tmp = path_eig_local[path_idx_2];
-        if (int(vg.GetVoxelInt(end_tmp)) <= 0) {
-          // the end point is free then raycast to see if all voxels in between
-          // are free
-          /* ::std::cout << "end is free" << ::std::endl; */
-          ::std::vector<Eigen::Vector3d> visited_points;
-          Eigen::Vector3d collision_pt;
-          double dist_start_end = (start - end_tmp).norm();
-          bool collision = !::path_finding_util::IsLineClear(
-              start, end_tmp, vg, dist_start_end, collision_pt, visited_points);
-          if (collision) {
-            /* ::std::cout << "collision" << ::std::endl; */
-            end_loop = true;
-          } else {
-            for (auto &pt : visited_points) {
-              if (int(vg.GetVoxelInt(pt)) > 0) {
-                end_loop = true;
-                /* ::std::cout << "visited point is potential field" */
-                /*             << ::std::endl; */
-              }
-            }
-          }
-          // if all voxels in between are not free, then take the latest point
-          // that the raycast gave free voxels
-          if (end_loop) {
-            if (end != end_tmp) {
-              path_idx_2 = path_idx_2 - 1;
-              /* ::std::cout << "loop is ending path_idx_2: " << path_idx_2 */
-              /*             << ::std::endl; */
-            }
-            break;
-          } else {
-            // if the raycast is free, then set this point as the end point
-            end = end_tmp;
-            path_idx_2 = path_idx_2 + 1;
-            /* ::std::cout << "updating end point" << end_tmp.transpose() */
-            /* << " updating path_idx_2: " << path_idx_2 */
-            /* << ::std::endl; */
-          }
+  int i = 0;
+  while (i + 1 < int(path_eig_local.size())) {
+    if (int(vg.GetVoxelInt(path_eig_local[i])) <= 0) {
+      int i_start = i;
+      int i_end = i;
+      int j = i + 1;
+      while (j < int(path_eig_local.size())) {
+        bool line_clear = true;
+        ::std::vector<Eigen::Vector3d> visited_points;
+        ::Eigen::Vector3d collision_pt;
+        ::Eigen::Vector3d start = path_eig_local[i_start];
+        ::Eigen::Vector3d end = path_eig_local[j];
+        double dist_start_end = (start - end).norm();
+        bool collision = !::path_finding_util::IsLineClear(
+            start, end, vg, dist_start_end, collision_pt, visited_points);
+        if (collision) {
+          line_clear = false;
         } else {
-          // if I entered the loop and started considering more than the first
-          // point, I need to decrement path_idx_2 so the next iteration starts
-          // from the current end point
-          /* ::std::cout << "point is not free" << ::std::endl; */
-          if (path_idx_2 > path_idx + 1) {
-            path_idx_2 = path_idx_2 - 1;
-            /* ::std::cout */
-            /*     << " Not the first point is not free, so update path_idx_2"
-             */
-            /*     << ::std::endl; */
+          for (auto &pt : visited_points) {
+            if (int(vg.GetVoxelInt(pt)) > 0) {
+              line_clear = false;
+            }
           }
+        }
+        // check if line clear and voxel is clear
+        if (int(vg.GetVoxelInt(path_eig_local[j])) <= 0 && line_clear) {
+          i_end = j;
+          j = j + 1;
+        } else {
           break;
         }
       }
-      // at this point we should have the end point that allows for a raycast
-      // that doesn't hit any occupied voxel or a potential field voxel
-      /* ::std::cout << "adding endpoint: " << end.transpose() << ::std::endl;
-       */
-      path_out_eig.push_back(end);
-    } else {
-      // if the voxel is not free i.e. is part of a potential field, then add it
-      // to the final path
-      /* ::std::cout << "adding start point because it is not free: " */
-      /*             << start.transpose() << ::std::endl; */
-      path_out_eig.push_back(start);
+      // remove the points between i_start and i_end
+      if (i_end > i_start) {
+        path_eig_local.erase(path_eig_local.begin() + i_start + 1,
+                             path_eig_local.begin() + i_end);
+      }
     }
-    path_idx = path_idx_2;
-    /* ::std::cout << "update path_idx: " << path_idx << ::std::endl; */
+    i = i + 1;
   }
-  /* ::std::cout << "path straightening is done" << ::std::endl; */
 
   // convert the path from local to global
   ::std::vector<::Eigen::Vector3d> path_eig_global =
-      ::path_finding_util::PathLocalToGlobal(path_out_eig, vg);
+      ::path_finding_util::PathLocalToGlobal(path_eig_local, vg);
 
   // convert eigen path to vector path
   ::std::vector<::std::vector<double>> path_out =
