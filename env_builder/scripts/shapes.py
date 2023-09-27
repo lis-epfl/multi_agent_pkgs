@@ -307,6 +307,7 @@ class RandomVolume(Shape):
     def __init__(self, origin_range, seed = 0):
         self.shapes = []
         self.origin_range = np.array(origin_range)
+        self.origin_range[1,:] += self.origin_range[0,:]
         rd.seed(seed)
 
 
