@@ -258,7 +258,7 @@ private:
   double eps_;
   bool verbose_;
 
-  const char val_free_ = 0;
+  const int8_t val_free_ = 0;
   int xGoal_, yGoal_, zGoal_;
   bool use_2d_;
   bool use_jps_ = false;

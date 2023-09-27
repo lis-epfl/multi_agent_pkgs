@@ -199,7 +199,7 @@ std::vector<bool> DMPlanner<Dim>::setPath(const vec_Vecf<Dim> &path,
     for (int nx = -rn; nx <= rn; nx++) {
       for (int ny = -rn; ny <= rn; ny++) {
         for (int nz = -hn; nz <= hn; nz++) {
-          if (std::hypot(nx, ny) > rn)
+          if (std::hypot(std::hypot(nx, ny), nz) > rn)
             continue;
           Veci<Dim> n;
           n << nx, ny, nz;
@@ -371,74 +371,7 @@ template <int Dim>
 void DMPlanner<Dim>::setMap(const std::shared_ptr<JPS::MapUtil<Dim>> &map_util,
                             const Vecf<Dim> &pos) {
   map_util_ = std::make_shared<JPS::MapUtil<Dim>>(*map_util);
-  const auto mask = createMask(pow_);
-  // compute a 2D local distance map
-  const auto dim = map_util_->getDim();
-  Veci<Dim> coord1 = Veci<Dim>::Zero();
-  Veci<Dim> coord2 = dim;
-  if (potential_map_range_.norm() > 0) {
-    coord1 = map_util_->floatToInt(pos - potential_map_range_);
-    coord2 = map_util_->floatToInt(pos + potential_map_range_);
-    for (int i = 0; i < Dim; i++) {
-      if (coord1(i) < 0)
-        coord1(i) = 0;
-      else if (coord1(i) >= dim(i))
-        coord1(i) = dim(i) - 1;
-
-      if (coord2(i) < 0)
-        coord2(i) = 0;
-      else if (coord2(i) >= dim(i))
-        coord2(i) = dim(i) - 1;
-    }
-  }
-
-  std::vector<int8_t> map = map_util_->getMap();
-  auto distance_map = map;
-
-  Veci<Dim> n;
-  if (Dim == 2) {
-    for (n(0) = coord1(0); n(0) < coord2(0); n(0)++) {
-      for (n(1) = coord1(1); n(1) < coord2(1); n(1)++) {
-        int idx = map_util_->getIndex(n);
-        if (map[idx] > 0) {
-          distance_map[idx] = H_MAX;
-          for (const auto &it : mask) {
-            const Veci<Dim> new_n = n + it.first;
-
-            if (!map_util_->isOutside(new_n)) {
-              const int new_idx = map_util_->getIndex(new_n);
-              distance_map[new_idx] =
-                  std::max(distance_map[new_idx], it.second);
-            }
-          }
-        }
-      }
-    }
-  } else {
-    for (n(0) = coord1(0); n(0) < coord2(0); n(0)++) {
-      for (n(1) = coord1(1); n(1) < coord2(1); n(1)++) {
-        for (n(2) = coord1(2); n(2) < coord2(2); n(2)++) {
-          int idx = map_util_->getIndex(n);
-          if (map[idx] > 0) {
-            distance_map[idx] = H_MAX;
-            for (const auto &it : mask) {
-              const Veci<Dim> new_n = n + it.first;
-
-              if (!map_util_->isOutside(new_n)) {
-                const int new_idx = map_util_->getIndex(new_n);
-                distance_map[new_idx] =
-                    std::max(distance_map[new_idx], it.second);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  cmap_ = distance_map;
-  map_util_->setMap(map_util_->getOrigin(), dim, distance_map,
-                    map_util_->getRes());
+  cmap_ = map_util_->getMap();
 }
 
 template <int Dim>

@@ -50,6 +50,10 @@ void MapBuilder::EnvironmentVoxelGridCallback(
   if (pos_curr_.size() > 0) {
     double voxel_size = vg_msg->voxel_grid.voxel_size;
     voxel_grid_curr_.voxel_grid.voxel_size = voxel_size;
+    voxel_grid_curr_.voxel_grid.potential_dist =
+        vg_msg->voxel_grid.potential_dist;
+    voxel_grid_curr_.voxel_grid.potential_pow =
+        vg_msg->voxel_grid.potential_pow;
 
     // find the origin of the grid
     ::std::array<float, 3> origin_grid = vg_msg->voxel_grid.origin;
@@ -88,6 +92,7 @@ void MapBuilder::EnvironmentVoxelGridCallback(
     voxel_grid_curr_.voxel_grid.data.resize(dim[0] * dim[1] * dim[2]);
     ::voxel_grid_util::VoxelGrid vg =
         ::mapping_util::ConvertVGMsgToVGUtil(vg_msg->voxel_grid);
+
     for (int i = start_idx[0]; i < start_idx[0] + int(dim[0]); i++) {
       for (int j = start_idx[1]; j < start_idx[1] + int(dim[1]); j++) {
         for (int k = start_idx[2]; k < start_idx[2] + int(dim[2]); k++) {

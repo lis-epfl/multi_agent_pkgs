@@ -100,7 +100,7 @@ Raycast(const ::Eigen::Vector3d &start, const ::Eigen::Vector3d &end,
     Eigen::Vector3i curr_point_i(x, y, z);
 
     // compute real point of intersection
-    // save  global tMax and do origin + tMax*dir
+    // save global tMax and do origin + tMax*dir
     Eigen::Vector3d curr_point_real = start + std::min(1.0, tMax) * dir;
 
     if (verbose) {
