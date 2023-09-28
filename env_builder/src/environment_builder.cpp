@@ -52,6 +52,8 @@ EnvironmentBuilder::EnvironmentBuilder()
       "~/" + get_grid_service_name_,
       ::std::bind(&EnvironmentBuilder::GetVoxelGridService, this,
                   ::std::placeholders::_1, ::std::placeholders::_2));
+
+  ::std::cout << "done" << ::std::endl;
 }
 
 ::env_builder_msgs::msg::VoxelGridStamped

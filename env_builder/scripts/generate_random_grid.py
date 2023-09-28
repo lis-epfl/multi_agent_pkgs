@@ -54,9 +54,9 @@ if __name__ == "__main__":
     seed = 50
 
     ##################### Voxel Grid parameters
-    dimension = [20.0, 10.0, 10.0] # meters
-    voxel_size = 0.2 # meters
-    origin = [0.0, 0.0, 0.0] # meters
+    dimension = [40.0, 40.0, 10.0] # meters
+    voxel_size = 0.3 # meters
+    origin = [2.0, 2.0, -3.5] # meters
 
     voxel_grid = VoxelGrid(dimension, voxel_size, origin) # Create the voxel grid
 
@@ -75,8 +75,8 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(wall)
 
     ## Create a Random volume
-    rd_volume_cylinders = RandomVolume([[15.0, 0.0, 0.0], [5.0, 10.0, 10.0]], seed) # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders.add_random_cylinders(3) # Choose to add 10 cylinders with parameters as default
+    rd_volume_cylinders = RandomVolume([origin, dimension], seed) # The containing volume of randomly generated cylinders.
+    rd_volume_cylinders.add_random_cylinders(90) # Choose to add 10 cylinders with parameters as default
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # # Or with loops (can do both in same volume)
@@ -87,4 +87,4 @@ if __name__ == "__main__":
     ########################### END OF PARAMETRIZING ##################################
     write_config_file(config_filename, voxel_grid, seed) # Write the YAML config file
 
-    voxel_grid.visualize()  # Visualize the voxel grid if you wish (needs matplotlib)
+    # voxel_grid.visualize()  # Visualize the voxel grid if you wish (needs matplotlib)
