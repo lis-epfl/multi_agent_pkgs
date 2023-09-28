@@ -9,7 +9,7 @@ def write_config_file(filename, voxel_grid, seed):
     dimension_grid: %s # dimensions in meters
     vox_size: %f # voxel size of the grid
     free_grid: true # if true the grid is initialized to free instead of unknown
-    inflation_dist: 0.0 # all voxels within that distance to an occupied voxel are set as occupied
+    inflation_dist: 0.3 # all voxels within that distance to an occupied voxel are set as occupied
     potential_dist: 1.8 # all voxels within that distance to an occupied voxel are set as a potential field
     potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
   
