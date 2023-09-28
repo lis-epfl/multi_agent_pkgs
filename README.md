@@ -4,7 +4,7 @@
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
 * [convex_decomp_util](#convex_decomp_util): package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
-* [decomp_ros](#decomp_ros): package for Sage Corridor generation and visualization based on [[3]](#3).
+* [decomp_ros](#decomp_ros): package for Safe Corridor generation and visualization based on [[3]](#3).
 * [env_builder](#env_builder): ROS2 package that allows to build an evironment in the form of voxel grid and publishes it in the form of a pointcloud for visualization in rviz2.
 * [jps3d](#jps3d): a modified version of [jps3d](https://github.com/KumarRobotics/jps3d) that checks for traversibilty when generating a path to make sure we can generate a Safe Corridor around it.
 * [mapping_util](#mapping_util): ROS2 package for voxel grid generation (clearing out voxels that are in the field of view of the drone) - TODO.

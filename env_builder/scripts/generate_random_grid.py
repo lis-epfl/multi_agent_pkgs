@@ -18,7 +18,7 @@ def write_config_file(filename, voxel_grid, seed):
     range_obst: [30.0, 30.0, 0.0] # area on the map where to generate obstacles, always positive numbers to move it around, use the origin_obst variable
     origin_obst: [0.0, 0.0, 0.0] # origin of the area where we generate the obstacles
     size_obst: %s # height x width x length
-    n_obst: 135 # 225, 180, 135, 90, number of obstacles (only used if we want to use random generation, otherwise the number of obstacles is inferred from position_obst_vec)
+    n_obst: 90 # 225, 180, 135, 90, number of obstacles (only used if we want to use random generation, otherwise the number of obstacles is inferred from position_obst_vec)
     rand_seed: %i #seed for the random generation of the obstacles
     size_obst_vec: %s # x,y,z size of each obstacle concatenated
     position_obst_vec: %s # x,y,z position of each obstacle concatenated
