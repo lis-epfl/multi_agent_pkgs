@@ -15,7 +15,7 @@
     dt: 0.1 # step time of the mpc
     path_vel: 4.5 # discretization velocity of the path
     path_vel_min: 4.5 # minimum discretization velocity of the path
-    path_vel_max: 6.0 # maximum discretization velocity of the path
+    path_vel_max: 4.5 # maximum discretization velocity of the path
     sens_dist: 0.02 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.2 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
     path_vel_dec: 0.0 # deceleration of discretization velocity of the path after every time step; stuff works better without it at 5.0 path_vel
@@ -26,7 +26,7 @@
     n_it_decomp: 60 # number of decomposition iterations for polyhedra generation
     use_cvx: true # if true, use our method for polyhedra generation, otherwise use Liu's method
     use_cvx_new: false # if true, use our new method (not the original method); it's better if it's false
-    drone_radius: 0.3 # the drone radius
+    drone_radius: 0.125 # the drone radius
     path_infl_size: 1 # amount of voxels to inflate the obstacles with for path finding; not yet implemented (in addition to the inflation for the drone radius) 
     com_latency: 0.0 # communication latency in seconds
     r_u: 0.01 # control weights

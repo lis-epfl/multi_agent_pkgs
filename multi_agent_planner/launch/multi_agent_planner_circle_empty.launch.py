@@ -25,7 +25,7 @@ def generate_launch_description():
     radius = 10 
     center_x = 20 
     center_y = 20
-    n_rob = 8 
+    n_rob = 10 
     use_mapping_util = True
     # use_mapping_util = False
 

@@ -157,14 +157,14 @@ void Agent::TrajPlanningIteration() {
     // wall clock start
     auto t_start_wall = ::std::chrono::high_resolution_clock::now();
 
-    // generate reference trajectory based on the last generated path
-    GenerateReferenceTrajectory();
-
     // generate safe corridor
     GenerateSafeCorridor();
 
     // add safe corridor constraints with other agent constraints
     GenerateTimeAwareSafeCorridor();
+
+    // generate reference trajectory based on the last generated path
+    GenerateReferenceTrajectory();
 
     // solve optimization problem and save the result to member variables
     SolveOptimizationProblem();
