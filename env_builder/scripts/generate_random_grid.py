@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     ## Create a Random volume
     rd_volume_cylinders = RandomVolume([origin, dimension], seed) # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders.add_random_cylinders(90) # Choose to add 10 cylinders with parameters as default
+    rd_volume_cylinders.add_random_cylinders(10) # Choose to add 10 cylinders with parameters as default
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # # Or with loops (can do both in same volume)
