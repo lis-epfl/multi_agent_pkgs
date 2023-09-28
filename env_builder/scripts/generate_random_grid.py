@@ -10,11 +10,13 @@ def write_config_file(filename, voxel_grid, seed):
     vox_size: %f # voxel size of the grid
     free_grid: true # if true the grid is initialized to free instead of unknown
     inflation_dist: 0.0 # all voxels within that distance to an occupied voxel are set as occupied
+    potential_dist: 1.8 # all voxels within that distance to an occupied voxel are set as a potential field
+    potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
   
     multi_obst_size: false # if false, use size_obst as a common size for all obstacles; otherwise use size_obst_multi to define the size of each obstacle
     multi_obst_position: true # if false, generate positions randomly using normal distribution, if true use position_obst_multi to define the position of each obstacle
     range_obst: [30.0, 30.0, 0.0] # area on the map where to generate obstacles, always positive numbers to move it around, use the origin_obst variable
-    origin_obst: [6.5, 6.5, 0.0] # origin of the area where we generate the obstacles
+    origin_obst: [0.0, 0.0, 0.0] # origin of the area where we generate the obstacles
     size_obst: %s # height x width x length
     n_obst: 135 # 225, 180, 135, 90, number of obstacles (only used if we want to use random generation, otherwise the number of obstacles is inferred from position_obst_vec)
     rand_seed: %i #seed for the random generation of the obstacles
