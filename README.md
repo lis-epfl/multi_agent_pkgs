@@ -35,7 +35,9 @@ mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws/src
 git clone https://github.com/lis-epfl/multi_agent_pkgs
 cd ..
-colcon build --symlink-install --packages-select jps3d decomp_util decomp_ros_msgs convex_decomp_util path_finding_util voxel_grid_util env_builder_msgs env_builder mapping_util decomp_ros_utils multi_agent_planner_msgs multi_agent_planner
+colcon build --symlink-install --packages-select jps3d decomp_util convex_decomp_util path_finding_util voxel_grid_util decomp_ros_msgs decomp_ros_utils 
+source install/setup.bash
+colcon build --symlink-install --packages-select env_builder_msgs env_builder mapping_util multi_agent_planner_msgs multi_agent_planner
 ```
 
 ## Running the simulation
