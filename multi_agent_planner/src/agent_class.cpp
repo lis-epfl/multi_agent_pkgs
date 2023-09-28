@@ -1502,7 +1502,7 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
         double dist_start = (path_start - pt).norm() * vg_util.GetVoxSize();
 
         // use the heuristic to compute the path velocity limit
-        double path_vel_tmp = GetVoxelVelocityLimit(voxel_val, dist_start);
+        double path_vel_tmp = GetVelocityLimit(voxel_val, dist_start);
 
         /* ::std::cout << "voxel_val: " << voxel_val << ::std::endl; */
         /* ::std::cout << "dist_start: " << dist_start << ::std::endl; */
@@ -1517,7 +1517,7 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
       // look at the collision point and use it to limit the speed
       int8_t voxel_val = vg_util.GetVoxelInt(collision_pt);
       double dist_start = (start - collision_pt).norm();
-      double path_vel_tmp = GetVoxelVelocityLimit(voxel_val, dist_start);
+      double path_vel_tmp = GetVelocityLimit(voxel_val, dist_start);
       if (path_vel_tmp < path_vel) {
         path_vel = path_vel_tmp;
       }
@@ -1530,9 +1530,9 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
   return path_vel;
 }
 
-double Agent::GetVoxelVelocityLimit(double voxel_val, double dist_start) {
+double Agent::GetVelocityLimit(double occ_val, double dist_start) {
   // compute linear factor
-  double alpha = 1 - (1 - 1 / exp(sens_pot_ * voxel_val)) *
+  double alpha = 1 - (1 - 1 / exp(sens_pot_ * occ_val)) *
                          (1 / exp(sens_dist_ * dist_start));
   double path_vel = path_vel_min_ + (path_vel_max_ - path_vel_min_) * alpha;
   return path_vel;

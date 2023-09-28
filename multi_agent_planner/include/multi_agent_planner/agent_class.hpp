@@ -117,9 +117,9 @@ private:
   // sample it at slower speeds
   double ComputePathVelocity(::std::vector<::std::vector<double>> &path);
 
-  // compute the velocity limit using the voxel value and the distance to the
-  // start
-  double GetVoxelVelocityLimit(double voxel_val, double dist_start);
+  // compute the velocity limit using the voxel/occupation value and the
+  // distance to the start
+  double GetVelocityLimit(double occ_val, double dist_start);
 
   // add hyperplane to a safe corridor
   ::std::vector<LinearConstraint3D>
