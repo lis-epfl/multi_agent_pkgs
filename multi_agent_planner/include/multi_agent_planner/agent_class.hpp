@@ -15,6 +15,8 @@
 #include "path_tools.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "voxel_grid.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
+#include "tf2_ros/transform_broadcaster.h"
 
 #include <decomp_geometry/polyhedron.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -180,7 +182,7 @@ private:
   // publish the polyhedra seeds
   void PublishPolyhedra();
 
-  // publish the polyhedra seeds
+  // publish current position as a marker and a transform
   void PublishCurrentPosition();
 
   // publish the traversed trajectory so far
@@ -260,6 +262,8 @@ private:
   // subscriber to get the voxel grid in case we are using mapping_util
   ::rclcpp::Subscription<::env_builder_msgs::msg::VoxelGridStamped>::SharedPtr
       voxel_grid_sub_;
+  // transform broadcaster to broadcast the position
+  ::std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   /* planner parameters */
   // topic prefix name that we add the id to it before publishing

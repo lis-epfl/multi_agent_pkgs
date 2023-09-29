@@ -10,8 +10,8 @@ def write_config_file(filename, voxel_grid, seed):
     dimension_grid: %s # dimensions in meters
     vox_size: %f # voxel size of the grid
     free_grid: true # if true the grid is initialized to free instead of unknown
-    inflation_dist: 0.3 # all voxels within that distance to an occupied voxel are set as occupied
-    potential_dist: 1.8 # all voxels within that distance to an occupied voxel are set as a potential field
+    inflation_dist: 0.0 # all voxels within that distance to an occupied voxel are set as occupied
+    potential_dist: 2.1 # all voxels within that distance to an occupied voxel are set as a potential field
     potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
   
     multi_obst_size: false # if false, use size_obst as a common size for all obstacles; otherwise use size_obst_multi to define the size of each obstacle
@@ -81,10 +81,15 @@ if __name__ == "__main__":
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
     rd_volume_cylinders = RandomVolume([origin, dimension], seed)
-    rd_volume_cylinders.add_random_cylinders(3, 
-                                             direction_range=[[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.3, 0.3],
-                                             height_range=[10.0, 10.0])  # Choose to add 10 cylinders with parameters as default
+    # rd_volume_cylinders.add_random_cylinders(50,
+    #                                          direction_range=[
+    #                                              [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+    #                                          radius_range=[0.3, 0.3],
+    #                                          height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
+    rd_volume_cylinders.add_random_loops(50,
+                                         angle_range=[0, np.pi/2],
+                                         radius_range=[1.5, 2],
+                                         thickness_range=[0.3, 0.3])
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # # Or with loops (can do both in same volume)

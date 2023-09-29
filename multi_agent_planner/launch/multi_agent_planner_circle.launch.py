@@ -11,7 +11,8 @@ def generate_launch_description():
     config_planner = os.path.join(
         get_package_share_directory('multi_agent_planner'),
         'config',
-        'agent_default_config.yaml'
+        # 'agent_default_config.yaml'
+        'agent_agile_config.yaml'
     )
 
     config_mapper = os.path.join(
@@ -21,10 +22,10 @@ def generate_launch_description():
     )
 
     # define params
-    radius = 22
+    radius = 25
     center_x = 21.1
     center_y = 21.1
-    n_rob = 8 
+    n_rob = 6 
     voxel_grid_range = [18.0, 18.0, 6.0]
     use_mapping_util = True
     # use_mapping_util = False

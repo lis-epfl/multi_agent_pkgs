@@ -72,9 +72,10 @@ Agent::Agent()
   seeds_pub_ = create_publisher<::sensor_msgs::msg::PointCloud2>(
       topic_name + "/seeds", 10);
 
-  // create publisher to publish the generated path
+  // create publisher to publish the current position
   pos_pub_ = create_publisher<::visualization_msgs::msg::Marker>(
       topic_name + "/position", 10);
+  tf_broadcaster_ = ::std::make_shared<::tf2_ros::TransformBroadcaster>(this);
 
   // create subscriber vector to other agents
   CreateTrajectorySubsriberVector();
@@ -740,6 +741,26 @@ void Agent::PublishCurrentPosition() {
 
   // publish marker
   pos_pub_->publish(marker_msg);
+
+  // create transform
+  geometry_msgs::msg::TransformStamped transform;
+  transform.header.stamp = now();
+  transform.header.frame_id = world_frame_;
+  transform.child_frame_id = "agent_" + ::std::to_string(id_);
+
+  // Set the translation (position) of the transform
+  transform.transform.translation.x = state_curr_[0];
+  transform.transform.translation.y = state_curr_[1];
+  transform.transform.translation.z = state_curr_[2];
+
+  // Set the rotation (orientation) of the transform
+  transform.transform.rotation.x = 0.0;
+  transform.transform.rotation.y = 0.0;
+  transform.transform.rotation.z = 0.0;
+  transform.transform.rotation.w = 1.0; // No rotation (identity quaternion)
+
+  // Publish the transform
+  tf_broadcaster_->sendTransform(transform);
 }
 
 void Agent::PublishPolyhedraSeeds() {

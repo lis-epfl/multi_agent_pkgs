@@ -27,6 +27,7 @@ find_package(convex_decomp_util REQUIRED)
 find_package(voxel_grid_util REQUIRED)
 find_package(path_finding_util REQUIRED)
 find_package(mapping_util REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(DEPENDENCIES
   pcl_conversions
@@ -39,6 +40,7 @@ set(DEPENDENCIES
   decomp_ros_msgs
   mapping_util
   decomp_ros_utils
+  tf2_ros
 )
 
 set(GUROBI_LIBRARIES "$ENV{GUROBI_HOME}/lib/libgurobi_c++.a;$ENV{GUROBI_HOME}/lib/libgurobi100.so" )
