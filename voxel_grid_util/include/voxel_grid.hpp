@@ -194,7 +194,7 @@ private:
 };
 
 /**
- * @brief add a cuboid obstacle to the grid
+ * @brief add a cuboid obstacle to the grid where the center is in the local grid frame
  * @param center_obs: obstacle center
  *        dim_obs: obstacle dimensions
  */

@@ -145,9 +145,9 @@ class VoxelGrid:
                     for shape in self.obstacles :
                         if shape.includes(point):
                             self.set_voxel(i,j,k,100)
-                            self.occupied_voxels.append(point[0])
-                            self.occupied_voxels.append(point[1])
-                            self.occupied_voxels.append(point[2])
+                            self.occupied_voxels.append(point[0] - self.origin[0])
+                            self.occupied_voxels.append(point[1] - self.origin[1])
+                            self.occupied_voxels.append(point[2] - self.origin[2])
                             break
 
     def get_occupied_voxels(self):
@@ -200,7 +200,8 @@ class Cylinder(Shape):
         """
         point = np.array(point)
         OP = point - self.axis_origin # relative vector
-        if -self.cylinder_height/2 <= np.dot(OP, self.axis_direction) < self.cylinder_height/2: # point is not too far from origin
+
+        if 0 <= abs(np.dot(OP, self.axis_direction)) < (self.cylinder_height)/2: # point is not too far from origin
             projection = np.dot(OP, self.axis_direction) * self.axis_direction # projection on the cylinder axis
             distance_vector = OP - projection # distance to cylinder axis
             if np.linalg.norm(distance_vector) <= self.radius : # distance to cylinder is smaller than radius : point belongs to the cylinder.

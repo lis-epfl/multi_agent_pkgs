@@ -57,9 +57,9 @@ if __name__ == "__main__":
     seed = 50
 
     # Voxel Grid parameters
-    dimension = [40.0, 40.0, 10.0]  # meters
+    dimension = [40.0, 40.0, 12.0]  # meters
     voxel_size = 0.3  # meters
-    origin = [2.0, 2.0, 0.0]  # meters
+    origin = [2.0, 2.0, -5.0]  # meters
 
     # Create the voxel grid
     voxel_grid = VoxelGrid(dimension, voxel_size, origin)
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
     rd_volume_cylinders = RandomVolume([origin, dimension], seed)
-    rd_volume_cylinders.add_random_cylinders(50, 
-                                             direction_range=[[0.0, 0.0, 1.0], [1.0, 1.0, 1.0]],
+    rd_volume_cylinders.add_random_cylinders(3, 
+                                             direction_range=[[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.3, 0.3],
                                              height_range=[10.0, 10.0])  # Choose to add 10 cylinders with parameters as default
     voxel_grid.add_shape(rd_volume_cylinders)
