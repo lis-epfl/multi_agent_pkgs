@@ -196,9 +196,10 @@ void Agent::TrajPlanningIteration() {
     // get the clock now
     auto t_wall = ::std::chrono::high_resolution_clock::now();
     // get the time in milliseconds
-    long long t_wall_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                              t_wall.time_since_epoch())
-                              .count();
+    long long t_wall_ms =
+        ::std::chrono::duration_cast<std::chrono::milliseconds>(
+            t_wall.time_since_epoch())
+            .count();
     // compute the remaining time by modulo with the planning iteration
     double remaining_sleep_time_ms =
         (dt_ * step_plan_ * 1e3) - t_wall_ms % int(dt_ * step_plan_ * 1e3);
@@ -210,7 +211,7 @@ void Agent::TrajPlanningIteration() {
     // update current state according to step_plan_ which indicates how many
     // MPC steps to skip (in case no external simulator)
     t_wall = ::std::chrono::high_resolution_clock::now();
-    t_wall_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    t_wall_ms = ::std::chrono::duration_cast<std::chrono::milliseconds>(
                     t_wall.time_since_epoch())
                     .count();
     state_curr_.clear();
@@ -458,7 +459,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // jps planner
   t_start = clock();
-  std::unique_ptr<JPSPlanner3D> planner_ptr(new JPSPlanner3D(planner_verbose_));
+  ::std::unique_ptr<JPSPlanner3D> planner_ptr(
+      new JPSPlanner3D(planner_verbose_));
   planner_ptr->setMapUtil(map_util);
   planner_ptr->updateMap();
   bool valid_jps = planner_ptr->plan(start, goal, 1, true);
@@ -817,7 +819,7 @@ void Agent::SolveOptimizationProblem() {
   ::std::vector<LinearConstraint3D> polyhedra;
   GRBLinExpr sum_bin;
   ::std::vector<GRBLinExpr> const_i;
-  std::vector<GRBLinExpr> const_i_1;
+  ::std::vector<GRBLinExpr> const_i_1;
 
   for (int i = 0; i < n_hor_; i++) {
     polyhedra = poly_const_final_vec_[i];
@@ -850,7 +852,7 @@ void Agent::SolveOptimizationProblem() {
     }
 
     at_least_1_poly_constr_grb_.push_back(model_.addConstr(
-        sum_bin >= 1, "at_least_1_pol_t_" + std::to_string(i)));
+        sum_bin >= 1, "at_least_1_pol_t_" + ::std::to_string(i)));
   }
 
   // add the objective function to the model
@@ -858,7 +860,7 @@ void Agent::SolveOptimizationProblem() {
 
   // set number of threads to 1 because it results in lower computation time
   // from experiments
-  model_.set("Threads", std::to_string(1));
+  model_.set("Threads", ::std::to_string(1));
 
   // set the maximum solving time in order to avoid going over the time
   // step/period of the planning
@@ -1041,7 +1043,7 @@ void Agent::GenerateTimeAwareSafeCorridor() {
         auto t_wall = ::std::chrono::high_resolution_clock::now();
         // get the time in milliseconds
         long long t_wall_ms =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
+            ::std::chrono::duration_cast<std::chrono::milliseconds>(
                 t_wall.time_since_epoch())
                 .count();
         // compute perturbation based on time; it is based on the quotient
@@ -1655,8 +1657,8 @@ Agent::GetIntermediateGoal(::std::vector<double> &goal,
     // get intersection with the edge of the grid
     double min_dim =
         voxel_grid.voxel_size *
-        std::min(std::min(voxel_grid.dimension[0], voxel_grid.dimension[1]),
-                 voxel_grid.dimension[2]);
+        ::std::min(std::min(voxel_grid.dimension[0], voxel_grid.dimension[1]),
+                   voxel_grid.dimension[2]);
     ::Eigen::Vector3d sampled_point = center_pos + (min_dim / 2) * ray_dir;
     int n_it = 0;
     while (n_it < 100) {
@@ -1701,9 +1703,9 @@ void Agent::SaveAndDisplayCompTime(::std::vector<double> &comp_time,
     }
     sum_t = sum_t + comp_time[i];
   }
-  std::cout << std::endl << "mean: " << sum_t / comp_time.size();
-  std::cout << std::endl << "max: " << max_t;
-  std::cout << std::endl << "min: " << min_t << std::endl;
+  ::std::cout << ::std::endl << "mean: " << sum_t / comp_time.size();
+  ::std::cout << ::std::endl << "max: " << max_t;
+  ::std::cout << ::std::endl << "min: " << min_t << ::std::endl;
 }
 
 void Agent::SaveStateHistory() {
@@ -1738,9 +1740,9 @@ void Agent::SaveStateHistory() {
     }
   }
   vel_average /= double(state_hist_.size());
-  std::cout << std::endl << "velocity for agent: " << id_;
-  std::cout << std::endl << "mean: " << vel_average;
-  std::cout << std::endl << "max: " << vel_max << std::endl;
+  ::std::cout << ::std::endl << "velocity for agent: " << id_;
+  ::std::cout << ::std::endl << "mean: " << vel_average;
+  ::std::cout << ::std::endl << "max: " << vel_max << ::std::endl;
 }
 
 void Agent::SaveAndDisplayCommunicationLatency() {
@@ -1816,7 +1818,7 @@ void Agent::CreateGurobiModel() {
       } else {
         tmp_vars.push_back(
             model_.addVar(x_lb_[j], x_ub_[j], 0.0, GRB_CONTINUOUS,
-                          "x_" + std::to_string(i) + std::to_string(j)));
+                          "x_" + ::std::to_string(i) + ::std::to_string(j)));
       }
     }
     x_grb_.push_back(tmp_vars);
@@ -1840,7 +1842,7 @@ void Agent::CreateGurobiModel() {
     for (int j = 0; j < poly_hor_; j++) {
       tmp_vars.push_back(
           model_.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_BINARY,
-                        "b_" + std::to_string(i) + std::to_string(j)));
+                        "b_" + ::std::to_string(i) + ::std::to_string(j)));
     }
     b_grb_.push_back(tmp_vars);
     tmp_vars.clear();
@@ -1880,7 +1882,8 @@ void Agent::CreateGurobiModel() {
     for (int j = 0; j < n_x_; j++) {
       model_.addConstr(GRBLinExpr(x_grb_[i + 1][j], 1.0) ==
                            GRBLinExpr(x_grb_[i][j], 1.0) + dt_ * mod_final[j],
-                       "dyn_constr_" + std::to_string(i) + std::to_string(j));
+                       "dyn_constr_" + ::std::to_string(i) +
+                           ::std::to_string(j));
     }
   }
 }
