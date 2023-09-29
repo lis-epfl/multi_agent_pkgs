@@ -1,6 +1,7 @@
 import numpy as np
 from shapes import VoxelGrid, Wall, RandomVolume, Cylinder, Loop
 
+
 def write_config_file(filename, voxel_grid, seed):
     voxel_grid.compute_occupancy()
     config_yaml = """env_builder_node: 
@@ -29,7 +30,7 @@ def write_config_file(filename, voxel_grid, seed):
     env_pc_frame: "world" # origin frame of the published poinctloud
     get_grid_service_name: "get_voxel_grid" # name of the service to get the voxel grid of each agent
 
-    save_obstacles: true # if true, save the obstacle position in pos_obs.csv as well as the pointcloud in a file""" %(
+    save_obstacles: true # if true, save the obstacle position in pos_obs.csv as well as the pointcloud in a file""" % (
         voxel_grid.origin,
         voxel_grid.dimension,
         voxel_grid.voxel_size,
@@ -41,7 +42,7 @@ def write_config_file(filename, voxel_grid, seed):
     )
 
     # Specify the filename for the YAML config file
-    config_filename = '../config/%s.yaml' %filename
+    config_filename = '../config/%s.yaml' % filename
 
     # Write the configuration to a YAML file
     with open(config_filename, 'w') as yaml_file:
@@ -55,14 +56,15 @@ if __name__ == "__main__":
     config_filename = "env_new_config"
     seed = 50
 
-    ##################### Voxel Grid parameters
-    dimension = [40.0, 40.0, 10.0] # meters
-    voxel_size = 0.3 # meters
-    origin = [2.0, 2.0, -3.5] # meters
+    # Voxel Grid parameters
+    dimension = [40.0, 40.0, 10.0]  # meters
+    voxel_size = 0.3  # meters
+    origin = [2.0, 2.0, 0.0]  # meters
 
-    voxel_grid = VoxelGrid(dimension, voxel_size, origin) # Create the voxel grid
+    # Create the voxel grid
+    voxel_grid = VoxelGrid(dimension, voxel_size, origin)
 
-    ##################### Add shapes : Cylinder, Loop, Walls or Random volumes
+    # Add shapes : Cylinder, Loop, Walls or Random volumes
     # # Create a cylinder
     # cylinder = Cylinder((2.0,5.0,5.0), (0.3,0.5,1.0), 1.5)
     # voxel_grid.add_shape(cylinder)
@@ -76,9 +78,13 @@ if __name__ == "__main__":
     # wall.add_square_gap((3,3),3,3)
     # voxel_grid.add_shape(wall)
 
-    ## Create a Random volume
-    rd_volume_cylinders = RandomVolume([origin, dimension], seed) # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders.add_random_cylinders(10) # Choose to add 10 cylinders with parameters as default
+    # Create a Random volume
+    # The containing volume of randomly generated cylinders.
+    rd_volume_cylinders = RandomVolume([origin, dimension], seed)
+    rd_volume_cylinders.add_random_cylinders(50, 
+                                             direction_range=[[0.0, 0.0, 1.0], [1.0, 1.0, 1.0]],
+                                             radius_range=[0.3, 0.3],
+                                             height_range=[10.0, 10.0])  # Choose to add 10 cylinders with parameters as default
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # # Or with loops (can do both in same volume)
@@ -87,6 +93,7 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(rd_volume_loops)
 
     ########################### END OF PARAMETRIZING ##################################
-    write_config_file(config_filename, voxel_grid, seed) # Write the YAML config file
+    # Write the YAML config file
+    write_config_file(config_filename, voxel_grid, seed)
 
     # voxel_grid.visualize()  # Visualize the voxel grid if you wish (needs matplotlib)

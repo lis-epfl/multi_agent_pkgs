@@ -200,7 +200,7 @@ class Cylinder(Shape):
         """
         point = np.array(point)
         OP = point - self.axis_origin # relative vector
-        if 0 <= np.dot(OP, self.axis_direction) < self.cylinder_height : # point is not too far from origin
+        if -self.cylinder_height/2 <= np.dot(OP, self.axis_direction) < self.cylinder_height/2: # point is not too far from origin
             projection = np.dot(OP, self.axis_direction) * self.axis_direction # projection on the cylinder axis
             distance_vector = OP - projection # distance to cylinder axis
             if np.linalg.norm(distance_vector) <= self.radius : # distance to cylinder is smaller than radius : point belongs to the cylinder.
