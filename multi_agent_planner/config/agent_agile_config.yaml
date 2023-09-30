@@ -31,7 +31,7 @@
     r_u: 0.01 # control weights
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
     r_n: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # last state variable error weight
-    max_vel: 9.5 # maximum variable set in the optimization
+    max_vel: 15.0 # maximum variable set in the optimization
     max_acc_z: 40.0 # maximum acceleration in the z direction
     min_acc_z: -40.0 # minimum acceleration in the z direction
     max_acc_xy: 40.0 # maximum acceleration in the x and y directions

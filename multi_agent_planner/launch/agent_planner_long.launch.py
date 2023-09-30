@@ -23,8 +23,8 @@ def generate_launch_description():
     # params
     use_mapping_util = True
     voxel_grid_range = [20.0, 20.0, 6.0]
-    # state_ini = [0.0, 20.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    # goal = [130.0, 20.0, 1.5]
+    state_ini = [0.0, 20.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    goal = [130.0, 20.0, 1.5]
 
     if use_mapping_util:
         params_sub = [{'id': 0},
@@ -44,9 +44,9 @@ def generate_launch_description():
     # create node
     params_sub = [{'use_mapping_util': use_mapping_util},
                   {'planner_verbose': False},
-                  {'voxel_grid_range': voxel_grid_range}]
-                  # {'state_ini': state_ini},
-                  # {'goal': goal}]
+                  {'voxel_grid_range': voxel_grid_range},
+                  {'state_ini': state_ini},
+                  {'goal': goal}]
     agent_node = Node(
         package='multi_agent_planner',
         executable='agent_node',
