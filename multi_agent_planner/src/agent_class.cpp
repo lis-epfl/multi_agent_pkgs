@@ -682,7 +682,7 @@ void Agent::PublishTrajectoryHistory() {
   path_msg.header.frame_id = world_frame_;
 
   // build the trajectory message
-  for (int i = 0; i < int(state_hist_.size()); i++) {
+  for (int i = 0; i < int(state_hist_.size() - 1); i++) {
     ::geometry_msgs::msg::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = state_hist_[i][0];
     pose_stamped.pose.position.y = state_hist_[i][1];
@@ -721,15 +721,44 @@ void Agent::PublishReferencePath() {
 }
 
 void Agent::PublishCurrentPosition() {
+  ::std::vector<double> state_curr;
+  // if we started the trajectory generation, use it for state_curr
+  if (traj_curr_.size() > 0) {
+    state_curr = traj_curr_[0];
+  } else {
+    state_curr = state_curr_;
+  }
+
+  ::std::string tf_name = "agent_" + ::std::to_string(id_);
+  // create transform
+  geometry_msgs::msg::TransformStamped transform;
+  transform.header.stamp = now();
+  transform.header.frame_id = world_frame_;
+  transform.child_frame_id = tf_name;
+
+  // Set the translation (position) of the transform
+  transform.transform.translation.x = state_curr[0];
+  transform.transform.translation.y = state_curr[1];
+  transform.transform.translation.z = state_curr[2];
+
+  // Set the rotation (orientation) of the transform
+  transform.transform.rotation.x = 0.0;
+  transform.transform.rotation.y = 0.0;
+  transform.transform.rotation.z = 0.0;
+  transform.transform.rotation.w = 1.0; // No rotation (identity quaternion)
+
+  // Publish the transform
+  tf_broadcaster_->sendTransform(transform);
+
   // create marker
   ::visualization_msgs::msg::Marker marker_msg;
-  marker_msg.header.frame_id = world_frame_;
+  marker_msg.header.frame_id = tf_name;
   marker_msg.header.stamp = now();
   marker_msg.type = visualization_msgs::msg::Marker::SPHERE;
   marker_msg.action = visualization_msgs::msg::Marker::ADD;
-  marker_msg.pose.position.x = state_curr_[0];
-  marker_msg.pose.position.y = state_curr_[1];
-  marker_msg.pose.position.z = state_curr_[2];
+  marker_msg.pose.position.x = 0;
+  marker_msg.pose.position.y = 0;
+  marker_msg.pose.position.z = 0;
   marker_msg.pose.orientation.w = 1.0;
   marker_msg.scale.x = 2 * drone_radius_;
   marker_msg.scale.y = 2 * drone_radius_;
@@ -741,26 +770,6 @@ void Agent::PublishCurrentPosition() {
 
   // publish marker
   pos_pub_->publish(marker_msg);
-
-  // create transform
-  geometry_msgs::msg::TransformStamped transform;
-  transform.header.stamp = now();
-  transform.header.frame_id = world_frame_;
-  transform.child_frame_id = "agent_" + ::std::to_string(id_);
-
-  // Set the translation (position) of the transform
-  transform.transform.translation.x = state_curr_[0];
-  transform.transform.translation.y = state_curr_[1];
-  transform.transform.translation.z = state_curr_[2];
-
-  // Set the rotation (orientation) of the transform
-  transform.transform.rotation.x = 0.0;
-  transform.transform.rotation.y = 0.0;
-  transform.transform.rotation.z = 0.0;
-  transform.transform.rotation.w = 1.0; // No rotation (identity quaternion)
-
-  // Publish the transform
-  tf_broadcaster_->sendTransform(transform);
 }
 
 void Agent::PublishPolyhedraSeeds() {

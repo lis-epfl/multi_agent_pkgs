@@ -13,7 +13,7 @@
   <depend>sensor_msgs</depend>
   <depend>rclcpp</depend>
   <depend>env_builder_msgs</depend>
-  <depend>visualization_msgs</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

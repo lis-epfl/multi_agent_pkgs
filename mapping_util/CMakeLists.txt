@@ -11,14 +11,14 @@ find_package(pcl_conversions REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(env_builder_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(DEPENDENCIES
   rclcpp
   pcl_conversions
   sensor_msgs
   env_builder_msgs
-  visualization_msgs
+  tf2_ros
 )
 
 include_directories(include/mapping_util ${VOXEL_GRID_UTIL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})

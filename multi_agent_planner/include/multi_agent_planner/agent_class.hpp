@@ -7,6 +7,7 @@
 #include "env_builder_msgs/msg/voxel_grid.hpp"
 #include "env_builder_msgs/msg/voxel_grid_stamped.hpp"
 #include "env_builder_msgs/srv/get_voxel_grid.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "global_planner.hpp"
 #include "gurobi_c++.h"
 #include "mapping_util/map_builder.hpp"
@@ -14,9 +15,8 @@
 #include "multi_agent_planner_msgs/msg/trajectory.hpp"
 #include "path_tools.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "voxel_grid.hpp"
-#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "tf2_ros/transform_broadcaster.h"
+#include "voxel_grid.hpp"
 
 #include <decomp_geometry/polyhedron.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -400,9 +400,13 @@ private:
   // initial state of drone; for now fixed as a config but it should be taken
   // from external simulator or real drone
   ::std::vector<double> state_ini_;
-  // current state which includes position and velocity concatenated; for now
-  // it will be the second point in the generated trajectory, but we should
-  // also have the option to get it from an external simulator/real drone
+  // current considered state for optimization which includes position and
+  // velocity concatenated; for now it will be the second point in the generated
+  // trajectory i.e. the expected point that the agent will be at at the next
+  // iteration because at each iteration, we plan starting from where the agent
+  // is gonna be at at the next iteration; we should also have the option to get
+  // it from an external simulator/real drone, by taking the current value of
+  // the simulator/real drone and projecting it to the next iteration
   ::std::vector<double> state_curr_;
   // current goal
   ::std::vector<double> goal_curr_;

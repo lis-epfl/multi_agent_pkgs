@@ -8,6 +8,9 @@ MapBuilder::MapBuilder() : ::rclcpp::Node("map_builder") {
   // initialize parameters
   InitializeRosParameters();
 
+  // resize current position
+  pos_curr_.resize(3);
+  
   // create environment voxel grid subscriber
   voxel_grid_sub_ =
       create_subscription<::env_builder_msgs::msg::VoxelGridStamped>(
@@ -16,11 +19,14 @@ MapBuilder::MapBuilder() : ::rclcpp::Node("map_builder") {
                       ::std::placeholders::_1));
 
   // create agent position subscriber
-  ::std::string pos_topic = "agent_" + ::std::to_string(id_) + "/position";
-  agent_pos_sub_ = create_subscription<::visualization_msgs::msg::Marker>(
-      pos_topic, 10,
-      ::std::bind(&MapBuilder::AgentPositionCallback, this,
-                  ::std::placeholders::_1));
+  agent_frame_ = "agent_" + ::std::to_string(id_);
+  tf_buffer_ = ::std::make_shared<::tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ =
+      ::std::make_shared<::tf2_ros::TransformListener>(*tf_buffer_, this);
+
+  tf_subscriber_ = this->create_subscription<::tf2_msgs::msg::TFMessage>(
+      "/tf", 10,
+      ::std::bind(&MapBuilder::TfCallback, this, ::std::placeholders::_1));
 
   // create voxel grid publisher
   ::std::string vg_pub_topic = "agent_" + ::std::to_string(id_) + "/voxel_grid";
@@ -118,14 +124,18 @@ void MapBuilder::EnvironmentVoxelGridCallback(
   }
 }
 
-void MapBuilder::AgentPositionCallback(
-    const ::visualization_msgs::msg::Marker::SharedPtr marker_msg) {
-  pos_mutex_.lock();
-  pos_curr_.resize(3);
-  pos_curr_[0] = marker_msg->pose.position.x;
-  pos_curr_[1] = marker_msg->pose.position.y;
-  pos_curr_[2] = marker_msg->pose.position.z;
-  pos_mutex_.unlock();
+void MapBuilder::TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg) {
+  for (const auto &transform_stamped : msg->transforms) {
+    if (transform_stamped.header.frame_id == world_frame_ &&
+        transform_stamped.child_frame_id == agent_frame_) {
+      // get the position from the transform
+      const geometry_msgs::msg::Transform &transform =
+          transform_stamped.transform;
+      pos_curr_[0] = transform.translation.x;
+      pos_curr_[1] = transform.translation.y;
+      pos_curr_[2] = transform.translation.z;
+    }
+  }
 }
 
 ::voxel_grid_util::VoxelGrid
