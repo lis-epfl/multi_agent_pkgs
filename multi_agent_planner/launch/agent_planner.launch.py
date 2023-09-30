@@ -23,6 +23,8 @@ def generate_launch_description():
     # params
     use_mapping_util = True
     voxel_grid_range = [20.0, 20.0, 6.0]
+    state_ini = [0.0, 20.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    goal = [130.0, 20.0, 1.5]
 
     if use_mapping_util:
         params_sub = [{'id': 0},
@@ -42,13 +44,15 @@ def generate_launch_description():
     # create node
     params_sub = [{'use_mapping_util': use_mapping_util},
                   {'planner_verbose': False},
-                  {'voxel_grid_range': voxel_grid_range}]
+                  {'voxel_grid_range': voxel_grid_range},
+                  {'state_ini': state_ini},
+                  {'goal': goal}]
     agent_node = Node(
         package='multi_agent_planner',
         executable='agent_node',
         name='agent_node_0',
         parameters=[config] + params_sub,
-        # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+        prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
         # prefix=["sudo \"PYTHONPATH=$PYTHONPATH\" \"LD_LIBRARY_PATH=$LD_LIBRARY_PATH\" \"PATH=$PATH\" \"USER=$USER\"  \"GUROBI_HOME=$GUROBI_HOME\" \"GRB_LICENSE_FILE=$GRB_LICENSE_FILE\" -u toumieh bash -c "],
         # shell=True
         output='screen',

@@ -57,9 +57,9 @@ if __name__ == "__main__":
     seed = 50
 
     # Voxel Grid parameters
-    dimension = [40.0, 40.0, 12.0]  # meters
+    dimension = [120.0, 40.0, 15.0]  # meters
     voxel_size = 0.3  # meters
-    origin = [2.0, 2.0, -5.0]  # meters
+    origin = [0.0, 0.0, -6.0]  # meters
 
     # Create the voxel grid
     voxel_grid = VoxelGrid(dimension, voxel_size, origin)
@@ -74,22 +74,44 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(loop)
 
     # # Create a wall
-    # wall = Wall((20,0,0), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=1) # Two directions to define the plane
-    # wall.add_square_gap((3,3),3,3)
-    # voxel_grid.add_shape(wall)
+    wall = Wall(origin = (75,0,-6), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=0.3) # Two directions to define the plane
+    wall.add_square_gap(rel_origin = (5,7.5), length = 3, height = 3)
+    wall.add_square_gap(rel_origin = (7.5,5), length = 3, height = 2)
+    wall.add_square_gap(rel_origin = (10,9.5), length = 2, height = 3)
+    wall.add_square_gap(rel_origin = (12.5,4), length = 2, height = 2)
+    wall.add_square_gap(rel_origin = (15,12.5), length = 2, height = 2)
+    wall.add_square_gap(rel_origin = (17.5,3), length = 2, height = 1.5)
+    wall.add_square_gap(rel_origin = (20,8.5), length = 3, height = 1)
+    wall.add_square_gap(rel_origin = (22.5,12), length = 1.5, height = 2)
+    wall.add_square_gap(rel_origin = (25,5.5), length = 2, height = 2)
+    wall.add_square_gap(rel_origin = (27.5,4), length = 3, height = 2)
+    wall.add_square_gap(rel_origin = (30,7), length = 2, height = 2)
+    wall.add_square_gap(rel_origin = (32.5,12), length = 3, height = 1.5)
+    wall.add_square_gap(rel_origin = (35,9), length = 2, height = 2)
+    wall.add_square_gap(rel_origin = (37.5,7), length = 1.5, height = 1.5)
+    voxel_grid.add_shape(wall)
 
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders = RandomVolume([origin, dimension], seed)
-    # rd_volume_cylinders.add_random_cylinders(50,
-    #                                          direction_range=[
-    #                                              [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-    #                                          radius_range=[0.3, 0.3],
-    #                                          height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
-    rd_volume_cylinders.add_random_loops(50,
-                                         angle_range=[0, np.pi/2],
-                                         radius_range=[1.5, 2],
-                                         thickness_range=[0.3, 0.3])
+    rd_volume_cylinders = RandomVolume([[30,0,-6], [30,30,15]], seed)
+    rd_volume_cylinders.add_random_cylinders(180,
+                                             direction_range=[
+                                                 [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+                                             radius_range=[0.3, 0.3],
+                                             height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
+    # rd_volume_cylinders.add_random_loops(50,
+    #                                      angle_range=[0, np.pi/2],
+    #                                      radius_range=[1.5, 2],
+    #                                      thickness_range=[0.3, 0.3])
+    voxel_grid.add_shape(rd_volume_cylinders)
+
+    rd_volume_cylinders = RandomVolume([[90,0,-6], [30,30,15]], seed)
+    rd_volume_cylinders.add_random_cylinders(360,
+                                             direction_range=[
+                                                 [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+                                             radius_range=[0.3, 0.3],
+                                             height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
+
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # # Or with loops (can do both in same volume)
