@@ -12,8 +12,9 @@ def generate_launch_description():
         get_package_share_directory('env_builder'),
         'config',
         # 'env_default_config.yaml'
-        # 'env_long_config.yaml'
-        'env_loop_config.yaml'
+        'env_long_config.yaml'
+        # 'env_loop_config.yaml'
+        # 'env_new_config.yaml'
     )
     env_builder_node = Node(
         package='env_builder',

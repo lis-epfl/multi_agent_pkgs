@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
     rd_volume_cylinders = RandomVolume([[30,0,-6], [30,30,15]], seed)
-    rd_volume_cylinders.add_random_cylinders(180,
+    rd_volume_cylinders.add_random_cylinders(135,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.3, 0.3],
