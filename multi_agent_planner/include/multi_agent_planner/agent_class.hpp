@@ -263,7 +263,7 @@ private:
   ::rclcpp::Subscription<::env_builder_msgs::msg::VoxelGridStamped>::SharedPtr
       voxel_grid_sub_;
   // transform broadcaster to broadcast the position
-  ::std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  ::std::shared_ptr<::tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   /* planner parameters */
   // topic prefix name that we add the id to it before publishing

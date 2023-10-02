@@ -75,6 +75,7 @@ if __name__ == "__main__":
 
     # # Create a wall
     wall = Wall(origin = (75,0,-6), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=0.3) # Two directions to define the plane
+    wall.add_square_gap(rel_origin = (2.5,5), length = 1.5, height = 2)
     wall.add_square_gap(rel_origin = (5,7.5), length = 3, height = 3)
     wall.add_square_gap(rel_origin = (7.5,5), length = 3, height = 2)
     wall.add_square_gap(rel_origin = (10,9.5), length = 2, height = 3)
