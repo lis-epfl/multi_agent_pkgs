@@ -43,7 +43,7 @@ def generate_launch_description():
             executable='agent_node',
             name='agent_node_{}'.format(i),
             parameters=[config] + params_sub,
-            prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+            # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
             # prefix=['xterm -fa default -fs 10 -hold -e'],
             output='screen',
             emulate_tty=True,
