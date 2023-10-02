@@ -85,7 +85,7 @@ if __name__ == "__main__":
     wall.add_square_gap(rel_origin = (20,8.5), length = 3, height = 1)
     wall.add_square_gap(rel_origin = (22.5,12), length = 1.5, height = 2)
     wall.add_square_gap(rel_origin = (25,5.5), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (27.5,4), length = 3, height = 2)
+    wall.add_square_gap(rel_origin = (27,4), length = 1, height = 2)
     wall.add_square_gap(rel_origin = (30,7), length = 2, height = 2)
     wall.add_square_gap(rel_origin = (32.5,12), length = 3, height = 1.5)
     wall.add_square_gap(rel_origin = (35,9), length = 2, height = 2)
