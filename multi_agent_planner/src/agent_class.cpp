@@ -282,7 +282,7 @@ void Agent::UpdatePath() {
     if (reset_path_ && !traj_curr_.empty()) {
       for (auto pt : traj_curr_) {
         if (vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2])) <=
-            0) {
+            100) {
           start = pt;
           break;
         }
@@ -356,7 +356,8 @@ void Agent::UpdatePath() {
         }
         // build path ini (without the last ref point because it is the start of
         // the path planning algorithm)
-        path_ini.push_back(traj_ref_curr[0]);
+        path_ini.push_back(
+            {traj_ref_curr[0].begin(), traj_ref_curr[0].begin() + 3});
         for (int i = path_ini_start_idx; i <= path_ini_end_idx; i++) {
           path_ini.push_back(path_curr_[i]);
         }
@@ -370,7 +371,6 @@ void Agent::UpdatePath() {
       path_curr_.insert(path_curr_.end(), path_out.begin(), path_out.end());
       // remove segments points that give acute angles in the path
       path_curr_ = RemoveZigZagSegments(path_curr_);
-
       path_mtx_.unlock();
 
       // set the path_ready_ variable to true so we can start the trajectory
@@ -1312,10 +1312,12 @@ void Agent::GenerateReferenceTrajectory() {
   if (traj_ref_curr_.size() > 0 && !reset_path_) {
     traj_ref_mtx_.lock();
     if (increment_traj_ref_) {
-      starting_point = traj_ref_curr_[1];
+      starting_point = {traj_ref_curr_[1][0], traj_ref_curr_[1][1],
+                        traj_ref_curr_[1][2]};
       /* starting_point = starting_point_; */
     } else {
-      starting_point = traj_ref_curr_[0];
+      starting_point = {traj_ref_curr_[0][0], traj_ref_curr_[0][1],
+                        traj_ref_curr_[0][2]};
     }
     last_point = traj_ref_curr_.back();
     traj_ref_mtx_.unlock();
