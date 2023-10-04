@@ -1,3 +1,4 @@
 /**: 
   ros__parameters:
     id: 1
+    world_frame: "world"

@@ -4,11 +4,12 @@
 #include "crazyflie_interfaces/msg/full_state.hpp"
 #include "crazyflie_interfaces/msg/position.hpp"
 #include "multi_agent_planner_msgs/msg/state.hpp"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
 #include "multi_agent_planner_msgs/msg/trajectory.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include <chrono>
 #include <thread>
-#include <visualization_msgs/msg/marker.hpp>
 
 namespace planner_crazyswarm_bridge {
 class Bridge : public ::rclcpp::Node {
@@ -23,9 +24,8 @@ private:
   // initialize ros parameters
   void InitializeRosParameters();
 
-  // callback function for the position
-  void PositionCallback(
-      const ::visualization_msgs::msg::Marker::SharedPtr marker_msg);
+  // callback for when we receive the new agent position
+  void TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg);
 
   // callback function for the trajectory
   void
@@ -35,13 +35,21 @@ private:
   /*-------------- member variables ---------------*/
   // ROS parameters
   int id_;
+  // world frame
+  ::std::string world_frame_;
+
+  // agent frame name
+  ::std::string agent_frame_;
+  // tf buffer
+  ::std::shared_ptr<::tf2_ros::Buffer> tf_buffer_;
+  // tf listener to get the agent position
+  ::std::shared_ptr<::tf2_ros::TransformListener> tf_listener_;
+  // tf subscriber
+  ::rclcpp::Subscription<::tf2_msgs::msg::TFMessage>::SharedPtr tf_subscriber_;
 
   // variable to indicate if we received the first trajectory. In that case,
   // stop sending the position command every time we receive a new position
   bool traj_received_ = false;
-
-  // subscriber to get the position of the agent
-  ::rclcpp::Subscription<::visualization_msgs::msg::Marker>::SharedPtr pos_sub_;
 
   // subscriber to get the position of the agent
   ::rclcpp::Subscription<::multi_agent_planner_msgs::msg::Trajectory>::SharedPtr

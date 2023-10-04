@@ -6,13 +6,13 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(crazyflie_interfaces REQUIRED)
 find_package(multi_agent_planner_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(DEPENDENCIES
   rclcpp
   crazyflie_interfaces
   multi_agent_planner_msgs
-  visualization_msgs
+  tf2_ros
 )
 
 include_directories(include/planner_crazyswarm_bridge)

@@ -34,13 +34,14 @@ def generate_launch_description():
     # use_mapping_util = False
 
     # set start and goal positions manually
-    start_positions = [(-3.27, -1.09, z_plane),
-                       (3.93, 0.17, z_plane),
-                       (0.45, 3.36, z_plane),
-                       (0.94, -4.0, z_plane),
-                       (-1.98, -3.56, z_plane),
-                       (2.97, 2.11, z_plane)]
-    goal_positions = [start_positions[1], start_positions[0], start_positions[3], start_positions[2], start_positions[5], start_positions[4]]
+    start_positions = [(-2.22, -0.15, z_plane),
+                       (1.81, -0.18, z_plane)]
+                       # (0.45, 3.36, z_plane),
+                       # (0.94, -4.0, z_plane),
+                       # (-1.98, -3.56, z_plane),
+                       # (2.97, 2.11, z_plane)]
+    goal_positions = [start_positions[1], start_positions[0]]
+    #, start_positions[3], start_positions[2], start_positions[5], start_positions[4]]
 
     n_rob = len(start_positions)
 

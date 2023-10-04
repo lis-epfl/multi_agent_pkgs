@@ -8,13 +8,15 @@ Bridge::Bridge() : ::rclcpp::Node("planner_crazyswarm_bridge") {
   // initialize ros parameters
   InitializeRosParameters();
 
-  // create subscriber for the position of the agent
-  ::std::string pos_topic = "agent_" + ::std::to_string(id_) + "/position";
-  pos_sub_ = create_subscription<::visualization_msgs::msg::Marker>(
-      pos_topic, 10,
-      ::std::bind(&Bridge::PositionCallback, this, ::std::placeholders::_1));
+  // create subscriber for the tf of the agent
+  agent_frame_ = "agent_" + ::std::to_string(id_);
+  tf_buffer_ = ::std::make_shared<::tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ =
+      ::std::make_shared<::tf2_ros::TransformListener>(*tf_buffer_, this);
+  tf_subscriber_ = this->create_subscription<::tf2_msgs::msg::TFMessage>(
+      "/tf", 10,
+      ::std::bind(&Bridge::TfCallback, this, ::std::placeholders::_1));
 
-  // create subscriber for the position of the agent
   // create subscriber for the full trajectory  of the agent
   ::std::string traj_full_topic =
       "agent_" + ::std::to_string(id_) + "/traj_full";
@@ -24,12 +26,10 @@ Bridge::Bridge() : ::rclcpp::Node("planner_crazyswarm_bridge") {
           ::std::bind(&Bridge::FullStateCallback, this,
                       ::std::placeholders::_1));
 
-  // create subscriber for the position of the agent
   // create publisher for the position command
   pos_pub_ = create_publisher<::crazyflie_interfaces::msg::Position>(
       "cf" + ::std::to_string(id_) + "/cmd_position", 10);
 
-  // create subscriber for the position of the agent
   // create publisher for the full state command
   full_state_pub_ = create_publisher<::crazyflie_interfaces::msg::FullState>(
       "cf" + ::std::to_string(id_) + "/cmd_full_state", 10);
@@ -38,24 +38,30 @@ Bridge::Bridge() : ::rclcpp::Node("planner_crazyswarm_bridge") {
 void Bridge::DeclareRosParameters() {
   // declare ros parameters
   declare_parameter("id", 0);
+  declare_parameter("world_frame", "world");
 }
 
 void Bridge::InitializeRosParameters() {
   // intialize ros parameters
   id_ = get_parameter("id").as_int();
+  world_frame_ = get_parameter("world_frame").as_string();
 }
 
-void Bridge::PositionCallback(
-    const ::visualization_msgs::msg::Marker::SharedPtr marker_msg) {
-  // first check if we received a trajecotry; if not proceed to send the
-  // position as a position command
+void Bridge::TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg) {
   if (!traj_received_) {
-    // create the position message to send
-    ::crazyflie_interfaces::msg::Position pos_msg;
-    pos_msg.x = marker_msg->pose.position.x;
-    pos_msg.y = marker_msg->pose.position.y;
-    pos_msg.z = marker_msg->pose.position.z;
-    pos_pub_->publish(pos_msg);
+    for (const auto &transform_stamped : msg->transforms) {
+      if (transform_stamped.header.frame_id == world_frame_ &&
+          transform_stamped.child_frame_id == agent_frame_) {
+        // get the position from the transform
+        const geometry_msgs::msg::Transform &transform =
+            transform_stamped.transform;
+        ::crazyflie_interfaces::msg::Position pos_msg;
+        pos_msg.x = transform.translation.x;
+        pos_msg.y = transform.translation.y;
+        pos_msg.z = transform.translation.z;
+        pos_pub_->publish(pos_msg);
+      }
+    }
   }
 }
 
