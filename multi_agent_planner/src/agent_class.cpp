@@ -170,11 +170,18 @@ void Agent::TrajPlanningIteration() {
     // solve optimization problem and save the result to member variables
     SolveOptimizationProblem();
 
-    // check if we need to increment the reference path
-    CheckReferenceTrajIncrement();
+    // if the optimization didnt fail on the first iteration
+    if (traj_curr_.size() > 0) {
+      // check if we need to increment the reference path
+      CheckReferenceTrajIncrement();
 
-    // publish the full generated trajectory for other agents
-    PublishTrajectoryFull();
+      // publish the full generated trajectory for other agents
+      PublishTrajectoryFull();
+    } else {
+      // if at the beginning the optimization failed, do not increment the
+      // reference trajectory
+      increment_traj_ref_ = false;
+    }
 
     // save cpu computation time
     comp_time_tot_.push_back((double)(clock() - t_start_cpu) / CLOCKS_PER_SEC *
@@ -215,10 +222,15 @@ void Agent::TrajPlanningIteration() {
     t_wall_ms = ::std::chrono::duration_cast<std::chrono::milliseconds>(
                     t_wall.time_since_epoch())
                     .count();
-    state_curr_.clear();
-    for (int i = 0; i < n_x_; i++) {
-      state_curr_.push_back(traj_curr_[step_plan_][i]);
+
+    // if the first iteration of the optimization didn't fail
+    if (traj_curr_.size() > 0) {
+      state_curr_.clear();
+      for (int i = 0; i < n_x_; i++) {
+        state_curr_.push_back(traj_curr_[step_plan_][i]);
+      }
     }
+
     state_hist_stamp_.push_back(double(t_wall_ms) * 1e-3);
 
     // save the current state
@@ -289,10 +301,10 @@ void Agent::UpdatePath() {
       }
     } else if (!traj_ref_curr.empty()) {
       // if the MIQP/MPC planner has planned at least once; remove the last
-      // points of traj_ref_curr that are not free and then take the last point
-      // of the free points as the starting point; not that traj_ref_curr is
-      // later used to be concatenated with the generated path so it is
-      // essential to remove all the points that are occupied
+      // points of traj_ref_curr that are not free and then take the last
+      // point of the free points as the starting point; not that
+      // traj_ref_curr is later used to be concatenated with the generated
+      // path so it is essential to remove all the points that are occupied
       ::std::vector<::std::vector<double>> traj_tmp;
       int i = 0;
       while (vg_util.GetVoxelGlobal(
@@ -329,9 +341,9 @@ void Agent::UpdatePath() {
     } else {
 
       // build the initial path from the start of the reference trajectory to
-      // the last point of the reference trajectory if we are not resetting the
-      // path (not included in the final path because it is the first point of
-      // path_out)
+      // the last point of the reference trajectory if we are not resetting
+      // the path (not included in the final path because it is the first
+      // point of path_out)
       ::std::vector<::std::vector<double>> path_ini;
       if (traj_ref_curr.size() > 0 && !reset_path_) {
         int path_ini_start_idx = 0;
@@ -354,8 +366,8 @@ void Agent::UpdatePath() {
             break;
           }
         }
-        // build path ini (without the last ref point because it is the start of
-        // the path planning algorithm)
+        // build path ini (without the last ref point because it is the start
+        // of the path planning algorithm)
         path_ini.push_back(
             {traj_ref_curr[0].begin(), traj_ref_curr[0].begin() + 3});
         for (int i = path_ini_start_idx; i <= path_ini_end_idx; i++) {
@@ -363,8 +375,8 @@ void Agent::UpdatePath() {
         }
       }
 
-      // join the reference trajectory to the planned path and update the final
-      // path used for planning
+      // join the reference trajectory to the planned path and update the
+      // final path used for planning
       path_mtx_.lock();
       path_curr_.clear();
       path_curr_.insert(path_curr_.begin(), path_ini.begin(), path_ini.end());
@@ -627,24 +639,26 @@ void Agent::PublishTrajectoryFull() {
 }
 
 void Agent::PublishTrajectory() {
-  // create path message
-  ::nav_msgs::msg::Path traj_msg;
+  if (traj_curr_.size() > 0) {
+    // create path message
+    ::nav_msgs::msg::Path traj_msg;
 
-  // set the time stamp and the frame
-  traj_msg.header.stamp = now();
-  traj_msg.header.frame_id = world_frame_;
+    // set the time stamp and the frame
+    traj_msg.header.stamp = now();
+    traj_msg.header.frame_id = world_frame_;
 
-  // build the trajectory message
-  for (int i = 0; i <= n_hor_; i++) {
-    ::geometry_msgs::msg::PoseStamped pose_stamped;
-    pose_stamped.pose.position.x = traj_curr_[i][0];
-    pose_stamped.pose.position.y = traj_curr_[i][1];
-    pose_stamped.pose.position.z = traj_curr_[i][2];
-    traj_msg.poses.push_back(pose_stamped);
+    // build the trajectory message
+    for (int i = 0; i <= n_hor_; i++) {
+      ::geometry_msgs::msg::PoseStamped pose_stamped;
+      pose_stamped.pose.position.x = traj_curr_[i][0];
+      pose_stamped.pose.position.y = traj_curr_[i][1];
+      pose_stamped.pose.position.z = traj_curr_[i][2];
+      traj_msg.poses.push_back(pose_stamped);
+    }
+
+    // publish the trajectory message
+    traj_pub_->publish(traj_msg);
   }
-
-  // publish the trajectory message
-  traj_pub_->publish(traj_msg);
 }
 
 void Agent::PublishPath() {
@@ -944,7 +958,8 @@ void Agent::SolveOptimizationProblem() {
   // used are kept the same as the previous iteration
   if (optimization_failed_) {
     int64_t stamp_ms = now().nanoseconds() / 1e6;
-    ::std::cout << "stamp optimization fail: " << stamp_ms << ::std::endl;
+    ::std::cout << "id: " << id_ << " stamp optimization fail : " << stamp_ms
+                << ::std::endl;
     if (!traj_curr.empty()) {
       // Remove the first element
       traj_curr.erase(traj_curr.begin());
@@ -1079,8 +1094,8 @@ void Agent::GenerateTimeAwareSafeCorridor() {
         // compute perturbation based on time; it is based on the quotient
         // of the division of the time in milliseconds by the planning step
         long long pert_int = (t_wall_ms) / (dt_ * step_plan_ * 1e3);
-        // the perturbation variable need to account for the fact that every new
-        // iteration, it is changing the previous hyperplanes of all the
+        // the perturbation variable need to account for the fact that every
+        // new iteration, it is changing the previous hyperplanes of all the
         // trajectory which may render the trajectory infeasible; need
         // modification to account for that
         double pert = 0; // pert_int % 50 / 1000;

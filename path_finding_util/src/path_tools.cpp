@@ -250,7 +250,7 @@ ShortenDMPPath(::std::vector<::std::vector<double>> &path,
   // start from the first point of the path and walk until we reach a point that
   // is not occupied or in a potential field
   int i = 0;
-  while (i + 1 < int(path_eig_local.size())) {
+  while (i < int(path_eig_local.size()) - 1) {
     if (int(vg.GetVoxelInt(path_eig_local[i])) <= 0) {
       int i_start = i;
       int i_end = i;
