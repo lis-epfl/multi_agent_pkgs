@@ -3,7 +3,7 @@ from shapes import VoxelGrid, Wall, RandomVolume, Cylinder, Loop
 
 
 def write_config_file(filename, voxel_grid, seed):
-    voxel_grid.compute_occupancy()
+    voxel_grid.compute_occupancy_new()
     config_yaml = """env_builder_node: 
   ros__parameters:
     origin_grid: %s # origin of the voxel grid
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Create the voxel grid
     voxel_grid = VoxelGrid(dimension, voxel_size, origin)
 
-    # Add shapes : Cylinder, Loop, Walls or Random volumes
+    # # Add shapes : Cylinder, Loop, Walls or Random volumes
     # # Create a cylinder
     # cylinder = Cylinder((2.0,5.0,5.0), (0.3,0.5,1.0), 1.5)
     # voxel_grid.add_shape(cylinder)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # loop = Loop((12.0,5.0,5.0), -np.pi/4, 2.0, 3.0)
     # voxel_grid.add_shape(loop)
 
-    # # Create a wall
+    # # # Create a wall
     wall = Wall(origin = (75,0,-6), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=0.3) # Two directions to define the plane
     wall.add_square_gap(rel_origin = (2.5,5), length = 1.5, height = 2)
     wall.add_square_gap(rel_origin = (5,7.5), length = 3, height = 3)
@@ -94,17 +94,17 @@ if __name__ == "__main__":
 
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders = RandomVolume([[30,0,-6], [30,30,15]], seed)
-    rd_volume_cylinders.add_random_cylinders(135,
-                                             direction_range=[
-                                                 [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.3, 0.3],
-                                             height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
+    # rd_volume_cylinders = RandomVolume([[30,0,-6], [30,30,15]], seed)
+    # rd_volume_cylinders.add_random_cylinders(135,
+    #                                          direction_range=[
+    #                                              [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+    #                                          radius_range=[0.3, 0.3],
+    #                                          height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
     # rd_volume_cylinders.add_random_loops(50,
     #                                      angle_range=[0, np.pi/2],
     #                                      radius_range=[1.5, 2],
     #                                      thickness_range=[0.3, 0.3])
-    voxel_grid.add_shape(rd_volume_cylinders)
+    # voxel_grid.add_shape(rd_volume_cylinders)
 
     rd_volume_cylinders = RandomVolume([[90,0,-6], [30,30,15]], seed)
     rd_volume_cylinders.add_random_cylinders(360,
@@ -115,10 +115,10 @@ if __name__ == "__main__":
 
     voxel_grid.add_shape(rd_volume_cylinders)
 
-    # # Or with loops (can do both in same volume)
-    # rd_volume_loops = RandomVolume([[33, 0, 0], [40,10,10]], seed)
-    # rd_volume_loops.add_random_loops(5)
-    # voxel_grid.add_shape(rd_volume_loops)
+    # Or with loops (can do both in same volume)
+    rd_volume_loops = RandomVolume([[33, 0, 0], [40,10,10]], seed)
+    rd_volume_loops.add_random_loops(5)
+    voxel_grid.add_shape(rd_volume_loops)
 
     ########################### END OF PARAMETRIZING ##################################
     # Write the YAML config file
