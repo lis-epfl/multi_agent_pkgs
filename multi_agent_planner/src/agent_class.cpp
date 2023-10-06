@@ -295,7 +295,7 @@ void Agent::UpdatePath() {
       for (auto pt : traj_curr_) {
         if (vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2])) <=
             100) {
-          start = pt;
+          start = {pt[0], pt[1], pt[2]};
           break;
         }
       }
@@ -316,10 +316,11 @@ void Agent::UpdatePath() {
           break;
       }
       traj_ref_curr = traj_tmp;
-      start = traj_ref_curr.back();
+      start = {traj_ref_curr.back()[0], traj_ref_curr.back()[1],
+               traj_ref_curr.back()[2]};
     } else if (!state_ini_.empty()) {
       // if the planner has not planned the first iteration yet
-      start = state_ini_;
+      start = {state_ini_[0], state_ini_[1], state_ini_[2]};
     }
 
     // find intermediate goal
@@ -501,6 +502,10 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // save dmp planner output
   auto path_dmp = dmp.getRawPath();
   ::std::vector<::std::vector<double>> path_dmp_final;
+  // add the start_arg because jps and dmp plan from the centers of the voxels
+  // and not from the actual starting point; path shortening takes care of the
+  // weird initial segment
+  path_dmp_final.push_back(start_arg);
   for (auto pt : path_dmp) {
     ::std::vector<double> path_pt = {pt[0], pt[1], pt[2]};
     path_dmp_final.push_back(path_pt);
@@ -1418,7 +1423,7 @@ void Agent::GenerateReferenceTrajectory() {
 
 ::std::vector<::std::vector<double>>
 Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
-  // remove unnecessare points that are in the middle of 2 segments forming an
+  // remove unnecessary points that are in the middle of 2 segments forming an
   // acute angle
   for (int i = 0; i < int(path.size()) - 2; i++) {
     ::std::vector<double> sg_1 = {path[i][0] - path[i + 1][0],
