@@ -1423,6 +1423,14 @@ void Agent::GenerateReferenceTrajectory() {
 
 ::std::vector<::std::vector<double>>
 Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
+  // get voxel grid to check if line is clear when removing zigzags
+  voxel_grid_mtx_.lock();
+  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
+      voxel_grid_stamped_.voxel_grid;
+  voxel_grid_mtx_.unlock();
+  ::voxel_grid_util::VoxelGrid vg_util =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
+
   // remove unnecessary points that are in the middle of 2 segments forming an
   // acute angle
   for (int i = 0; i < int(path.size()) - 2; i++) {
@@ -1433,8 +1441,19 @@ Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
                                   path[i + 1][1] - path[i + 2][1],
                                   path[i + 1][2] - path[i + 2][2]};
     if (DotProduct(sg_1, sg_2) <= 0) {
-      path.erase(path.begin() + i + 1);
-      i = ::std::max(0, i - 2);
+      // if acute angle, check if the line is clear between the points that will
+      // remain after removing the midpoint of the 2 segments; first transform
+      // point to voxel coordinates
+      ::Eigen::Vector3d pt_1(path[i][0], path[i][1], path[i][2]);
+      ::Eigen::Vector3d pt_2(path[i + 2][0], path[i + 2][1], path[i + 2][2]);
+      ::Eigen::Vector3d pt_1_local = vg_util.GetCoordLocal(pt_1);
+      ::Eigen::Vector3d pt_2_local = vg_util.GetCoordLocal(pt_2);
+      if (::path_finding_util::IsLineClear(pt_1_local, pt_2_local, vg_util,
+                                           (pt_1_local - pt_2_local).norm(),
+                                           false)) {
+        path.erase(path.begin() + i + 1);
+        i = ::std::max(0, i - 2);
+      }
     }
   }
   return path;
@@ -1798,7 +1817,8 @@ void Agent::SaveStateHistory() {
 }
 
 void Agent::SaveAndDisplayCommunicationLatency() {
-  // go through all agents and compute the average and max communication latency
+  // go through all agents and compute the average and max communication
+  // latency
   ::std::vector<double> com_latency_mean;
   com_latency_mean.resize(n_rob_);
   ::std::vector<double> com_latency_max;
