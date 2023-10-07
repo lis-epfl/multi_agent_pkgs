@@ -42,16 +42,22 @@ def generate_launch_description():
     #                    (0.81, -1.73, z_plane)]
     # goal_positions = [start_positions[1], start_positions[0], start_positions[3],
     #                   start_positions[2], start_positions[5], start_positions[4]]
-    start_positions = [(2, 0, z_plane),
-                       (0.62, 1.9, z_plane),
-                       (-1.62, 1.17, z_plane),
-                       (-1.17, -1.62, z_plane),
-                       (0.62, -1.9, z_plane)]
-    goal_positions = [(-2.0, 0.0, z_plane),
-                      (-0.62, -1.9, z_plane),
-                      (1.62, -1.17, z_plane),
-                      (1.17, 1.62, z_plane),
-                      (-0.62, 1.9, z_plane)]
+    # start_positions = [(2, 0, z_plane),
+    #                    (0.62, 1.9, z_plane),
+    #                    (-1.62, 1.17, z_plane),
+    #                    (-1.17, -1.62, z_plane),
+    #                    (0.62, -1.9, z_plane)]
+    # goal_positions = [(-2.0, 0.0, z_plane),
+    #                   (-0.62, -1.9, z_plane),
+    #                   (1.62, -1.17, z_plane),
+    #                   (1.17, 1.62, z_plane),
+    #                   (-0.62, 1.9, z_plane)]
+    start_positions = [(2.0, 0.0, z_plane),
+                       (0.0, 2.0, z_plane),
+                       (-2.0, 0.0, z_plane),
+                       (0.0, -2.0, z_plane)]
+    goal_positions = [start_positions[2], start_positions[3],
+                      start_positions[0], start_positions[1]]
 
     n_rob = len(start_positions)
 

@@ -511,6 +511,11 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
     path_dmp_final.push_back(path_pt);
   }
 
+  // also add the final goal point because jps and dmp plan to the centers of
+  // voxels and not the actual goal; path shortening takes care of the weird
+  // final segment
+  path_dmp_final.push_back(goal_arg);
+
   // first check if the path isn't empty or the planning didn't fail
   if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
     ::std::cout << int(valid_jps) << " " << int(valid_dist) << " "

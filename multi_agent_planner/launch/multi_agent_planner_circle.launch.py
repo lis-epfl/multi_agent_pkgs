@@ -23,8 +23,8 @@ def generate_launch_description():
 
     # define params
     radius = 20  
-    center_x = 21.1
-    center_y = 21.1
+    center_x = 21.11
+    center_y = 21.11
     n_rob = 10 
     voxel_grid_range = [18.0, 18.0, 6.0]
     use_mapping_util = True
