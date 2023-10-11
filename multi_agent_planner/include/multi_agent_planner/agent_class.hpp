@@ -72,7 +72,7 @@ private:
   // if no path has been found
   bool GetPath(::std::vector<double> &start_arg,
                ::std::vector<double> &goal_arg,
-               ::env_builder_msgs::msg::VoxelGrid &voxel_grid,
+               ::voxel_grid_util::VoxelGrid &voxel_grid,
                ::std::vector<::std::vector<double>> &path_out);
 
   // get path using our path finding library
@@ -320,7 +320,7 @@ private:
   // addition to the inflation to account for the drone radius); used to allow
   // for better polyhedron generation in tight corridors in case there is no
   // adaptation for the grid resolution in tight spaces
-  int path_infl_size_;
+  double path_infl_dist_;
   // communication latency in seconds (added artificially)
   double com_latency_;
   // MPC control weight
@@ -351,6 +351,8 @@ private:
   /* path planner params */
   // distance map planner potential radius
   double dmp_pot_rad_;
+  // distance map planner potential power
+  double dmp_pot_pow_;
   // distance map planner search radius
   double dmp_search_rad_;
   // number of iteration for the dmp planner

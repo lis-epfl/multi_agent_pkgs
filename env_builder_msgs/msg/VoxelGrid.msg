@@ -7,11 +7,5 @@ uint32[3] dimension
 # voxel size
 float64 voxel_size
 
-# potential field distance
-float64 potential_dist
-
-# potential field power
-float64 potential_pow
-
 # voxel grid data
 int8[] data

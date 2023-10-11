@@ -4,6 +4,8 @@
 #include <vector>
 
 namespace voxel_grid_util {
+VoxelGrid::VoxelGrid() {}
+
 VoxelGrid::VoxelGrid(Eigen::Vector3d &origin, Eigen::Vector3i &dim,
                      double vox_size, bool free)
     : origin_(origin), dim_(dim), vox_size_(vox_size) {
@@ -207,6 +209,22 @@ VoxelGrid::CreateMask(double mask_dist, double pow) {
   return mask;
 }
 
+void VoxelGrid::FreeUnknown() {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = ENV_BUILDER_FREE;
+    }
+  }
+}
+
+void VoxelGrid::OccupyUnknown() {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = ENV_BUILDER_OCC;
+    }
+  }
+}
+
 void VoxelGrid::InflateObstacles(double inflation_dist) {
   // first create mask to get all the voxels that are within the inflation
   // distance of the center voxel that is being considered for inflation
@@ -310,4 +328,5 @@ void WriteGridToFile(VoxelGrid::Ptr vg, std::string file_name) {
   }
   my_file.close();
 }
+
 } // namespace voxel_grid_util

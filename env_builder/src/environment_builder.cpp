@@ -16,12 +16,6 @@ EnvironmentBuilder::EnvironmentBuilder()
   // add obstacles to the voxel grid
   AddObstacles();
 
-  // inflate the obstacles by inflation_dist_
-  InflateObstacles();
-
-  // generate potential field from potential_dist_ and potential_pow_
-  CreatePotentialField();
-
   // save obstacle positions and pointcloud to file if save_obstacles_ is true
   if (save_obstacles_) {
     SaveObstacles();
@@ -74,10 +68,6 @@ EnvironmentBuilder::GenerateVoxelGridMSG(::std::array<float, 3> &position,
               origin_grid_[2];
 
   vg_msg.voxel_grid.origin = origin;
-
-  // add the potential distance and potential power
-  vg_msg.voxel_grid.potential_dist = potential_dist_;
-  vg_msg.voxel_grid.potential_pow = potential_pow_;
 
   // find the range in integer dimensions
   ::std::array<uint32_t, 3> dim;
@@ -152,10 +142,6 @@ void EnvironmentBuilder::CreateEnvironmentVoxelGrid() {
   voxel_grid_stamped_msg_.voxel_grid.origin[0] = origin_grid_[0];
   voxel_grid_stamped_msg_.voxel_grid.origin[1] = origin_grid_[1];
   voxel_grid_stamped_msg_.voxel_grid.origin[2] = origin_grid_[2];
-
-  // add the potential distance and potential power
-  voxel_grid_stamped_msg_.voxel_grid.potential_dist = potential_dist_;
-  voxel_grid_stamped_msg_.voxel_grid.potential_pow = potential_pow_;
 
   // set the integer dimensions of the grid
   voxel_grid_stamped_msg_.voxel_grid.dimension[0] =
@@ -244,14 +230,6 @@ void EnvironmentBuilder::AddObstacles() {
   }
 }
 
-void EnvironmentBuilder::InflateObstacles() {
-  voxel_grid_shared_ptr_->InflateObstacles(inflation_dist_);
-}
-
-void EnvironmentBuilder::CreatePotentialField() {
-  voxel_grid_shared_ptr_->CreatePotentialField(potential_dist_, potential_pow_);
-}
-
 void EnvironmentBuilder::SaveObstacles() {
   // save pointcloud to csv file
   ::voxel_grid_util::WriteGridToFile(voxel_grid_shared_ptr_, "map.csv");
@@ -270,9 +248,6 @@ void EnvironmentBuilder::DeclareRosParameters() {
   declare_parameter("dimension_grid", std::vector<double>(3, 15.0));
   declare_parameter("vox_size", 0.3);
   declare_parameter("free_grid", true);
-  declare_parameter("inflation_dist", 0.3);
-  declare_parameter("potential_dist", 0.0);
-  declare_parameter("potential_pow", 1.0);
   declare_parameter("save_obstacles", false);
 
   declare_parameter("multi_obst_size", false);
@@ -297,9 +272,6 @@ void EnvironmentBuilder::InitializeRosParameters() {
   dimension_grid_ = get_parameter("dimension_grid").as_double_array();
   vox_size_ = get_parameter("vox_size").as_double();
   free_grid_ = get_parameter("free_grid").as_bool();
-  inflation_dist_ = get_parameter("inflation_dist").as_double();
-  potential_dist_ = get_parameter("potential_dist").as_double();
-  potential_pow_ = get_parameter("potential_pow").as_double();
   save_obstacles_ = get_parameter("save_obstacles").as_bool();
 
   multi_obst_size_ = get_parameter("multi_obst_size").as_bool();

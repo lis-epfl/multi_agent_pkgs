@@ -293,8 +293,9 @@ void Agent::UpdatePath() {
     ::std::vector<double> start;
     if (reset_path_ && !traj_curr_.empty()) {
       for (auto pt : traj_curr_) {
-        if (vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2])) <=
-            100) {
+        int8_t voxel_val =
+            vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2]));
+        if (voxel_val != ENV_BUILDER_OCC && voxel_val != ENV_BUILDER_UNK) {
           start = {pt[0], pt[1], pt[2]};
           break;
         }
@@ -309,7 +310,10 @@ void Agent::UpdatePath() {
       int i = 0;
       while (vg_util.GetVoxelGlobal(
                  ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
-                                   traj_ref_curr[i][2])) != ENV_BUILDER_OCC) {
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_OCC &&
+             vg_util.GetVoxelGlobal(
+                 ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_UNK) {
         traj_tmp.push_back(traj_ref_curr[i]);
         i = ::std::min(int(traj_ref_curr.size()) - 1, i + 1);
         if (i == int(traj_ref_curr.size()) - 1)
@@ -333,7 +337,7 @@ void Agent::UpdatePath() {
     ::std::vector<::std::vector<double>> path_out;
     bool valid_path;
     // plan using original method
-    valid_path = GetPath(start, goal_inter, voxel_grid, path_out);
+    valid_path = GetPath(start, goal_inter, vg_util, path_out);
     // plan using new method
     /* valid_path = GetPathNew(start, goal_inter, vg_util, path_out); */
 
@@ -446,10 +450,19 @@ bool Agent::GetPathNew(::std::vector<double> &start_arg,
 
 bool Agent::GetPath(::std::vector<double> &start_arg,
                     ::std::vector<double> &goal_arg,
-                    ::env_builder_msgs::msg::VoxelGrid &voxel_grid,
+                    ::voxel_grid_util::VoxelGrid &vg_util,
                     ::std::vector<::std::vector<double>> &path_out) {
   // set the namespace
   using namespace JPS;
+
+  // free the unknown voxels in the voxel grid
+  vg_util.FreeUnknown();
+
+  // inflate obstacles
+  vg_util.InflateObstacles(path_infl_dist_);
+
+  // create potential field
+  vg_util.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_);
 
   // define start and goal
   Vec3f start(start_arg[0], start_arg[1], start_arg[2]);
@@ -460,11 +473,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // store map in map_util
   ::std::shared_ptr<VoxelMapUtil> map_util = ::std::make_shared<VoxelMapUtil>();
-  Vec3f origin(voxel_grid.origin[0], voxel_grid.origin[1],
-               voxel_grid.origin[2]);
-  Vec3i dim(voxel_grid.dimension[0], voxel_grid.dimension[1],
-            voxel_grid.dimension[2]);
-  map_util->setMap(origin, dim, voxel_grid.data, voxel_grid.voxel_size);
+  map_util->setMap(vg_util.GetOrigin(), vg_util.GetDim(), vg_util.GetData(),
+                   vg_util.GetVoxSize());
 
   if (planner_verbose_) {
     RCLCPP_INFO(get_logger(), "map_util time: %.3fs",
@@ -488,7 +498,6 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // set up dmp planner
   t_start = clock();
   IterativeDMPlanner3D dmp(planner_verbose_);
-  dmp.setPotentialRadius(Vec3f(dmp_pot_rad_, dmp_pot_rad_, dmp_pot_rad_));
   dmp.setSearchRadius(Vec3f(dmp_search_rad_, dmp_search_rad_, dmp_search_rad_));
   dmp.setMap(map_util, start);
 
@@ -518,15 +527,13 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // first check if the path isn't empty or the planning didn't fail
   if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
-    ::std::cout << int(valid_jps) << " " << int(valid_dist) << " "
-                << path_dmp_final.size() << ::std::endl;
+    ::std::cout << "valid_jps: " << int(valid_jps)
+                << " valid_dmp: " << int(valid_dist)
+                << " path dmp size: " << path_dmp_final.size() << ::std::endl;
     return false;
   }
 
   // shorten the path
-  ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
-                                       dmp.getMap());
-
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
   path_out = path_out_final;
@@ -1185,6 +1192,8 @@ void Agent::GenerateSafeCorridor() {
   ::env_builder_msgs::msg::VoxelGrid voxel_grid =
       voxel_grid_stamped_.voxel_grid;
   voxel_grid_mtx_.unlock();
+  ::voxel_grid_util::VoxelGrid vg_util =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
   // then find segment outside the polyhedra in our poly_const_vec_new by
   // walking on the path starting from the current position
@@ -1195,6 +1204,8 @@ void Agent::GenerateSafeCorridor() {
   // these polyhedra
   int path_idx = 1;
   ::Eigen::Vector3d curr_pt(path_curr[0][0], path_curr[0][1], path_curr[0][2]);
+  // set the unknown voxels to occupid before generating the Safe Corridor
+  vg_util.OccupyUnknown();
   while (n_poly < poly_hor_) {
     ::Eigen::Vector3d next_pt(path_curr[path_idx][0], path_curr[path_idx][1],
                               path_curr[path_idx][2]);
@@ -1276,7 +1287,7 @@ void Agent::GenerateSafeCorridor() {
     // use point as seed for polyhedra
     // check if use voxel grid based method or liu's method
     Polyhedron3D poly_new;
-    ::std::vector<int8_t> &grid_data = voxel_grid.data;
+    ::std::vector<int8_t> grid_data = vg_util.GetData();
     if (use_cvx_) {
       Vec3i dim(voxel_grid.dimension[0], voxel_grid.dimension[1],
                 voxel_grid.dimension[2]);
@@ -1577,6 +1588,10 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
         // voxel to the start point
         /* ::std::cout << "visited pt: " << pt.transpose() << ::std::endl; */
         double voxel_val = double(vg_util.GetVoxelInt(pt));
+        if (voxel_val == -1) {
+          voxel_val = 100;
+        }
+
         double dist_start = (path_start - pt).norm() * vg_util.GetVoxSize();
 
         // use the heuristic to compute the path velocity limit
@@ -2032,7 +2047,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("use_cvx", true);
   declare_parameter("use_cvx_new", false);
   declare_parameter("drone_radius", 0.2);
-  declare_parameter("path_infl_size", 1);
+  declare_parameter("path_infl_dist", 0.3);
   declare_parameter("com_latency", 0.0);
   declare_parameter("r_u", 0.01);
   declare_parameter("r_x", ::std::vector<double>(9, 0.0));
@@ -2048,6 +2063,8 @@ void Agent::DeclareRosParameters() {
   declare_parameter("goal", ::std::vector<double>(3, 0.0));
   declare_parameter("planner_verbose", false);
   declare_parameter("save_stats", false);
+  declare_parameter("dmp_pot_rad", 0.0);
+  declare_parameter("dmp_pot_pow", 4.0);
   declare_parameter("dmp_search_rad", 0.0);
   declare_parameter("dmp_n_it", 1);
   declare_parameter("path_planning_period", 0.1);
@@ -2085,7 +2102,7 @@ void Agent::InitializeRosParameters() {
   use_cvx_ = get_parameter("use_cvx").as_bool();
   use_cvx_new_ = get_parameter("use_cvx_new").as_bool();
   drone_radius_ = get_parameter("drone_radius").as_double();
-  path_infl_size_ = get_parameter("path_infl_size").as_int();
+  path_infl_dist_ = get_parameter("path_infl_dist").as_double();
   com_latency_ = get_parameter("com_latency").as_double();
   r_u_ = get_parameter("r_u").as_double();
   r_x_ = get_parameter("r_x").as_double_array();
@@ -2101,6 +2118,8 @@ void Agent::InitializeRosParameters() {
   goal_curr_ = get_parameter("goal").as_double_array();
   planner_verbose_ = get_parameter("planner_verbose").as_bool();
   save_stats_ = get_parameter("save_stats").as_bool();
+  dmp_pot_rad_ = get_parameter("dmp_pot_rad").as_double();
+  dmp_pot_pow_ = get_parameter("dmp_pot_pow").as_double();
   dmp_search_rad_ = get_parameter("dmp_search_rad").as_double();
   dmp_n_it_ = get_parameter("dmp_n_it").as_int();
   path_planning_period_ = get_parameter("path_planning_period").as_double();
@@ -2114,7 +2133,6 @@ void Agent::VoxelGridResponseCallback(
     // store the data descriptions
     voxel_grid_mtx_.lock();
     voxel_grid_stamped_ = future.get()->voxel_grid_stamped;
-    dmp_pot_rad_ = voxel_grid_stamped_.voxel_grid.potential_dist;
     voxel_grid_mtx_.unlock();
     voxel_grid_ready_ = true;
     if (planner_verbose_) {

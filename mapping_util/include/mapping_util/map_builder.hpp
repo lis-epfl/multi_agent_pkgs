@@ -3,8 +3,8 @@
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "tf2_ros/transform_listener.h"
 #include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 #include "voxel_grid.hpp"
 #include <env_builder_msgs/msg/voxel_grid_stamped.hpp>
 #include <env_builder_msgs/srv/get_voxel_grid.hpp>
@@ -14,6 +14,7 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <stdlib.h>
 #include <string>
+#include "path_tools.hpp"
 
 namespace mapping_util {
 class MapBuilder : public ::rclcpp::Node {
@@ -32,6 +33,21 @@ private:
   void EnvironmentVoxelGridCallback(
       const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg);
 
+  // merge 2 grids together; the unknown voxels of the new grid are replaced
+  // with the voxels of the old grid
+  ::voxel_grid_util::VoxelGrid
+  MergeVoxelGrids(const ::voxel_grid_util::VoxelGrid &vg_old,
+                  const ::voxel_grid_util::VoxelGrid &vg_new);
+
+  // raycast from a point inside the voxel grid (local coordinates) to clear all
+  // the voxels in the way
+  void RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
+                       const ::Eigen::Vector3d &start);
+
+  // clear the line along the start and the end in the voxel
+  void ClearLine(::voxel_grid_util::VoxelGrid &vg,
+                 const ::Eigen::Vector3d &start, const ::Eigen::Vector3d &end);
+
   // callback for when we receive the new agent position
   void TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg);
 
@@ -47,7 +63,8 @@ private:
   ::std::string world_frame_;
   // agent frame name
   ::std::string agent_frame_;
-  // whether to free all voxels that are not occupied (no unknowns)
+  // whether to free all voxels that are not occupied (no unknowns); if not then
+  // we have to raycast to free the voxels
   bool free_grid_;
 
   /* publishers/subscribers */
@@ -68,7 +85,7 @@ private:
   ::std::vector<double> pos_curr_;
 
   // current voxel grid
-  ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_curr_;
+  ::voxel_grid_util::VoxelGrid voxel_grid_curr_;
 
   /* mutexes for memory management - unnecessary for now because the callbacks
    * are executed sequentially but in case we use MultiThreadedExecutor in the
