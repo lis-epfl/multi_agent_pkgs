@@ -114,6 +114,11 @@ private:
   ::std::vector<std::vector<double>>
   SamplePath(::std::vector<::std::vector<double>> &path);
 
+  // keep only the points that are in the free voxels for the reference
+  // trajectory
+  ::std::vector<::std::vector<double>>
+  KeepOnlyFreeReference(::std::vector<::std::vector<double>> &traj_ref);
+
   // compute the path sampling velocity based on path and the voxel
   // grid/potential field; if the path is close to the obstacles, we wanna
   // sample it at slower speeds
@@ -135,13 +140,10 @@ private:
   // get intermediate goal
   ::std::vector<double>
   GetIntermediateGoal(::std::vector<double> &goal,
-                      ::env_builder_msgs::msg::VoxelGrid &voxel_grid);
+                      ::voxel_grid_util::VoxelGrid &voxel_grid);
 
   // clear the borders of the voxel grid
-  void ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid);
-
-  // get index of voxel grid from its dimensions
-  int GetPointIdx(::Eigen::Vector3i &pt, ::std::array<uint32_t, 3> &dim);
+  void ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid);
 
   // get distance squared between vectors
   double GetDistanceSquared(::std::vector<double> &p1,
@@ -220,8 +222,8 @@ private:
   // voxel grid client
   ::rclcpp::Client<::env_builder_msgs::srv::GetVoxelGrid>::SharedPtr
       voxel_grid_client_;
-  // voxel grid message
-  ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped_;
+  // voxel grid
+  ::voxel_grid_util::VoxelGrid voxel_grid_;
   // timers for voxel service delay
   ::rclcpp::TimerBase::SharedPtr voxel_service_timer_;
   // whether to use the mapping_util or env_builder

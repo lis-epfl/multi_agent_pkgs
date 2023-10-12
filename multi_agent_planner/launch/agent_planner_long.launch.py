@@ -43,7 +43,7 @@ def generate_launch_description():
 
     # create node
     params_sub = [{'use_mapping_util': use_mapping_util},
-                  {'planner_verbose': False},
+                  {'planner_verbose': True},
                   {'voxel_grid_range': voxel_grid_range},
                   {'state_ini': state_ini},
                   {'goal': goal}]

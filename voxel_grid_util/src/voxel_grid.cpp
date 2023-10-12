@@ -265,7 +265,9 @@ void VoxelGrid::CreatePotentialField(double potential_dist, int pow) {
         if (IsOccupied(n)) {
           for (const auto &it : mask) {
             const ::Eigen::Vector3i new_n = n + it.first;
-            SetVoxelInt(new_n, ::std::max(GetVoxelInt(new_n), it.second));
+            if (GetVoxelInt(new_n) != ENV_BUILDER_UNK) {
+              SetVoxelInt(new_n, ::std::max(GetVoxelInt(new_n), it.second));
+            }
           }
         }
       }

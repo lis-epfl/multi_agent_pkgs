@@ -38,7 +38,7 @@ EnvironmentBuilder::EnvironmentBuilder()
   voxel_grid_pub_ = create_publisher<::env_builder_msgs::msg::VoxelGridStamped>(
       "~/" + env_vg_topic_, 10);
   voxel_grid_timer_ = create_wall_timer(
-      std::chrono::milliseconds(200),
+      std::chrono::milliseconds(100),
       std::bind(&EnvironmentBuilder::TimerCallbackEnvironmentVG, this));
 
   // create service for drones to call and get the local voxel grid
