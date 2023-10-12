@@ -265,7 +265,7 @@ class Cylinder(Shape):
         second_normal = np.cross(self.axis_direction, first_normal)
 
         # Create mesh grid and fill occupancy in the voxel grid
-        for radius in np.arange(mesh_size/2, self.radius, mesh_size):
+        for radius in np.arange(self.radius, mesh_size/4, -mesh_size):
             angle_step = mesh_size / (2*np.pi*radius)
             for angle in np.arange(0, 2*np.pi, angle_step):
                 x_rel = radius*np.cos(angle)
