@@ -1,4 +1,5 @@
 import math
+import time
 import numpy as np
 import random as rd
 import matplotlib.pyplot as plt
@@ -20,11 +21,11 @@ class VoxelGrid:
         self.voxel_size = voxel_size
         self.origin = origin
         self.grid_size = self.to_voxel_coordinates(dimension[0] + self.origin[0],
-                                                   dimension[1] +
-                                                   self.origin[1],
+                                                   dimension[1] + self.origin[1],
                                                    dimension[2] + self.origin[2])  # Create the size of the grid
-        self.data = [0] * (self.grid_size[0] *
+        self.data = [False] * (self.grid_size[0] *
                            self.grid_size[1] * self.grid_size[2])
+        self.occupied_voxels = []
         # List of shapes that will be obstacles. A random volume and a wall are also shapes.
         self.obstacles = []
 
@@ -57,6 +58,7 @@ class VoxelGrid:
         index = i + self.grid_size[0] * j + \
             self.grid_size[0] * self.grid_size[1] * k
         return self.data[index]
+    
 
     def clear(self):
         """Clear the voxel grid by setting all voxels to 0."""
@@ -111,6 +113,19 @@ class VoxelGrid:
         k = int((z - self.origin[2]) / self.voxel_size)
         return (i, j, k)
 
+    def point_to_voxel_coordinates(self, point):
+        """
+        Convert world coordinates to voxel coordinates.
+
+        Args:
+            point (vector): point in world space.
+
+        Returns:
+            tuple: 3D vector representing voxel coordinates.
+        """
+        return self.to_voxel_coordinates(point[0], point[1], point[2])
+
+
     def visualize(self):
         """
         Visualize the voxel grid using Matplotlib.
@@ -128,7 +143,7 @@ class VoxelGrid:
             z.append(self.occupied_voxels[i+2])
 
         # Blue markers for occupied voxels
-        ax.scatter(x, y, z, c='b', marker='o', s=100)
+        ax.scatter(x, y, z, c='b', marker='o', s=30)
 
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
@@ -143,14 +158,14 @@ class VoxelGrid:
         self.obstacles.append(shape)
 
     def compute_occupancy(self):
-        self.occupied_voxels = []
+
         for i in range(self.grid_size[0]):
             for j in range(self.grid_size[1]):
                 for k in range(self.grid_size[2]):
                     point = np.array(self.to_world_coordinates(i, j, k))
                     for shape in self.obstacles:
                         if shape.includes(point):
-                            self.set_voxel(i, j, k, 100)
+                            self.set_voxel(i, j, k, True)
                             self.occupied_voxels.append(
                                 point[0] - self.origin[0])
                             self.occupied_voxels.append(
@@ -158,12 +173,20 @@ class VoxelGrid:
                             self.occupied_voxels.append(
                                 point[2] - self.origin[2])
                             break
+    
+    def compute_occupancy_new(self):
+        start_time = time.time()
+        print('Start generation of obstacles ...')
+        for obstacle in self.obstacles :
+            obstacle.occupy_voxels(self, mesh_size = self.voxel_size/2)
+        print("Done : generation of obstacles took %.2f seconds." %(time.time()-start_time))
+
 
     def get_occupied_voxels(self):
         """
         Returns two lists : a list of size of obstacles (voxel size) by triplets, and a list that will give the x,y,z positions of given obstacles. Function made to fill out the YAML file
         """
-        self.compute_occupancy()
+        self.compute_occupancy_new()
         return [self.voxel_size]*len(self.occupied_voxels), self.occupied_voxels
 
 
@@ -187,13 +210,19 @@ class Shape:
         """
         pass
 
+    def occupy_voxels(self, voxel_grid, container_volume, mesh_size):
+        """
+        Mark all the voxels from the grid that the shape occupies to True.
+        """
+        pass
+
 
 class Cylinder(Shape):
     """
     Class that implements the cylinder shape
     """
 
-    def __init__(self, axis_origin, axis_direction, radius, cylinder_height=float('Inf')):
+    def __init__(self, axis_origin, axis_direction, radius, cylinder_height=12.0):
         # the starting point of the cylinder
         self.axis_origin = np.array(axis_origin)
         # its direction, need not to be a unit vector, but should not be null vector.
@@ -225,7 +254,33 @@ class Cylinder(Shape):
             if np.linalg.norm(distance_vector) <= self.radius:
                 return True
         return False
+    
+    def occupy_voxels(self, voxel_grid, container_volume = None, mesh_size = 0.05):
 
+        # Find the normals to the axis
+        first_normal = np.cross(self.axis_direction, np.array([0,1,0]))
+        if np.linalg.norm(first_normal) < 1e-2:
+            first_normal = np.cross(self.axis_direction, np.array([1,0,0]))
+        first_normal = first_normal/np.linalg.norm(first_normal)
+        second_normal = np.cross(self.axis_direction, first_normal)
+
+        # Create mesh grid and fill occupancy in the voxel grid
+        for radius in np.arange(self.radius, mesh_size/4, -mesh_size):
+            angle_step = mesh_size / (2*np.pi*radius)
+            for angle in np.arange(0, 2*np.pi, angle_step):
+                x_rel = radius*np.cos(angle)
+                y_rel = radius*np.sin(angle)
+                for z_rel in np.arange(-self.cylinder_height/2, self.cylinder_height/2, mesh_size):
+                    point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
+                    if (container_volume is None or container_volume.volume_includes(point)):
+                        voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
+                        if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
+                            voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[0])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[1])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+                                
+        
 
 class Loop(Shape):
     """
@@ -235,6 +290,9 @@ class Loop(Shape):
     def __init__(self, axis_origin, angle, inside_radius, outside_radius, thickness=1):
         self.axis_origin = np.array(axis_origin)
         self.axis_direction = np.array([np.cos(angle), np.sin(angle), 0])
+        self.inside_radius = inside_radius
+        self.outside_radius = outside_radius
+        self.thickness = thickness
         # A loop consists only of two cylinders of same thickness and same revolution axis
         self.inner_cylinder = Cylinder(
             self.axis_origin, self.axis_direction, inside_radius, thickness)
@@ -253,13 +311,35 @@ class Loop(Shape):
         """
         return self.outer_cylinder.includes(point) and not (self.inner_cylinder.includes(point))  # Point belongs to loop if it belongs to the outer cylinder without belonging to inner cylinder.
 
+    def occupy_voxels(self, voxel_grid, container_volume = None, mesh_size = 0.05):
+
+        # Find the normals to the axis
+        first_normal = np.cross(self.axis_direction, np.array([0,1,0]))
+        if np.linalg.norm(first_normal) < 1e-2:
+            first_normal = np.cross(self.axis_direction, np.array([1,0,0]))
+        first_normal = first_normal/np.linalg.norm(first_normal)
+        second_normal = np.cross(self.axis_direction, first_normal)
+
+        # Create mesh grid and fill occupancy in the voxel grid
+        for x_rel in np.arange(-self.outside_radius, self.outside_radius, mesh_size):
+            for y_rel in np.arange(-self.outside_radius, self.outside_radius, mesh_size):
+                if self.inside_radius**2<= (x_rel**2 + y_rel**2) < self.outside_radius**2 :
+                    for z_rel in np.arange(0.0, self.thickness, mesh_size):
+                        point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
+                        if (container_volume is None or container_volume.volume_includes(point)):
+                            voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
+                            if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
+                                voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
+                                voxel_grid.occupied_voxels.append(voxel_coord_world[0])
+                                voxel_grid.occupied_voxels.append(voxel_coord_world[1])
+                                voxel_grid.occupied_voxels.append(voxel_coord_world[2])
 
 class Wall(Shape):
     """
     Implements the wall shape
     """
 
-    def __init__(self, origin, direction1, direction2=(0, 0, 1), length=float('Inf'), width=2.0, height=float('Inf')):
+    def __init__(self, origin, direction1, direction2=(0, 0, 1), length=100.0, width=1.0, height=100.0):
         """
         Initialize a wall object
 
@@ -328,6 +408,27 @@ class Wall(Shape):
                    self.direction2, length, self.width, height)
         self.gaps.append(gap)
 
+    def occupy_voxels(self, voxel_grid, container_volume = None, mesh_size = 0.05):
+        # Create mesh grid and fill occupancy in the voxel grid
+        for x_rel in np.arange(0.0, self.length, mesh_size):
+            for y_rel in np.arange(0.0, self.height, mesh_size):
+                for z_rel in np.arange(-self.width, 0.0, mesh_size):
+                    point = self.origin + x_rel*self.direction1 + y_rel*self.direction2 + z_rel*self.normal
+                    voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
+                    if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]): #is inside the voxelGrid
+                        is_in_wall = True
+                        for gap in self.gaps:
+                            if gap.includes(point) :
+                                is_in_wall = False
+                                break
+                        if is_in_wall: # No gap includes the point, it is part of the wall
+                            voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[0])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[1])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+
+
+
 
 class RandomVolume(Shape):
 
@@ -392,14 +493,21 @@ class RandomVolume(Shape):
         for i in range(len(bounds[0])):
             result.append(rd.uniform(bounds[0, i], bounds[1, i]))
         return result
+    
+    def volume_includes(self, point):
+        return self.origin_range[0, 0] <= point[0] < self.origin_range[1, 0] \
+                and self.origin_range[0, 1] <= point[1] < self.origin_range[1, 1] \
+                and self.origin_range[0, 2] <= point[2] < self.origin_range[1, 2]
 
     def includes(self, point):
-        if (self.origin_range[0, 0] <= point[0] < self.origin_range[1, 0]
-            and self.origin_range[0, 1] <= point[1] < self.origin_range[1, 1]
-                and self.origin_range[0, 2] <= point[2] < self.origin_range[1, 2]):  # Check if point is inside the volume defined by the random volume (x between x_min and x_max, y between ... etc)
+        if self.volume_includes(point):  # Check if point is inside the volume defined by the random volume (x between x_min and x_max, y between ... etc)
             # then tests whether point belongs a least too one of the shapes in the collection.
             for shape in self.shapes:
                 if shape.includes(point):
                     return True
         return False
+
+    def occupy_voxels(self, voxel_grid, container_volume = None, mesh_size = 0.05):
+        for shape in self.shapes:
+            shape.occupy_voxels(voxel_grid, self, mesh_size)
 
