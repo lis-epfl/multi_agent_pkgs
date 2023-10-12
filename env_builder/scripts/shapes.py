@@ -176,9 +176,10 @@ class VoxelGrid:
     
     def compute_occupancy_new(self):
         start_time = time.time()
+        print('Start generation of obstacles ...')
         for obstacle in self.obstacles :
             obstacle.occupy_voxels(self, mesh_size = self.voxel_size/2)
-        print("Generation of obstacles took %.2f seconds." %(time.time()-start_time))
+        print("Done : generation of obstacles took %.2f seconds." %(time.time()-start_time))
 
 
     def get_occupied_voxels(self):
@@ -264,18 +265,20 @@ class Cylinder(Shape):
         second_normal = np.cross(self.axis_direction, first_normal)
 
         # Create mesh grid and fill occupancy in the voxel grid
-        for x_rel in np.arange(-self.radius, self.radius, mesh_size):
-            for y_rel in np.arange(-self.radius, self.radius, mesh_size):
-                if x_rel**2 + y_rel**2 < self.radius**2 :
-                    for z_rel in np.arange(-self.cylinder_height/2, self.cylinder_height/2, mesh_size):
-                        point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
-                        if (container_volume is None or container_volume.volume_includes(point)):
-                            voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
-                            if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
-                                voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[0])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[1])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+        for radius in np.arange(mesh_size/2, self.radius, mesh_size):
+            angle_step = mesh_size / (2*np.pi*radius)
+            for angle in np.arange(0, 2*np.pi, angle_step):
+                x_rel = radius*np.cos(angle)
+                y_rel = radius*np.sin(angle)
+                for z_rel in np.arange(-self.cylinder_height/2, self.cylinder_height/2, mesh_size):
+                    point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
+                    if (container_volume is None or container_volume.volume_includes(point)):
+                        voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
+                        if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
+                            voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[0])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[1])
+                            voxel_grid.occupied_voxels.append(voxel_coord_world[2])
                                 
         
 
