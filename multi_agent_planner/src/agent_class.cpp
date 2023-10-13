@@ -2222,7 +2222,7 @@ void Agent::PublishVoxelGrid() {
         pt.z = k * vox_size + vox_size / 2 + origin_vg[2];
         if (vg_util.GetVoxelInt(pt_i) == ENV_BUILDER_OCC) {
           cloud_occ.points.push_back(pt);
-        } else if (vg_util.GetVoxelInt(pt_i) == ENV_BUILDER_FREE) {
+        } else if (vg_util.GetVoxelInt(pt_i) >= ENV_BUILDER_FREE) {
           cloud_free.points.push_back(pt);
         } else if (vg_util.GetVoxelInt(pt_i) == ENV_BUILDER_UNK) {
           cloud_unk.points.push_back(pt);

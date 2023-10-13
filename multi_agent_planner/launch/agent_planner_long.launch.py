@@ -22,9 +22,9 @@ def generate_launch_description():
 
     # params
     use_mapping_util = True
-    voxel_grid_range = [16.0, 16.0, 6.0]
-    state_ini = [0.0, 15.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    goal = [100.0, 15.0, 1.5]
+    voxel_grid_range = [16.0, 16.0, 8.0]
+    state_ini = [0.0, 15.0, 1.50, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    goal = [96, 15.0, 1.50]
 
     if use_mapping_util:
         params_sub = [{'id': 0},
@@ -54,6 +54,7 @@ def generate_launch_description():
         parameters=[config] + params_sub,
         # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
         # prefix=["sudo \"PYTHONPATH=$PYTHONPATH\" \"LD_LIBRARY_PATH=$LD_LIBRARY_PATH\" \"PATH=$PATH\" \"USER=$USER\"  \"GUROBI_HOME=$GUROBI_HOME\" \"GRB_LICENSE_FILE=$GRB_LICENSE_FILE\" -u toumieh bash -c "],
+        # prefix=['xterm -fa default -fs 10 -hold -e'],
         # shell=True
         output='screen',
         emulate_tty=True

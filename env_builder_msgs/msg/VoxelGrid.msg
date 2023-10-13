@@ -1,5 +1,5 @@
 # voxel grid origin
-float32[3] origin
+float64[3] origin
 
 # voxel grid dimensions i.e. number of voxels
 uint32[3] dimension

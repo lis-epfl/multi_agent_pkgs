@@ -49,14 +49,14 @@ EnvironmentBuilder::EnvironmentBuilder()
 }
 
 ::env_builder_msgs::msg::VoxelGridStamped
-EnvironmentBuilder::GenerateVoxelGridMSG(::std::array<float, 3> &position,
-                                         ::std::array<float, 3> &range) {
+EnvironmentBuilder::GenerateVoxelGridMSG(::std::array<double, 3> &position,
+                                         ::std::array<double, 3> &range) {
 
   ::env_builder_msgs::msg::VoxelGridStamped vg_msg;
   vg_msg.voxel_grid.voxel_size = vox_size_;
 
   // find the origin of the grid
-  ::std::array<float, 3> origin;
+  ::std::array<double, 3> origin;
   origin[0] = (position[0] - range[0] / 2);
   origin[1] = (position[1] - range[1] / 2);
   origin[2] = (position[2] - range[2] / 2);
@@ -116,8 +116,8 @@ void EnvironmentBuilder::GetVoxelGridService(
         response) {
   // process the request in a new thread to avoid a huge backlog in case
   // multiple agents are requesting information
-  ::std::array<float, 3> position = request->position;
-  ::std::array<float, 3> range = request->range;
+  ::std::array<double, 3> position = request->position;
+  ::std::array<double, 3> range = request->range;
 
   ::env_builder_msgs::msg::VoxelGridStamped vg_stamped_msg =
       GenerateVoxelGridMSG(position, range);
@@ -292,5 +292,4 @@ void EnvironmentBuilder::InitializeRosParameters() {
 
   get_grid_service_name_ = get_parameter("get_grid_service_name").as_string();
 }
-
 } // namespace env_builder

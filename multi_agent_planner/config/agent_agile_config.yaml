@@ -14,7 +14,7 @@
     n_hor: 9 # number of mpc steps
     dt: 0.1 # step time of the mpc
     path_vel_min: 4.5 # minimum discretization velocity of the path
-    path_vel_max: 6.5 # maximum discretization velocity of the path
+    path_vel_max: 4.5 # maximum discretization velocity of the path
     sens_dist: 0.001 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.01 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
     path_vel_dec: 0.0 # deceleration of discretization velocity of the path after every time step; stuff works better without it at 5.0 path_vel
@@ -43,8 +43,8 @@
     save_stats: true # if true, save computation time statistics and state history
     gurobi_verbose: false # if true, display gurobi optimization information  
     path_infl_dist: 0.3 # distance to inflate the obstacles with when doing path finding
-    dmp_search_rad: 1.2 # search radius for the dmp
-    dmp_pot_rad: 1.5 # search radius for the dmp
+    dmp_search_rad: 1.8 # search radius for the dmp
+    dmp_pot_rad: 1.8 # search radius for the dmp
     dmp_pot_pow: 4.0 # potential power
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.2 # path planning period

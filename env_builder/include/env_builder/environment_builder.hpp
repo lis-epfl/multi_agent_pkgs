@@ -54,8 +54,8 @@ private:
   // generate the sub-voxel grid from the main one using the robot position and
   // its sensing range
   ::env_builder_msgs::msg::VoxelGridStamped
-  GenerateVoxelGridMSG(::std::array<float, 3> &position,
-                       ::std::array<float, 3> &range);
+  GenerateVoxelGridMSG(::std::array<double, 3> &position,
+                       ::std::array<double, 3> &range);
 
   // voxel grid get service
   void GetVoxelGridService(

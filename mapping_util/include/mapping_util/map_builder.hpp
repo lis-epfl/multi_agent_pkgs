@@ -2,6 +2,7 @@
 #define MAPPING_UTIL_MAP_BUILDER_CLASS_H_
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "path_tools.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
@@ -14,7 +15,6 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <stdlib.h>
 #include <string>
-#include "path_tools.hpp"
 
 namespace mapping_util {
 class MapBuilder : public ::rclcpp::Node {
@@ -50,6 +50,13 @@ private:
 
   // callback for when we receive the new agent position
   void TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg);
+
+  // display computation time
+  void DisplayCompTime(::std::vector<double> &comp_time);
+
+  // function to execute on the shutdown of the node to save computation time
+  // statistics
+  void OnShutdown();
 
   /*-------------- member variables ---------------*/
   /* ROS parameters */
@@ -92,6 +99,11 @@ private:
    * future */
   // mutex for position update
   ::std::mutex pos_mutex_;
+
+  // raycast computation time
+  ::std::vector<double> raycast_comp_time_;
+  ::std::vector<double> merge_comp_time_;
+  ::std::vector<double> tot_comp_time_;
 };
 
 // convert ::env_builder_msgs::msg::VoxelGrid to ::voxel_grid_util::VoxelGrid

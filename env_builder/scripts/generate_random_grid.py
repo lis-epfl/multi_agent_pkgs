@@ -71,27 +71,28 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(loop)
 
     # # Create a wall
-    wall = Wall(origin = (48,0,-6), direction1=(0.0,1.0,0.0), direction2 = (0.0, 0.0, 1.0), width=0.3) # Two directions to define the plane
-    wall.add_square_gap(rel_origin = (2.5,5), length = 1.5, height = 2)
-    wall.add_square_gap(rel_origin = (5,7.5), length = 3, height = 3)
-    wall.add_square_gap(rel_origin = (7.5,5), length = 3, height = 2)
-    wall.add_square_gap(rel_origin = (10,9.5), length = 2, height = 3)
-    wall.add_square_gap(rel_origin = (12.5,4), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (15,12.5), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (17.5,3), length = 2, height = 1.5)
-    wall.add_square_gap(rel_origin = (20,8.5), length = 3, height = 1)
-    wall.add_square_gap(rel_origin = (22.5,12), length = 1.5, height = 2)
-    wall.add_square_gap(rel_origin = (25,5.5), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (27,4), length = 1, height = 2)
-    wall.add_square_gap(rel_origin = (30,7), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (32.5,12), length = 3, height = 1.5)
-    wall.add_square_gap(rel_origin = (35,9), length = 2, height = 2)
-    wall.add_square_gap(rel_origin = (37.5,7), length = 1.5, height = 1.5)
+    wall = Wall(origin=(48, 0, -6), direction1=(0.0, 1.0, 0.0), direction2=(0.0,
+                0.0, 1.0), width=0.3)  # Two directions to define the plane
+    wall.add_square_gap(rel_origin=(2.5, 5), length=1.5, height=2)
+    wall.add_square_gap(rel_origin=(5, 7.5), length=3, height=3)
+    wall.add_square_gap(rel_origin=(7.5, 5), length=3, height=2)
+    wall.add_square_gap(rel_origin=(10, 9.5), length=2, height=3)
+    wall.add_square_gap(rel_origin=(12.5, 4), length=2, height=2)
+    wall.add_square_gap(rel_origin=(15, 12.5), length=2, height=2)
+    wall.add_square_gap(rel_origin=(17.5, 3), length=2, height=1.5)
+    wall.add_square_gap(rel_origin=(20, 8.5), length=3, height=1)
+    wall.add_square_gap(rel_origin=(22.5, 12), length=1.5, height=2)
+    wall.add_square_gap(rel_origin=(25, 5.5), length=2, height=2)
+    wall.add_square_gap(rel_origin=(27, 4), length=1, height=2)
+    wall.add_square_gap(rel_origin=(30, 7), length=2, height=2)
+    wall.add_square_gap(rel_origin=(32.5, 12), length=3, height=1.5)
+    wall.add_square_gap(rel_origin=(35, 9), length=2, height=2)
+    wall.add_square_gap(rel_origin=(37.5, 7), length=1.5, height=1.5)
     voxel_grid.add_shape(wall)
 
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
-    rd_volume_cylinders = RandomVolume([[3,0,-6], [30,30,15]], seed)
+    rd_volume_cylinders = RandomVolume([[3, 0, -6], [30, 30, 15]], seed)
     rd_volume_cylinders.add_random_cylinders(135,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
@@ -103,11 +104,11 @@ if __name__ == "__main__":
     #                                      thickness_range=[0.3, 0.3])
     voxel_grid.add_shape(rd_volume_cylinders)
 
-    rd_volume_cylinders = RandomVolume([[63,0,-6], [30,30,15]], seed)
+    rd_volume_cylinders = RandomVolume([[63, 0, -6], [30, 30, 15]], seed)
     rd_volume_cylinders.add_random_cylinders(270,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.3, 0.3],
+                                             radius_range=[0.1, 0.1],
                                              height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
 
     voxel_grid.add_shape(rd_volume_cylinders)

@@ -8,6 +8,9 @@ MapBuilder::MapBuilder() : ::rclcpp::Node("map_builder") {
   // initialize parameters
   InitializeRosParameters();
 
+  // set up a callback to execute code on shutdown
+  on_shutdown(::std::bind(&MapBuilder::OnShutdown, this));
+
   // resize current position
   pos_curr_.resize(3);
 
@@ -54,11 +57,14 @@ void MapBuilder::EnvironmentVoxelGridCallback(
     const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg) {
   // first check if we received the first position
   if (pos_curr_.size() > 0) {
+    // start global timer
+    auto t_start_wall_global = ::std::chrono::high_resolution_clock::now();
+
     // get voxel size
     double voxel_size = vg_msg->voxel_grid.voxel_size;
 
     // find the origin of the grid
-    ::std::array<float, 3> origin_grid = vg_msg->voxel_grid.origin;
+    ::std::array<double, 3> origin_grid = vg_msg->voxel_grid.origin;
     ::Eigen::Vector3d origin;
     pos_mutex_.lock();
     ::Eigen::Vector3d pos_curr(pos_curr_[0], pos_curr_[1], pos_curr_[2]);
@@ -66,11 +72,11 @@ void MapBuilder::EnvironmentVoxelGridCallback(
     origin[1] = (pos_curr_[1] - voxel_grid_range_[1] / 2);
     origin[2] = (pos_curr_[2] - voxel_grid_range_[2] / 2);
     pos_mutex_.unlock();
-    origin[0] = floor((origin[0] - origin_grid[0]) / voxel_size) * voxel_size +
+    origin[0] = round((origin[0] - origin_grid[0]) / voxel_size) * voxel_size +
                 origin_grid[0];
-    origin[1] = floor((origin[1] - origin_grid[1]) / voxel_size) * voxel_size +
+    origin[1] = round((origin[1] - origin_grid[1]) / voxel_size) * voxel_size +
                 origin_grid[1];
-    origin[2] = floor((origin[2] - origin_grid[2]) / voxel_size) * voxel_size +
+    origin[2] = round((origin[2] - origin_grid[2]) / voxel_size) * voxel_size +
                 origin_grid[2];
 
     // find the range in integer dimensions
@@ -132,11 +138,34 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       }
       // first raycast from the center of the grid to clear voxels
       ::Eigen::Vector3d pos_curr_local = vg.GetCoordLocal(pos_curr);
+      auto t_start_wall = ::std::chrono::high_resolution_clock::now();
       RaycastAndClear(vg, pos_curr_local);
+      auto t_end_wall = ::std::chrono::high_resolution_clock::now();
+      double raycast_time_wall_ms =
+          ::std::chrono::duration_cast<::std::chrono::nanoseconds>(t_end_wall -
+                                                                   t_start_wall)
+              .count();
+      // convert from nano to milliseconds
+      raycast_time_wall_ms *= 1e-6;
+      // save wall computation time
+      raycast_comp_time_.push_back(raycast_time_wall_ms);
 
       // then merge the voxel grid and set voxel_grid_curr_ to the new merged
       // grid
-      voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg);
+      t_start_wall = ::std::chrono::high_resolution_clock::now();
+
+      /* voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg); */
+      voxel_grid_curr_ = vg;
+
+      t_end_wall = ::std::chrono::high_resolution_clock::now();
+      double merging_time_wall_ms =
+          ::std::chrono::duration_cast<::std::chrono::nanoseconds>(t_end_wall -
+                                                                   t_start_wall)
+              .count();
+      // convert from nano to milliseconds
+      merging_time_wall_ms *= 1e-6;
+      // save wall computation time
+      merge_comp_time_.push_back(merging_time_wall_ms);
     } else {
       // if we don't need to raycast, then the voxel_grid that we save is the
       // same as the one that we receive from the environment
@@ -152,6 +181,16 @@ void MapBuilder::EnvironmentVoxelGridCallback(
     vg_final_msg_stamped.voxel_grid.voxel_size = voxel_size;
     vg_final_msg_stamped.header.stamp = now();
     vg_final_msg_stamped.header.frame_id = world_frame_;
+
+    auto t_end_wall_global = ::std::chrono::high_resolution_clock::now();
+    double tot_time_wall_ms =
+        ::std::chrono::duration_cast<::std::chrono::nanoseconds>(
+            t_end_wall_global - t_start_wall_global)
+            .count();
+    // convert from nano to milliseconds
+    tot_time_wall_ms *= 1e-6;
+    // save wall computation time
+    tot_comp_time_.push_back(tot_time_wall_ms);
 
     voxel_grid_pub_->publish(vg_final_msg_stamped);
   }
@@ -201,33 +240,33 @@ void MapBuilder::RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
   ::Eigen::Vector3i dim = vg.GetDim();
 
   // first raycast the ceiling and the floor
-  ::std::vector<int> k_vec = {0, dim(2)};
+  ::std::vector<int> k_vec = {0, dim(2) - 1};
   for (int i = 0; i < dim(0); i++) {
     for (int j = 0; j < dim(1); j++) {
       for (int k : k_vec) {
-        ::Eigen::Vector3d end(i, j, k);
+        ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
         ClearLine(vg, start, end);
       }
     }
   }
 
   // then raycast the wall with fixed y coordinate
-  ::std::vector<int> j_vec = {0, dim(1)};
+  ::std::vector<int> j_vec = {0, dim(1) - 1};
   for (int i = 0; i < dim(0); i++) {
     for (int k = 0; k < dim(2); k++) {
       for (int j : j_vec) {
-        ::Eigen::Vector3d end(i, j, k);
+        ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
         ClearLine(vg, start, end);
       }
     }
   }
 
   // then raycast the wall with fixed x coordinate
-  ::std::vector<int> i_vec = {0, dim(0)};
+  ::std::vector<int> i_vec = {0, dim(0) - 1};
   for (int j = 0; j < dim(1); j++) {
     for (int k = 0; k < dim(2); k++) {
       for (int i : i_vec) {
-        ::Eigen::Vector3d end(i, j, k);
+        ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
         ClearLine(vg, start, end);
       }
     }
@@ -242,15 +281,18 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
   double max_dist_raycast = (start - end).norm();
   bool line_clear = ::path_finding_util::IsLineClear(
       start, end, vg, max_dist_raycast, collision_pt, visited_points);
+  visited_points.push_back(end);
   // if line is not clear than the last point is a collision point and we
   // don't need to clear it in the voxel grid
-  int vec_size = visited_points.size();
-  if (!line_clear) {
-    vec_size = vec_size - 1;
+  if (line_clear) {
+    visited_points.push_back(end);
   }
-  for (int i = 0; i < vec_size; i++) {
-    vg.SetVoxelInt(::Eigen::Vector3i(visited_points[i](0), visited_points[i](1),
-                                     visited_points[i](2)),
+  int vec_size = visited_points.size();
+  for (int i = 0; i < vec_size - 1; i++) {
+    vg.SetVoxelInt(::Eigen::Vector3i(
+                       (visited_points[i](0) + visited_points[i + 1](0)) / 2.0,
+                       (visited_points[i](1) + visited_points[i + 1](1)) / 2.0,
+                       (visited_points[i](2) + visited_points[i + 1](2)) / 2.0),
                    0);
   }
 }
@@ -267,6 +309,33 @@ void MapBuilder::TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg) {
       pos_curr_[2] = transform.translation.z;
     }
   }
+}
+
+void MapBuilder::DisplayCompTime(::std::vector<double> &comp_time) {
+  double max_t = 0;
+  double min_t = 1e10;
+  double sum_t = 0;
+  for (int i = 0; i < int(comp_time.size()); i++) {
+    if (comp_time[i] > max_t) {
+      max_t = comp_time[i];
+    }
+    if (comp_time[i] < min_t) {
+      min_t = comp_time[i];
+    }
+    sum_t = sum_t + comp_time[i];
+  }
+  ::std::cout << ::std::endl << "mean: " << sum_t / comp_time.size();
+  ::std::cout << ::std::endl << "max: " << max_t;
+  ::std::cout << ::std::endl << "min: " << min_t << ::std::endl;
+}
+
+void MapBuilder::OnShutdown() {
+  ::std::cout << ::std::endl << "raycast: ";
+  DisplayCompTime(raycast_comp_time_);
+  ::std::cout << ::std::endl << "merge: ";
+  DisplayCompTime(merge_comp_time_);
+  ::std::cout << ::std::endl << "total: ";
+  DisplayCompTime(tot_comp_time_);
 }
 
 ::voxel_grid_util::VoxelGrid

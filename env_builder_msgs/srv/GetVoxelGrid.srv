@@ -1,4 +1,4 @@
-float32[3] position
-float32[3] range
+float64[3] position
+float64[3] range
 ---
 VoxelGridStamped voxel_grid_stamped
