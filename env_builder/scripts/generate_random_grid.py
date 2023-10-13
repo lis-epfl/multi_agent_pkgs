@@ -10,9 +10,6 @@ def write_config_file(filename, voxel_grid, seed):
     dimension_grid: %s # dimensions in meters
     vox_size: %f # voxel size of the grid
     free_grid: true # if true the grid is initialized to free instead of unknown
-    inflation_dist: 0.0 # all voxels within that distance to an occupied voxel are set as occupied
-    potential_dist: 2.1 # all voxels within that distance to an occupied voxel are set as a potential field
-    potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
   
     multi_obst_size: false # if false, use size_obst as a common size for all obstacles; otherwise use size_obst_multi to define the size of each obstacle
     multi_obst_position: true # if false, generate positions randomly using normal distribution, if true use position_obst_multi to define the position of each obstacle
@@ -107,7 +104,7 @@ if __name__ == "__main__":
     voxel_grid.add_shape(rd_volume_cylinders)
 
     rd_volume_cylinders = RandomVolume([[63,0,-6], [30,30,15]], seed)
-    rd_volume_cylinders.add_random_cylinders(360,
+    rd_volume_cylinders.add_random_cylinders(270,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.3, 0.3],

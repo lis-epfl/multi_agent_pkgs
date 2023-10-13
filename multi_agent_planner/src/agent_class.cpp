@@ -324,14 +324,8 @@ void Agent::UpdatePath() {
       start = {state_ini_[0], state_ini_[1], state_ini_[2]};
     }
 
-    ::std::cout << "start: " << start[0] << " " << start[1] << " " << start[2]
-                << ::std::endl;
-
     // find intermediate goal
     ::std::vector<double> goal_inter = GetIntermediateGoal(goal, vg_util);
-
-    ::std::cout << "goal_inter: " << goal_inter[0] << " " << goal_inter[1]
-                << " " << goal_inter[2] << ::std::endl;
 
     // clear boundary voxels
     ClearBoundary(vg_util);
@@ -1276,8 +1270,6 @@ void Agent::GenerateSafeCorridor() {
     Polyhedron3D poly_new;
     ::std::vector<int8_t> grid_data = vg_util.GetData();
     if (use_cvx_) {
-      Vec3i dim(dim[0], dim[1], dim[2]);
-      Vec3f origin(origin[0], origin[1], origin[2]);
       if (use_cvx_new_) {
         // if use new method
         poly_new = ::convex_decomp_lib::GetPolyOcta3DNew(
@@ -1652,8 +1644,8 @@ void Agent::ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid) {
     for (int k = 0; k <= z_max; k++) {
       ::Eigen::Vector3i pt_1(0, j, k);
       ::Eigen::Vector3i pt_2(x_max, j, k);
-      voxel_grid.SetVoxelInt(pt_1) = 0;
-      voxel_grid.SetVoxelInt(pt_2) = 0;
+      voxel_grid.SetVoxelInt(pt_1, 0);
+      voxel_grid.SetVoxelInt(pt_2, 0);
     }
   }
 
@@ -1661,8 +1653,8 @@ void Agent::ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid) {
     for (int k = 0; k <= z_max; k++) {
       ::Eigen::Vector3i pt_1(i, 0, k);
       ::Eigen::Vector3i pt_2(i, y_max, k);
-      voxel_grid.SetVoxelInt(pt_1) = 0;
-      voxel_grid.SetVoxelInt(pt_2) = 0;
+      voxel_grid.SetVoxelInt(pt_1, 0);
+      voxel_grid.SetVoxelInt(pt_2, 0);
     }
   }
 
@@ -1673,8 +1665,8 @@ void Agent::ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid) {
   /*   for (int j = 0; j < y_max; j++) { */
   /*     ::Eigen::Vector3i pt_1(i, j, 0); */
   /*     ::Eigen::Vector3i pt_2(i, j, z_max); */
-  /*     voxel_grid.SetVoxelInt(pt_1) = 0; */
-  /*     voxel_grid.SetVoxelInt(pt_2) = 0; */
+  /*     voxel_grid.SetVoxelInt(pt_1, 0); */
+  /*     voxel_grid.SetVoxelInt(pt_2, 0); */
   /*   } */
   /* } */
 }
@@ -1716,7 +1708,7 @@ double Agent::DotProduct(::std::vector<double> &v_1,
 
 ::std::vector<double>
 Agent::GetIntermediateGoal(::std::vector<double> &goal,
-                           ::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
+                           ::voxel_grid_util::VoxelGrid &voxel_grid) {
   // get goal position in grid frame
   ::Eigen::Vector3d goal_grid_frame;
   ::Eigen::Vector3d origin = voxel_grid.GetOrigin();
@@ -1747,8 +1739,7 @@ Agent::GetIntermediateGoal(::std::vector<double> &goal,
     ray_dir.normalize();
 
     // get intersection with the edge of the grid
-    double min_dim =
-        voxel_grid.voxel_size * ::std::min(std::min(dim[0], dim[1]), dim[2]);
+    double min_dim = voxel_size * ::std::min(std::min(dim[0], dim[1]), dim[2]);
     ::Eigen::Vector3d sampled_point = center_pos + (min_dim / 2) * ray_dir;
     int n_it = 0;
     while (n_it < 100) {
@@ -2133,7 +2124,8 @@ void Agent::VoxelGridResponseCallback(
     ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped =
         future.get()->voxel_grid_stamped;
     voxel_grid_mtx_.lock();
-    voxel_grid_ = ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
+    voxel_grid_ =
+        ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
     voxel_grid_mtx_.unlock();
 
     // inflate obstacles
@@ -2186,7 +2178,8 @@ void Agent::MappingUtilVoxelGridCallback(
     const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg) {
   ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped = *vg_msg;
   voxel_grid_mtx_.lock();
-  voxel_grid_ = ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
+  voxel_grid_ =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
   voxel_grid_mtx_.unlock();
 
   // inflate obstacles

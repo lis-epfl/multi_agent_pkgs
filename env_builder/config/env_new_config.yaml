@@ -4,6 +4,7 @@ env_builder_node:
     dimension_grid: [100.0, 30.0, 15.0] # dimensions in meters
     vox_size: 0.300000 # voxel size of the grid
     free_grid: true # if true the grid is initialized to free instead of unknown
+  
     multi_obst_size: false # if false, use size_obst as a common size for all obstacles; otherwise use size_obst_multi to define the size of each obstacle
     multi_obst_position: true # if false, generate positions randomly using normal distribution, if true use position_obst_multi to define the position of each obstacle
     range_obst: [30.0, 30.0, 0.0] # area on the map where to generate obstacles, always positive numbers to move it around, use the origin_obst variable

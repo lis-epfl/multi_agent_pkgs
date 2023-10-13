@@ -25,3 +25,4 @@ env_builder_node:
     env_vg_topic: "environment_voxel_grid" # topic on which to publish the env voxel grid 
     env_pc_frame: "world" # origin frame of the published poinctloud
     get_grid_service_name: "get_voxel_grid" # name of the service to get the voxel grid of each agent
+    publish_period: 0.2 # publishing period of the voxel grid

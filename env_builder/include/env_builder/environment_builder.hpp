@@ -72,6 +72,8 @@ private:
   double free_grid_;
   // if true wirte obstacle positions and pointcloud to csv file
   bool save_obstacles_;
+  // voxel grid publishing period
+  double publish_period_;
 
   // obstacles parameters
   bool multi_obst_size_;

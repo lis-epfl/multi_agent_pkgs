@@ -38,7 +38,7 @@ EnvironmentBuilder::EnvironmentBuilder()
   voxel_grid_pub_ = create_publisher<::env_builder_msgs::msg::VoxelGridStamped>(
       "~/" + env_vg_topic_, 10);
   voxel_grid_timer_ = create_wall_timer(
-      std::chrono::milliseconds(100),
+      std::chrono::milliseconds(int(publish_period_ * 1e3)),
       std::bind(&EnvironmentBuilder::TimerCallbackEnvironmentVG, this));
 
   // create service for drones to call and get the local voxel grid
@@ -249,6 +249,7 @@ void EnvironmentBuilder::DeclareRosParameters() {
   declare_parameter("vox_size", 0.3);
   declare_parameter("free_grid", true);
   declare_parameter("save_obstacles", false);
+  declare_parameter("publish_period", 0.2);
 
   declare_parameter("multi_obst_size", false);
   declare_parameter("multi_obst_position", false);
@@ -273,6 +274,7 @@ void EnvironmentBuilder::InitializeRosParameters() {
   vox_size_ = get_parameter("vox_size").as_double();
   free_grid_ = get_parameter("free_grid").as_bool();
   save_obstacles_ = get_parameter("save_obstacles").as_bool();
+  publish_period_ = get_parameter("publish_period").as_double();
 
   multi_obst_size_ = get_parameter("multi_obst_size").as_bool();
   multi_obst_position_ = get_parameter("multi_obst_position").as_bool();

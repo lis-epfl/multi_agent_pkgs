@@ -22,3 +22,4 @@ env_builder_node:
     get_grid_service_name: "get_voxel_grid" # name of the service to get the voxel grid of each agent
 
     save_obstacles: true # if true, save the obstacle position in pos_obs.csv as well as the pointcloud in a file
+    publish_period: 0.2 # publishing period of the voxel grid

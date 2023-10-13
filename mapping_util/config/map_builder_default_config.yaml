@@ -4,7 +4,7 @@
     id: 0 # id of the agent; needs to be modified in the launch file in case we have multiple agents
     voxel_grid_range: [20.0, 20.0, 6.0] # voxel grid size centered around the agent position
     world_frame: "world" # frame for publishing the voxel grid in
-    free_grid: true # if true set all non occupied voxels to free
+    free_grid: false # if true set all non occupied voxels to free
     inflation_dist: 0.0 # all voxels within that distance to an occupied voxel are set as occupied
-    potential_dist: 2.1 # all voxels within that distance to an occupied voxel are set as a potential field
+    potential_dist: 0.0 # all voxels within that distance to an occupied voxel are set as a potential field
     potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
