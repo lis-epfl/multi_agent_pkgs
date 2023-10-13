@@ -3,7 +3,7 @@ from shapes import VoxelGrid, Wall, RandomVolume, Cylinder, Loop
 
 
 def write_config_file(filename, voxel_grid, seed):
-    voxel_grid.compute_occupancy_new()
+    voxel_grid.compute_occupancy()
     config_yaml = """env_builder_node: 
   ros__parameters:
     origin_grid: %s # origin of the voxel grid

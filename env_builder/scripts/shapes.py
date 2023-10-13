@@ -156,38 +156,27 @@ class VoxelGrid:
 
     def add_shape(self, shape):
         self.obstacles.append(shape)
-
+    
     def compute_occupancy(self):
-
+        start_time = time.time()
+        print('Start generation of obstacles ...')
+        # Go through all the obstacles to fill grid
+        for obstacle in self.obstacles :
+            obstacle.occupy_voxels(self, mesh_size = self.voxel_size/2)
+        # Run through grid to output taken obstacles
         for i in range(self.grid_size[0]):
             for j in range(self.grid_size[1]):
                 for k in range(self.grid_size[2]):
-                    point = np.array(self.to_world_coordinates(i, j, k))
-                    for shape in self.obstacles:
-                        if shape.includes(point):
-                            self.set_voxel(i, j, k, True)
-                            self.occupied_voxels.append(
-                                point[0] - self.origin[0])
-                            self.occupied_voxels.append(
-                                point[1] - self.origin[1])
-                            self.occupied_voxels.append(
-                                point[2] - self.origin[2])
-                            break
-    
-    def compute_occupancy_new(self):
-        start_time = time.time()
-        print('Start generation of obstacles ...')
-        for obstacle in self.obstacles :
-            obstacle.occupy_voxels(self, mesh_size = self.voxel_size/2)
+                    if self.get_voxel(i,j,k):
+                        point = np.array(self.to_world_coordinates(i, j, k))
+                        self.occupied_voxels.append(
+                            point[0] - self.origin[0])
+                        self.occupied_voxels.append(
+                            point[1] - self.origin[1])
+                        self.occupied_voxels.append(
+                            point[2] - self.origin[2])
         print("Done : generation of obstacles took %.2f seconds." %(time.time()-start_time))
 
-
-    def get_occupied_voxels(self):
-        """
-        Returns two lists : a list of size of obstacles (voxel size) by triplets, and a list that will give the x,y,z positions of given obstacles. Function made to fill out the YAML file
-        """
-        self.compute_occupancy_new()
-        return [self.voxel_size]*len(self.occupied_voxels), self.occupied_voxels
 
 
 class Shape:
@@ -275,10 +264,7 @@ class Cylinder(Shape):
                     if (container_volume is None or container_volume.volume_includes(point)):
                         voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
                         if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
-                            voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[0])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[1])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+                            voxel_grid.set_voxel(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2], True)
                                 
         
 
@@ -320,19 +306,19 @@ class Loop(Shape):
         first_normal = first_normal/np.linalg.norm(first_normal)
         second_normal = np.cross(self.axis_direction, first_normal)
 
+
         # Create mesh grid and fill occupancy in the voxel grid
-        for x_rel in np.arange(-self.outside_radius, self.outside_radius, mesh_size):
-            for y_rel in np.arange(-self.outside_radius, self.outside_radius, mesh_size):
-                if self.inside_radius**2<= (x_rel**2 + y_rel**2) < self.outside_radius**2 :
-                    for z_rel in np.arange(0.0, self.thickness, mesh_size):
-                        point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
-                        if (container_volume is None or container_volume.volume_includes(point)):
-                            voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
-                            if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
-                                voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[0])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[1])
-                                voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+        for radius in np.arange(self.outside_radius, self.inside_radius, -mesh_size):
+            angle_step = mesh_size / (2*np.pi*radius)
+            for angle in np.arange(0, 2*np.pi, angle_step):
+                x_rel = radius*np.cos(angle)
+                y_rel = radius*np.sin(angle)
+                for z_rel in np.arange(0.0, self.thickness, mesh_size):
+                    point = self.axis_origin + x_rel*first_normal + y_rel*second_normal + z_rel*self.axis_direction
+                    if (container_volume is None or container_volume.volume_includes(point)):
+                        voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
+                        if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
+                            voxel_grid.set_voxel(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2], True)
 
 class Wall(Shape):
     """
@@ -423,9 +409,8 @@ class Wall(Shape):
                                 break
                         if is_in_wall: # No gap includes the point, it is part of the wall
                             voxel_coord_world = voxel_grid.to_world_coordinates(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[0])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[1])
-                            voxel_grid.occupied_voxels.append(voxel_coord_world[2])
+                            if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]):
+                                voxel_grid.set_voxel(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2], True)
 
 
 
