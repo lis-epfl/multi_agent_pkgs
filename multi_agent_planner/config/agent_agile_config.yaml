@@ -13,8 +13,8 @@
     n_u: 3 # number of control variables (3 for jerk/acceleration control)
     n_hor: 9 # number of mpc steps
     dt: 0.1 # step time of the mpc
-    path_vel_min: 2.5 # minimum discretization velocity of the path
-    path_vel_max: 4.5 # maximum discretization velocity of the path
+    path_vel_min: 3.5 # minimum discretization velocity of the path
+    path_vel_max: 6.5 # maximum discretization velocity of the path
     sens_dist: 0.001 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.01 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
     path_vel_dec: 0.0 # deceleration of discretization velocity of the path after every time step; stuff works better without it at 5.0 path_vel
@@ -32,11 +32,11 @@
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
     r_n: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # last state variable error weight
     max_vel: 10.0 # maximum variable set in the optimization
-    max_acc_z: 20.0 # maximum acceleration in the z direction
-    min_acc_z: -20.0 # minimum acceleration in the z direction
-    max_acc_xy: 20.0 # maximum acceleration in the x and y directions
-    min_acc_xy: -20.0 # minimum acceleration in the x and y directions
-    max_jerk: 30.0 # maximum jerk
+    max_acc_z: 30.0 # maximum acceleration in the z direction
+    min_acc_z: -30.0 # minimum acceleration in the z direction
+    max_acc_xy: 30.0 # maximum acceleration in the x and y directions
+    min_acc_xy: -30.0 # minimum acceleration in the x and y directions
+    max_jerk: 40.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
     goal: [42.15, 42.15, 1.5] # goal of the agent

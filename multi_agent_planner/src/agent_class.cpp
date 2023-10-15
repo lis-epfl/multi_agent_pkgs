@@ -1178,7 +1178,6 @@ void Agent::GenerateSafeCorridor() {
   ::std::deque<::std::vector<double>> path_curr(path_curr_.begin(),
                                                 path_curr_.end());
   path_mtx_.unlock();
-  /* path_curr.push_front({state_curr_[0], state_curr_[1], state_curr_[2]}); */
 
   // then copy the voxel grid used for the generation
   voxel_grid_mtx_.lock();

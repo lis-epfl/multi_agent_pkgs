@@ -22,7 +22,7 @@ def generate_launch_description():
 
     # params
     use_mapping_util = True
-    voxel_grid_range = [16.0, 16.0, 10.0]
+    voxel_grid_range = [20.0, 20.0, 6.0]
     state_ini = [0.0, 15.0, 1.50, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     goal = [96, 15.0, 1.50]
 
