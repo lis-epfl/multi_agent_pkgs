@@ -105,7 +105,7 @@ if __name__ == "__main__":
     voxel_grid.add_shape(rd_volume_cylinders)
 
     rd_volume_cylinders = RandomVolume([[63, 0, -6], [30, 30, 15]], seed)
-    rd_volume_cylinders.add_random_cylinders(270,
+    rd_volume_cylinders.add_random_cylinders(225,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.1, 0.1],
