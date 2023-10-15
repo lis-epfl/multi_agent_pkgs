@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(mapping_util)
 
-add_compile_options(-g)
+# add_compile_options(-g) # compile options for debugging
+add_compile_options(-O3 -flto -march=native)
 
 find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)

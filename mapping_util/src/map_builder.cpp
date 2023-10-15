@@ -43,6 +43,9 @@ void MapBuilder::DeclareRosParameters() {
   declare_parameter("voxel_grid_range", ::std::vector<double>(3, 10.0));
   declare_parameter("world_frame", "world");
   declare_parameter("free_grid", true);
+  declare_parameter("inflation_dist", 0.3);
+  declare_parameter("potential_dist", 1.8);
+  declare_parameter("potential_pow", 4.0);
 }
 
 void MapBuilder::InitializeRosParameters() {
@@ -51,6 +54,9 @@ void MapBuilder::InitializeRosParameters() {
   voxel_grid_range_ = get_parameter("voxel_grid_range").as_double_array();
   world_frame_ = get_parameter("world_frame").as_string();
   free_grid_ = get_parameter("free_grid").as_bool();
+  inflation_dist_ = get_parameter("inflation_dist").as_double();
+  potential_dist_ = get_parameter("potential_dist").as_double();
+  potential_pow_ = get_parameter("potential_pow").as_double();
 }
 
 void MapBuilder::EnvironmentVoxelGridCallback(
@@ -154,8 +160,7 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       // grid
       t_start_wall = ::std::chrono::high_resolution_clock::now();
 
-      /* voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg); */
-      voxel_grid_curr_ = vg;
+      voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg);
 
       t_end_wall = ::std::chrono::high_resolution_clock::now();
       double merging_time_wall_ms =
@@ -172,9 +177,16 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       voxel_grid_curr_ = vg;
     }
 
+    // inflate obstacles
+    auto voxel_grid = voxel_grid_curr_;
+    voxel_grid.InflateObstacles(inflation_dist_);
+
+    // create potential field
+    voxel_grid.CreatePotentialField(potential_dist_, potential_pow_);
+
     // create the final grid message and publish it
     ::env_builder_msgs::msg::VoxelGrid vg_final_msg =
-        ConvertVGUtilToVGMsg(voxel_grid_curr_);
+        ConvertVGUtilToVGMsg(voxel_grid);
 
     ::env_builder_msgs::msg::VoxelGridStamped vg_final_msg_stamped;
     vg_final_msg_stamped.voxel_grid = vg_final_msg;
@@ -208,9 +220,9 @@ MapBuilder::MergeVoxelGrids(const ::voxel_grid_util::VoxelGrid &vg_old,
   ::Eigen::Vector3i dim = vg_final.GetDim();
   ::Eigen::Vector3d offset_double = (vg_final.GetOrigin() - vg_old.GetOrigin());
   ::Eigen::Vector3i offset_int;
-  offset_int[0] = offset_double[0] / voxel_size;
-  offset_int[1] = offset_double[1] / voxel_size;
-  offset_int[2] = offset_double[2] / voxel_size;
+  offset_int[0] = round(offset_double[0] / voxel_size);
+  offset_int[1] = round(offset_double[1] / voxel_size);
+  offset_int[2] = round(offset_double[2] / voxel_size);
   for (int i = 0; i < dim[0]; i++) {
     for (int j = 0; j < dim[1]; j++) {
       for (int k = 0; k < dim[2]; k++) {
@@ -236,8 +248,12 @@ void MapBuilder::RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
    voxels of the grid; this way we guarantee that we don't miss a voxel while
    maintaining the number of raycasted lines low */
 
-  // get dimenstions
+  // get params
+  ::Eigen::Vector3d origin = vg.GetOrigin();
   ::Eigen::Vector3i dim = vg.GetDim();
+
+  // create final voxel grid
+  ::voxel_grid_util::VoxelGrid vg_final(origin, dim, vg.GetVoxSize(), false);
 
   // first raycast the ceiling and the floor
   ::std::vector<int> k_vec = {0, dim(2) - 1};
@@ -245,7 +261,7 @@ void MapBuilder::RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
     for (int j = 0; j < dim(1); j++) {
       for (int k : k_vec) {
         ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
-        ClearLine(vg, start, end);
+        ClearLine(vg, vg_final, start, end);
       }
     }
   }
@@ -256,7 +272,7 @@ void MapBuilder::RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
     for (int k = 0; k < dim(2); k++) {
       for (int j : j_vec) {
         ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
-        ClearLine(vg, start, end);
+        ClearLine(vg, vg_final, start, end);
       }
     }
   }
@@ -267,13 +283,17 @@ void MapBuilder::RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
     for (int k = 0; k < dim(2); k++) {
       for (int i : i_vec) {
         ::Eigen::Vector3d end(i + 0.5, j + 0.5, k + 0.5);
-        ClearLine(vg, start, end);
+        ClearLine(vg, vg_final, start, end);
       }
     }
   }
+
+  // set vg to vg_final
+  vg = vg_final;
 }
 
 void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
+                           ::voxel_grid_util::VoxelGrid &vg_final,
                            const ::Eigen::Vector3d &start,
                            const ::Eigen::Vector3d &end) {
   ::Eigen::Vector3d collision_pt;
@@ -286,14 +306,21 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
   // don't need to clear it in the voxel grid
   if (line_clear) {
     visited_points.push_back(end);
+  } else {
+    ::Eigen::Vector3d last_point = (end - start) * 1e-7 + collision_pt;
+    ::Eigen::Vector3i last_point_int(last_point[0], last_point[1],
+                                     last_point[2]);
+    vg_final.SetVoxelInt(last_point_int, 100);
   }
+
   int vec_size = visited_points.size();
   for (int i = 0; i < vec_size - 1; i++) {
-    vg.SetVoxelInt(::Eigen::Vector3i(
-                       (visited_points[i](0) + visited_points[i + 1](0)) / 2.0,
-                       (visited_points[i](1) + visited_points[i + 1](1)) / 2.0,
-                       (visited_points[i](2) + visited_points[i + 1](2)) / 2.0),
-                   0);
+    vg_final.SetVoxelInt(
+        ::Eigen::Vector3i(
+            (visited_points[i](0) + visited_points[i + 1](0)) / 2.0,
+            (visited_points[i](1) + visited_points[i + 1](1)) / 2.0,
+            (visited_points[i](2) + visited_points[i + 1](2)) / 2.0),
+        0);
   }
 }
 

@@ -21,7 +21,7 @@ def generate_launch_description():
     )
 
     # define params
-    n_rob = 10 
+    n_rob = 7 
     dist_between_rob = 2.01
     x_pos = 0
     z_pos = 0 

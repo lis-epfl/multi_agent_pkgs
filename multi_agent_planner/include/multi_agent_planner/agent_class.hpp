@@ -296,6 +296,8 @@ private:
   double sens_pot_;
   // sampling path velocity deceleration
   double path_vel_dec_;
+  // number of reference trajectory points to keep at the next iteration
+  int traj_ref_points_to_keep_;
   // whether to use rk4 or euler for integration
   bool rk4_;
   // how many time steps (MPC) between planning iterations

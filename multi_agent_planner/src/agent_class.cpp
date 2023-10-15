@@ -289,7 +289,8 @@ void Agent::UpdatePath() {
     // get the start from the current reference trajectory
     ::std::vector<double> start;
     if (reset_path_ && !traj_curr_.empty()) {
-      for (auto pt : traj_curr_) {
+      for (int i = 0; i < traj_curr_.size(); i++) {
+        auto pt = traj_curr_[i];
         int8_t voxel_val =
             vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2]));
         if (voxel_val != ENV_BUILDER_OCC && voxel_val != ENV_BUILDER_UNK) {
@@ -310,7 +311,8 @@ void Agent::UpdatePath() {
                                    traj_ref_curr[i][2])) != ENV_BUILDER_OCC &&
              vg_util.GetVoxelGlobal(
                  ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
-                                   traj_ref_curr[i][2])) != ENV_BUILDER_UNK) {
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_UNK &&
+             i < traj_ref_points_to_keep_) {
         traj_tmp.push_back(traj_ref_curr[i]);
         i = ::std::min(int(traj_ref_curr.size()) - 1, i + 1);
         if (i == int(traj_ref_curr.size()) - 1)
@@ -452,7 +454,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // set the namespace
   using namespace JPS;
 
-  // free unknown voxels
+  // TODO: make the voxel grid so it can also be used here without the need to
+  // free unknown voxels and rebuild the potential field free unknown voxels
   vg_util.FreeUnknown();
 
   // create new potential field
@@ -2029,6 +2032,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("sens_dist", 1.0);
   declare_parameter("sens_pot", 1.0);
   declare_parameter("path_vel_dec", 0.1);
+  declare_parameter("traj_ref_points_to_keep", 10);
   declare_parameter("rk4", false);
   declare_parameter("step_plan", 1);
   declare_parameter("thresh_dist", 0.2);
@@ -2084,6 +2088,7 @@ void Agent::InitializeRosParameters() {
   sens_dist_ = get_parameter("sens_dist").as_double();
   sens_pot_ = get_parameter("sens_pot").as_double();
   path_vel_dec_ = get_parameter("path_vel_dec").as_double();
+  traj_ref_points_to_keep_ = get_parameter("traj_ref_points_to_keep").as_int();
   rk4_ = get_parameter("rk4").as_bool();
   step_plan_ = get_parameter("step_plan").as_int();
   thresh_dist_ = get_parameter("thresh_dist").as_double();
@@ -2129,10 +2134,10 @@ void Agent::VoxelGridResponseCallback(
     voxel_grid_mtx_.unlock();
 
     // inflate obstacles
-    voxel_grid_.InflateObstacles(path_infl_dist_);
+    /* voxel_grid_.InflateObstacles(path_infl_dist_); */
 
     // create potential field
-    voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_);
+    /* voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_); */
 
     voxel_grid_ready_ = true;
     if (planner_verbose_) {
@@ -2183,10 +2188,10 @@ void Agent::MappingUtilVoxelGridCallback(
   voxel_grid_mtx_.unlock();
 
   // inflate obstacles
-  voxel_grid_.InflateObstacles(path_infl_dist_);
+  /* voxel_grid_.InflateObstacles(path_infl_dist_); */
 
   // create potential field
-  voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_);
+  /* voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_); */
 
   voxel_grid_ready_ = true;
   if (planner_verbose_) {

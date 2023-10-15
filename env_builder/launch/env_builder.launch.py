@@ -16,11 +16,12 @@ def generate_launch_description():
         # 'env_loop_config.yaml'
         'env_new_config.yaml'
     )
+    params_sub = [{'publish_period': 0.1}]
     env_builder_node = Node(
         package='env_builder',
         executable='env_builder_node',
         name='env_builder_node',
-        parameters=[config],
+        parameters=[config] + params_sub,
         # prefix=['xterm -fa default -fs 10 -e gdb -ex run --args'],
         output='screen',
         emulate_tty=True

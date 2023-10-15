@@ -46,6 +46,7 @@ private:
 
   // clear the line along the start and the end in the voxel
   void ClearLine(::voxel_grid_util::VoxelGrid &vg,
+                 ::voxel_grid_util::VoxelGrid &vg_final,
                  const ::Eigen::Vector3d &start, const ::Eigen::Vector3d &end);
 
   // callback for when we receive the new agent position
@@ -73,6 +74,11 @@ private:
   // whether to free all voxels that are not occupied (no unknowns); if not then
   // we have to raycast to free the voxels
   bool free_grid_;
+  // inflation distance
+  double inflation_dist_;
+  // potential distance and power
+  double potential_dist_;
+  double potential_pow_;
 
   /* publishers/subscribers */
   // environment voxel grid subscriber
