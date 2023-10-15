@@ -169,6 +169,9 @@ public:
   // set unknonw voxels to free
   void OccupyUnknown();
 
+  // set unknonw voxels to custom value
+  void SetUnknown(int8_t val);
+
   // get origin
   Eigen::Vector3d GetOrigin() const;
 

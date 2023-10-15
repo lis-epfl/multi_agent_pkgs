@@ -224,6 +224,13 @@ void VoxelGrid::OccupyUnknown() {
     }
   }
 }
+void VoxelGrid::SetUnknown(int8_t val) {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = val;
+    }
+  }
+}
 
 void VoxelGrid::InflateObstacles(double inflation_dist) {
   // first create mask to get all the voxels that are within the inflation

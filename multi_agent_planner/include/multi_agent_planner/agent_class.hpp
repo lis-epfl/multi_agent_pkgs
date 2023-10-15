@@ -32,6 +32,7 @@
 #include <fstream>
 #include <mutex>
 #include <pthread.h>
+#include <deque>
 
 namespace multi_agent_planner {
 class Agent : public ::rclcpp::Node {

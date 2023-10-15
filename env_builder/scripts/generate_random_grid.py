@@ -51,7 +51,7 @@ def write_config_file(filename, voxel_grid, seed):
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
     config_filename = "env_new_config"
-    seed = 59
+    seed = 58
 
     # Voxel Grid parameters
     dimension = [100.0, 30.0, 15.0]  # meters
@@ -93,10 +93,10 @@ if __name__ == "__main__":
     # Create a Random volume
     # The containing volume of randomly generated cylinders.
     rd_volume_cylinders = RandomVolume([[3, 0, -6], [30, 30, 15]], seed)
-    rd_volume_cylinders.add_random_cylinders(135,
+    rd_volume_cylinders.add_random_cylinders(90,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.3, 0.3],
+                                             radius_range=[0.1, 0.1],
                                              height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
     # rd_volume_cylinders.add_random_loops(50,
     #                                      angle_range=[0, np.pi/2],
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     voxel_grid.add_shape(rd_volume_cylinders)
 
     rd_volume_cylinders = RandomVolume([[63, 0, -6], [30, 30, 15]], seed)
-    rd_volume_cylinders.add_random_cylinders(225,
+    rd_volume_cylinders.add_random_cylinders(180,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.1, 0.1],

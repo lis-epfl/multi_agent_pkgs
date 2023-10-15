@@ -496,6 +496,7 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   t_start = clock();
   IterativeDMPlanner3D dmp(planner_verbose_);
   dmp.setSearchRadius(Vec3f(dmp_search_rad_, dmp_search_rad_, dmp_search_rad_));
+  dmp.setCweight(1);
   dmp.setMap(map_util, start);
 
   // run dmp planner
@@ -1174,9 +1175,10 @@ void Agent::GenerateSafeCorridor() {
   // generate new polyhedra using the global path until poly_hor_
   // first copy the global path and add the current state to it
   path_mtx_.lock();
-  ::std::vector<::std::vector<double>> path_curr = path_curr_;
+  ::std::deque<::std::vector<double>> path_curr(path_curr_.begin(),
+                                                path_curr_.end());
   path_mtx_.unlock();
-  path_curr.push_back({state_curr_[0], state_curr_[1], state_curr_[2]});
+  /* path_curr.push_front({state_curr_[0], state_curr_[1], state_curr_[2]}); */
 
   // then copy the voxel grid used for the generation
   voxel_grid_mtx_.lock();
