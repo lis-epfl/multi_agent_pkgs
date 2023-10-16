@@ -905,7 +905,7 @@ void Agent::SolveOptimizationProblem() {
     }
 
     at_least_1_poly_constr_grb_.push_back(model_.addConstr(
-        sum_bin >= 1, "at_least_1_pol_t_" + ::std::to_string(i)));
+        sum_bin == 1, "at_least_1_pol_t_" + ::std::to_string(i)));
   }
 
   // add the objective function to the model
