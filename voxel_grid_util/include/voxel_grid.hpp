@@ -153,6 +153,12 @@ public:
   // test if voxel is free in the grid frame
   bool IsFree(const Eigen::Vector3d coord_int) const;
 
+  // test if voxel is free in the grid frame
+  bool IsUnknown(const Eigen::Vector3i coord_int) const;
+
+  // test if voxel is free in the grid frame
+  bool IsUnknown(const Eigen::Vector3d coord_int) const;
+
   // inflate the obstacle of the grid by a certain distance
   void InflateObstacles(double inflation_dist);
 

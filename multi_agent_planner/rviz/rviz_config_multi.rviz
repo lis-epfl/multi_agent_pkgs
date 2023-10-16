@@ -95,7 +95,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Alpha: 0.019999999552965164
+    - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -104,7 +104,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/PointCloud2
-      Color: 255; 255; 255
+      Color: 230; 97; 0
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: false
@@ -138,8 +138,8 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color: 154; 153; 150
+      Color Transformer: FlatColor
       Decay Time: 0
       Enabled: false
       Invert Rainbow: false
@@ -201,7 +201,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 25; 255; 0
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -224,7 +224,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_0/path
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
@@ -257,7 +257,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 192; 97; 203
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -280,7 +280,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_0/traj_ref
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
       Name: Marker
@@ -331,7 +331,7 @@ Visualization Manager:
     - Alpha: 0.20000000298023224
       BoundColor: 255; 0; 0
       Class: decomp_rviz_plugins/PolyhedronArray
-      Enabled: false
+      Enabled: true
       MeshColor: 0; 170; 255
       Name: PolyhedronArray
       Scale: 0.10000000149011612
@@ -343,7 +343,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_0/polyhedra
-      Value: false
+      Value: true
       VsColor: 0; 255; 0
       VsScale: 1
     - Alpha: 1
@@ -1086,7 +1086,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 25; 255; 0
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -1109,7 +1109,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_5/path
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
@@ -1142,7 +1142,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 192; 97; 203
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -1165,7 +1165,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_5/traj_ref
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
       Name: Marker
@@ -2367,25 +2367,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 37.80547332763672
+      Distance: 48.79463195800781
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 63.55780029296875
-        Y: 12.586417198181152
-        Z: 0.8066794276237488
+        X: 11.207564353942871
+        Y: 12.466947555541992
+        Z: 4.280450344085693
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4997963905334473
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 4.743411540985107
+      Yaw: 4.613387107849121
     Saved: ~
 Window Geometry:
   Displays:

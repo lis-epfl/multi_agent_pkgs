@@ -44,6 +44,12 @@ private:
   void RaycastAndClear(::voxel_grid_util::VoxelGrid &vg,
                        const ::Eigen::Vector3d &start);
 
+  // go through all the voxels that are free, and set those
+  // that have at least one unknown neighbours as also unknown because due
+  // to the inflation they can become occupied; if it has one occupied
+  // neighbour or all its neighbours are free; it is kept as free
+  void SetUncertainToUnknown(::voxel_grid_util::VoxelGrid &vg);
+
   // clear the line along the start and the end in the voxel
   void ClearLine(::voxel_grid_util::VoxelGrid &vg,
                  ::voxel_grid_util::VoxelGrid &vg_final,

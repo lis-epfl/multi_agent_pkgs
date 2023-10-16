@@ -18,7 +18,7 @@
     sens_dist: 0.001 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.01 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
     path_vel_dec: 0.0 # deceleration of discretization velocity of the path after every time step; stuff works better without it at 5.0 path_vel
-    traj_ref_points_to_keep: 7 # number of reference trajectory points to keep at the next iteration for smoothness
+    traj_ref_points_to_keep: 9 # number of reference trajectory points to keep at the next iteration for smoothness
     rk4: false # whether to use rk4 or euler
     step_plan: 1 # number of mpc steps to skip during planning; not tested yet - TODO
     thresh_dist: 1.0 # threshold distance to move forward the reference trajectory on the path

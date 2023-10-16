@@ -175,6 +175,20 @@ bool VoxelGrid::IsFree(const Eigen::Vector3d coord_int) const {
     return false;
 }
 
+bool VoxelGrid::IsUnknown(const Eigen::Vector3i coord_int) const {
+  if (GetVoxelInt(coord_int) == ENV_BUILDER_UNK)
+    return true;
+  else
+    return false;
+}
+
+bool VoxelGrid::IsUnknown(const Eigen::Vector3d coord_int) const {
+  if (GetVoxelInt(coord_int) == ENV_BUILDER_UNK)
+    return true;
+  else
+    return false;
+}
+
 ::std::vector<::std::pair<::Eigen::Vector3i, int8_t>>
 VoxelGrid::CreateMask(double mask_dist, double pow) {
   // create mask variable
