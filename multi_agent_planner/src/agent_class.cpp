@@ -1178,6 +1178,7 @@ void Agent::GenerateSafeCorridor() {
   ::std::deque<::std::vector<double>> path_curr(path_curr_.begin(),
                                                 path_curr_.end());
   path_mtx_.unlock();
+  path_curr.push_front({state_curr_[0], state_curr_[1], state_curr_[2]});
 
   // then copy the voxel grid used for the generation
   voxel_grid_mtx_.lock();
@@ -1263,6 +1264,20 @@ void Agent::GenerateSafeCorridor() {
     }
 
     /* generate polyhedron */
+    bool use_cvx = use_cvx_;
+    bool use_cvx_new = use_cvx_new_;
+    // first check if the seed is constrained from a given direction
+    if ((vg_util.IsOccupied(::Eigen::Vector3i(seed[0] - 1, seed[1], seed[2])) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0] + 1, seed[1], seed[2]))) ||
+        (vg_util.IsOccupied(::Eigen::Vector3i(seed[0], seed[1] - 1, seed[2])) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0], seed[1] + 1, seed[2]))) ||
+        (vg_util.IsOccupied(::Eigen::Vector3i(seed[0], seed[1], seed[2] - 1)) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0], seed[1], seed[2] + 1)))) {
+      use_cvx_new = true;
+    }
     // first push seed into the new poly_seeds list
     Vec3f seed_world;
     seed_world[0] = seed[0] * voxel_size + voxel_size / 2 + origin[0];
@@ -1273,8 +1288,8 @@ void Agent::GenerateSafeCorridor() {
     // check if use voxel grid based method or liu's method
     Polyhedron3D poly_new;
     ::std::vector<int8_t> grid_data = vg_util.GetData();
-    if (use_cvx_) {
-      if (use_cvx_new_) {
+    if (use_cvx) {
+      if (use_cvx_new) {
         // if use new method
         poly_new = ::convex_decomp_lib::GetPolyOcta3DNew(
             seed, grid_data, dim, n_it_decomp_, voxel_size, -n_poly, origin);

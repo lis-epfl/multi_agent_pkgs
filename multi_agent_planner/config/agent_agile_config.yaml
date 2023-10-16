@@ -13,7 +13,7 @@
     n_u: 3 # number of control variables (3 for jerk/acceleration control)
     n_hor: 9 # number of mpc steps
     dt: 0.1 # step time of the mpc
-    path_vel_min: 3.5 # minimum discretization velocity of the path
+    path_vel_min: 2.5 # minimum discretization velocity of the path
     path_vel_max: 5.5 # maximum discretization velocity of the path
     sens_dist: 0.001 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.01 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
@@ -23,7 +23,7 @@
     step_plan: 1 # number of mpc steps to skip during planning; not tested yet - TODO
     thresh_dist: 1.0 # threshold distance to move forward the reference trajectory on the path
     poly_hor: 3 # number of polyhedra per planning iteration
-    n_it_decomp: 60 # number of decomposition iterations for polyhedra generation
+    n_it_decomp: 42 # number of decomposition iterations for polyhedra generation
     use_cvx: true # if true, use our method for polyhedra generation, otherwise use Liu's method
     use_cvx_new: false # if true, use our new method (not the original method); it's better if it's false
     drone_radius: 0.3 # the drone radius
