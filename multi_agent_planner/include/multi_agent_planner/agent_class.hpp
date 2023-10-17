@@ -319,8 +319,10 @@ private:
   // (only if use_cvx_ is true) use the original polyhedron decomposition
   // method or the new shape aware one (the new one may not be as good)
   bool use_cvx_new_;
-  // drone safety radius
+  // drone safety radius (a value in the ellipse function)
   double drone_radius_;
+  // drone z offset for downwash (b value in the ellipse function) 
+  double drone_z_offset_;
   // obstacles inflation (in number of voxels) for path finding (this is in
   // addition to the inflation to account for the drone radius); used to allow
   // for better polyhedron generation in tight corridors in case there is no

@@ -11,7 +11,8 @@ def generate_launch_description():
     config_planner = os.path.join(
         get_package_share_directory('multi_agent_planner'),
         'config',
-        'agent_default_config.yaml'
+        # 'agent_default_config.yaml'
+        'agent_agile_config.yaml'
         # 'agent_crazyflie_config.yaml'
     )
 

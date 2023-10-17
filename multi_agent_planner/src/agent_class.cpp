@@ -1079,9 +1079,21 @@ void Agent::GenerateTimeAwareSafeCorridor() {
 
         // get the midpoint between the positions
         Vec3f pos_mid = (pos_curr + pos_other) / 2;
+
+        // compute the distance using the the ellipsoid function
+        double angle_x_axis =
+            M_PI_2 - ::std::fabs(::std::acos(plane_normal_normalized(2)));
+        double t_val = ::std::atan(drone_radius_ / drone_z_offset_ *
+                                   ::std::tan(angle_x_axis));
+        double x_val = drone_radius_ * ::std::cos(t_val);
+        double y_val = drone_z_offset_ * ::std::sin(t_val);
+        double safety_dist = ::std::hypot(x_val, y_val);
+
+        // compute the plane point
         Vec3f plane_point =
-            pos_mid - ::std::min(2 * drone_radius_, plane_normal.norm()) / 2 *
+            pos_mid - ::std::min(2 * safety_dist, plane_normal.norm()) / 2 *
                           plane_normal_normalized;
+
         /* get the final normal vector after adding the perturbations */
         // first set up the perturbation vectors
         Vec3f up(0, 0, 1);
@@ -2056,7 +2068,8 @@ void Agent::DeclareRosParameters() {
   declare_parameter("n_it_decomp", 42);
   declare_parameter("use_cvx", true);
   declare_parameter("use_cvx_new", false);
-  declare_parameter("drone_radius", 0.2);
+  declare_parameter("drone_radius", 0.3);
+  declare_parameter("drone_z_offset", 0.3);
   declare_parameter("path_infl_dist", 0.3);
   declare_parameter("com_latency", 0.0);
   declare_parameter("r_u", 0.01);
@@ -2113,6 +2126,7 @@ void Agent::InitializeRosParameters() {
   use_cvx_ = get_parameter("use_cvx").as_bool();
   use_cvx_new_ = get_parameter("use_cvx_new").as_bool();
   drone_radius_ = get_parameter("drone_radius").as_double();
+  drone_z_offset_ = get_parameter("drone_z_offset").as_double();
   path_infl_dist_ = get_parameter("path_infl_dist").as_double();
   com_latency_ = get_parameter("com_latency").as_double();
   r_u_ = get_parameter("r_u").as_double();
