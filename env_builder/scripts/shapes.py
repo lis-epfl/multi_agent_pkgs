@@ -169,12 +169,9 @@ class VoxelGrid:
                 for k in range(self.grid_size[2]):
                     if self.get_voxel(i,j,k):
                         point = np.array(self.to_world_coordinates(i, j, k))
-                        self.occupied_voxels.append(
-                            point[0] - self.origin[0])
-                        self.occupied_voxels.append(
-                            point[1] - self.origin[1])
-                        self.occupied_voxels.append(
-                            point[2] - self.origin[2])
+                        self.occupied_voxels.append(point[0])
+                        self.occupied_voxels.append(point[1])
+                        self.occupied_voxels.append(point[2])
         print("Done : generation of obstacles took %.2f seconds." %(time.time()-start_time))
 
 
@@ -398,7 +395,7 @@ class Wall(Shape):
         # Create mesh grid and fill occupancy in the voxel grid
         for x_rel in np.arange(0.0, self.length, mesh_size):
             for y_rel in np.arange(0.0, self.height, mesh_size):
-                for z_rel in np.arange(-self.width, 0.0, mesh_size):
+                for z_rel in np.arange(0.0, -self.width, -mesh_size):
                     point = self.origin + x_rel*self.direction1 + y_rel*self.direction2 + z_rel*self.normal
                     voxel_coordinates = voxel_grid.point_to_voxel_coordinates(point)
                     if voxel_grid.is_valid_coordinate(voxel_coordinates[0], voxel_coordinates[1], voxel_coordinates[2]): #is inside the voxelGrid
