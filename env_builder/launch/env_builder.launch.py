@@ -14,7 +14,8 @@ def generate_launch_description():
         # 'env_default_config.yaml'
         # 'env_long_config.yaml'
         # 'env_loop_config.yaml'
-        'env_new_config.yaml'
+        # 'env_new_config.yaml'
+        'env_crazyflie_config.yaml'
     )
     params_sub = [{'publish_period': 0.1}]
     env_builder_node = Node(
