@@ -109,6 +109,12 @@ Agent::Agent()
         ::std::bind(&Agent::GetVoxelGridAsync, this));
   }
 
+  // create a goal subscriber
+  ::std::string goal_sub_topic = "agent_" + ::std::to_string(id_) + "/goal";
+  goal_sub_ = create_subscription<::geometry_msgs::msg::PointStamped>(
+      goal_sub_topic, 10,
+      ::std::bind(&Agent::GoalCallback, this, ::std::placeholders::_1));
+
   // launch path planning thread
   path_planning_thread_ = ::std::thread(&Agent::UpdatePath, this);
 
@@ -1304,11 +1310,13 @@ void Agent::GenerateSafeCorridor() {
       if (use_cvx_new) {
         // if use new method
         poly_new = ::convex_decomp_lib::GetPolyOcta3DNew(
-            seed, grid_data, dim, n_it_decomp_, voxel_size, -n_poly, origin);
+            seed, grid_data, dim, n_it_decomp_, voxel_size, -(n_poly + 1),
+            origin);
       } else {
         // use original method
-        poly_new = ::convex_decomp_lib::GetPolyOcta3D(
-            seed, grid_data, dim, n_it_decomp_, voxel_size, -n_poly, origin);
+        poly_new = ::convex_decomp_lib::GetPolyOcta3D(seed, grid_data, dim,
+                                                      n_it_decomp_, voxel_size,
+                                                      -(n_poly + 1), origin);
       }
     } else {
       // TODO (but not essential) : use liu's method
@@ -2230,6 +2238,16 @@ void Agent::MappingUtilVoxelGridCallback(
   if (publish_voxel_grid_) {
     PublishVoxelGrid();
   }
+}
+
+void Agent::GoalCallback(
+    const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg){
+  goal_mtx_.lock();
+  goal_curr_.resize(3);
+  goal_curr_[0] = goal_msg->point.x;
+  goal_curr_[1] = goal_msg->point.y;
+  goal_curr_[2] = goal_msg->point.z;
+  goal_mtx_.unlock();
 }
 
 void Agent::PublishVoxelGrid() {

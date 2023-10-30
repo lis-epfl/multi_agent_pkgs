@@ -20,6 +20,7 @@
 
 #include <decomp_geometry/polyhedron.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 #include <jps_planner/distance_map_planner/distance_map_planner.h>
 #include <jps_planner/jps_planner/jps_planner.h>
 #include <nav_msgs/msg/path.hpp>
@@ -29,10 +30,10 @@
 
 #include <chrono>
 #include <cmath>
+#include <deque>
 #include <fstream>
 #include <mutex>
 #include <pthread.h>
-#include <deque>
 
 namespace multi_agent_planner {
 class Agent : public ::rclcpp::Node {
@@ -206,6 +207,10 @@ private:
   void MappingUtilVoxelGridCallback(
       const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg);
 
+  // current goal subscriber callback
+  void
+  GoalCallback(const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg);
+
   // function to execute on the shutdown of the node to save computation time
   // statistics
   void OnShutdown();
@@ -267,6 +272,9 @@ private:
       voxel_grid_sub_;
   // transform broadcaster to broadcast the position
   ::std::shared_ptr<::tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  // subscriber to get the most recent goal
+  ::rclcpp::Subscription<::geometry_msgs::msg::PointStamped>::SharedPtr
+      goal_sub_;
 
   /* planner parameters */
   // topic prefix name that we add the id to it before publishing
@@ -321,7 +329,7 @@ private:
   bool use_cvx_new_;
   // drone safety radius (a value in the ellipse function)
   double drone_radius_;
-  // drone z offset for downwash (b value in the ellipse function) 
+  // drone z offset for downwash (b value in the ellipse function)
   double drone_z_offset_;
   // obstacles inflation (in number of voxels) for path finding (this is in
   // addition to the inflation to account for the drone radius); used to allow

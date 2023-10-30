@@ -1,0 +1,28 @@
+env_builder_node: 
+  ros__parameters:
+    origin_grid: [-20.0, 0.0, -3.0] # origin of the voxel grid; they are rounded to the nearest multiple of vox_size
+    dimension_grid: [40.0, 40.0, 12.0] # dimensions in meters
+    vox_size: 0.3 # voxel size of the grid
+    free_grid: true # if true the grid is initialized to free instead of unknown
+  
+    multi_obst_size: true # if false, use size_obst as a common size for all obstacles; otherwise use size_obst_multi to define the size of each obstacle
+    multi_obst_position: true # if false, generate positions randomly using normal distribution, if true use position_obst_multi to define the position of each obstacle
+    range_obst: [40.0, 40.0, 0.0] # area on the map where to generate obstacles, always positive numbers to move it around, use the origin_obst variable
+    origin_obst: [0.0, 0.0, 0.0] # origin of the area where we generate the obstacles
+    size_obst: [0.3, 0.3, 6.0] # height x width x length
+    n_obst: 450 # number of obstacles (only used if we want to use random generation, otherwise the number of obstacles is inferred from position_obst_vec)
+    rand_seed: 1 # seed for the random generation of the obstacles
+    size_obst_vec: [0.3, 0.3, 6.0, 
+                    8.0, 0.5, 15.0, 
+                    8.0, 0.5, 3.0, 
+                    8.0, 0.5, 3.0] # x,y,z size of each obstacle concatenated
+    position_obst_vec: [16.6, 6.0, 0.0, 
+                        25.0, 6.0, 0.0, 
+                        20.6, 6.0, 6.0, 
+                        20.6, 6.0, 2.0] # x,y,z position of each obstacle concatenated
+
+    env_pc_topic: "environment_poincloud" # topic on which to publish the env pointcloud
+    env_vg_topic: "environment_voxel_grid" # topic on which to publish the env voxel grid 
+    env_pc_frame: "world" # origin frame of the published poinctloud
+    get_grid_service_name: "get_voxel_grid" # name of the service to get the voxel grid of each agent
+    publish_period: 0.2 # publishing period of the voxel grid
