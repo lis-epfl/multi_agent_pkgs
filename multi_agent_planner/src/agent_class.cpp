@@ -791,7 +791,7 @@ void Agent::PublishCurrentPosition() {
   marker_msg.pose.orientation.w = 1.0;
   marker_msg.scale.x = 2 * drone_radius_;
   marker_msg.scale.y = 2 * drone_radius_;
-  marker_msg.scale.z = 2 * drone_radius_;
+  marker_msg.scale.z = 2 * drone_z_offset_;
   marker_msg.color.a = 1;
   marker_msg.color.r = 0.0;
   marker_msg.color.g = 1.0;
