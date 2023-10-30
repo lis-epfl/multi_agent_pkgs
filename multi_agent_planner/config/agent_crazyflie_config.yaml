@@ -24,17 +24,17 @@
     use_cvx: true # if true, use our method for polyhedra generation, otherwise use Liu's method
     use_cvx_new: false # if true, use our new method (not the original method); it's better if it's false
     drone_radius: 0.2 # the drone radius
-    drone_z_offset: 0.6 # the drone radius
+    drone_z_offset: 0.5 # the drone radius
     com_latency: 0.0 # communication latency in seconds
     r_u: 0.01 # control weights
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
     r_n: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # last state variable error weight
     max_vel: 1.5 # maximum variable set in the optimization
-    max_acc_z: 5.0 # maximum acceleration in the z direction
-    min_acc_z: -5.0 # minimum acceleration in the z direction
-    max_acc_xy: 5.0 # maximum acceleration in the x and y directions
-    min_acc_xy: -5.0 # minimum acceleration in the x and y directions
-    max_jerk: 7.0 # maximum jerk
+    max_acc_z: 4.0 # maximum acceleration in the z direction
+    min_acc_z: -4.0 # minimum acceleration in the z direction
+    max_acc_xy: 4.0 # maximum acceleration in the x and y directions
+    min_acc_xy: -4.0 # minimum acceleration in the x and y directions
+    max_jerk: 8.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
     goal: [42.15, 42.15, 1.5] # goal of the agent

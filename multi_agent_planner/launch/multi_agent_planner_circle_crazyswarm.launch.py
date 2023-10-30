@@ -20,11 +20,11 @@ def generate_launch_description():
         'map_builder_default_config.yaml'
     )
 
-    config_bridge = os.path.join(
-        get_package_share_directory('planner_crazyswarm_bridge'),
-        'config',
-        'bridge_default_config.yaml'
-    )
+    # config_bridge = os.path.join(
+    #     get_package_share_directory('planner_crazyswarm_bridge'),
+    #     'config',
+    #     'bridge_default_config.yaml'
+    # )
 
     # define params
     voxel_grid_range = [12.0, 12.0, 5.0]
@@ -39,10 +39,9 @@ def generate_launch_description():
                        (-3.55, 0.5, z_plane),
                        (-3.55, -0.37, z_plane),
                        (-3.55, -1.28, z_plane),
-                       (-2.8, 1.43, z_plane),
-                       (-2.8, 0.5, z_plane),
-                       (-2.8, -0.37, z_plane),
-                       (-2.8, -1.28, z_plane)]
+                       (-2.8, 0.96, z_plane),
+                       (-2.8, 0.06, z_plane),
+                       (-2.8, -0.82, z_plane)]
 
     goal_positions = []
     for x, y, z in start_positions:
@@ -98,19 +97,19 @@ def generate_launch_description():
         ld.add_action(node_planner)
 
     # create bridge nodes
-    for i in range(n_rob):
-        params_sub = [{'id': i}]
-        node_bridge = Node(
-            package='planner_crazyswarm_bridge',
-            executable='bridge_node',
-            name='bridge_node_{}'.format(i),
-            parameters=[config_bridge] + params_sub,
-            # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
-            # prefix=['xterm -fa default -fs 10 -hold -e'],
-            # prefix=prefix_tmp,
-            output='screen',
-            emulate_tty=True,
-        )
-        ld.add_action(node_bridge)
+    # for i in range(n_rob):
+    #     params_sub = [{'id': i}]
+    #     node_bridge = Node(
+    #         package='planner_crazyswarm_bridge',
+    #         executable='bridge_node',
+    #         name='bridge_node_{}'.format(i),
+    #         parameters=[config_bridge] + params_sub,
+    #         # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+    #         # prefix=['xterm -fa default -fs 10 -hold -e'],
+    #         # prefix=prefix_tmp,
+    #         output='screen',
+    #         emulate_tty=True,
+    #     )
+    #     ld.add_action(node_bridge)
 
     return ld

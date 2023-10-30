@@ -3,8 +3,8 @@ project(multi_agent_planner)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fno-tree-ccp")
 
