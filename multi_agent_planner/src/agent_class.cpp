@@ -287,6 +287,15 @@ void Agent::UpdatePath() {
     ::std::vector<double> goal = goal_curr_;
     goal_mtx_.unlock();
 
+    // to be uncommented only when doing the going back and forth of the
+    // crazyfly test
+    int period = int(int(state_hist_.size()) / 75);
+    if (period % 2 == 1 && period < 6) {
+      goal[0] = state_ini_[0];
+      goal[1] = state_ini_[1];
+      goal[2] = state_ini_[2];
+    }
+
     // mutex for the reference trajectory to get the start variable
     traj_ref_mtx_.lock();
     ::std::vector<::std::vector<double>> traj_ref_curr = traj_ref_curr_;
@@ -2241,7 +2250,7 @@ void Agent::MappingUtilVoxelGridCallback(
 }
 
 void Agent::GoalCallback(
-    const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg){
+    const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg) {
   goal_mtx_.lock();
   goal_curr_.resize(3);
   goal_curr_[0] = goal_msg->point.x;
