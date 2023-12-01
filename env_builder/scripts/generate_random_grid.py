@@ -50,7 +50,7 @@ def write_config_file(filename, voxel_grid, seed):
 
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
-    config_filename = "env_new_config"
+    config_filename = "env_long_config"
     seed = 49 
 
     # Voxel Grid parameters
