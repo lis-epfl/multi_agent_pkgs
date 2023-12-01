@@ -30,11 +30,11 @@
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
     r_n: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # last state variable error weight
     max_vel: 1.5 # maximum variable set in the optimization
-    max_acc_z: 4.0 # maximum acceleration in the z direction
-    min_acc_z: -4.0 # minimum acceleration in the z direction
-    max_acc_xy: 4.0 # maximum acceleration in the x and y directions
-    min_acc_xy: -4.0 # minimum acceleration in the x and y directions
-    max_jerk: 8.0 # maximum jerk
+    max_acc_z: 3.0 # maximum acceleration in the z direction
+    min_acc_z: -3.0 # minimum acceleration in the z direction
+    max_acc_xy: 3.0 # maximum acceleration in the x and y directions
+    min_acc_xy: -3.0 # minimum acceleration in the x and y directions
+    max_jerk: 4.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
     goal: [42.15, 42.15, 1.5] # goal of the agent
@@ -42,8 +42,8 @@
     save_stats: true # if true, save computation time statistics and state history
     gurobi_verbose: false # if true, display gurobi optimization information  
     path_infl_dist: 0.3 # distance to inflate the obstacles with when doing path finding
-    dmp_search_rad: 0.8 # search radius for the dmp
-    dmp_pot_rad: 0.8 # search radius for the dmp
+    dmp_search_rad: 0.6 # search radius for the dmp
+    dmp_pot_rad: 0.6 # search radius for the dmp
     dmp_pot_pow: 4.0 # potential power
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.2 # path planning period

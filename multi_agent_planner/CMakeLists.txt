@@ -48,7 +48,6 @@ set(GUROBI_LIBRARIES "$ENV{GUROBI_HOME}/lib/libgurobi_c++.a;$ENV{GUROBI_HOME}/li
 include_directories(include/multi_agent_planner ${PCL_INCLUDE_DIRS} ${CONVEX_DECOMP_UTIL_INCLUDE_DIRS} ${GUROBI_INCLUDE_DIRS} ${DECOMP_UTIL_INCLUDE_DIRS} ${JPS3D_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${VOXEL_GRID_UTIL_INCLUDE_DIRS} ${PATH_FINDING_UTIL_INCLUDE_DIRS})
 
 # message("decomp_ros_utils_INCLUDE_DIRECTORIES: " ${decomp_ros_utils_INCLUDE_DIRECTORIES})
-
 add_library(agent_class src/agent_class.cpp)
 # target_include_directories(agent_class PRIVATE ${decomp_ros_utils_INCLUDE_DIRECTORIES})
 target_link_libraries(agent_class ${CONVEX_DECOMP_UTIL_LIBRARIES} ${JPS3D_LIBRARIES} ${GUROBI_LIBRARIES} ${PATH_FINDING_UTIL_LIBRARIES} ${VOXEL_GRID_UTIL_LIBRARIES})

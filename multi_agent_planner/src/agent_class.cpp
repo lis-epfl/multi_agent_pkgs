@@ -289,12 +289,24 @@ void Agent::UpdatePath() {
 
     // to be uncommented only when doing the going back and forth of the
     // crazyfly test
-    int period = int(int(state_hist_.size()) / 75);
-    if (period % 2 == 1 && period < 6) {
-      goal[0] = state_ini_[0];
-      goal[1] = state_ini_[1];
-      goal[2] = state_ini_[2];
-    }
+    int period = int(int(state_hist_.size()) / 115);
+    /* if (period % 2 == 1 && period < 6) { */
+    /*   goal[0] = state_ini_[0]; */
+    /*   goal[1] = state_ini_[1]; */
+    /*   goal[2] = state_ini_[2]; */
+    /* } */
+
+    /* if (period > 5){ */
+    /*   goal[0] = state_ini_[0]; */
+    /*   goal[1] = state_ini_[1]; */
+    /*   goal[2] = 0; */
+    /* } */
+
+    /* if (period >= 1){ */
+    /*   goal[0] = goal_curr_[0]; */
+    /*   goal[1] = goal_curr_[1]; */
+    /*   goal[2] = 0; */
+    /* } */
 
     // mutex for the reference trajectory to get the start variable
     traj_ref_mtx_.lock();

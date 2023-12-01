@@ -20,28 +20,28 @@ def generate_launch_description():
         'map_builder_default_config.yaml'
     )
 
-    # config_bridge = os.path.join(
-    #     get_package_share_directory('planner_crazyswarm_bridge'),
-    #     'config',
-    #     'bridge_default_config.yaml'
-    # )
+    config_bridge = os.path.join(
+        get_package_share_directory('planner_crazyswarm_bridge'),
+        'config',
+        'bridge_default_config.yaml'
+    )
 
     # define params
     voxel_grid_range = [12.0, 12.0, 5.0]
     # height of the start and the goal
-    z_plane = 1.5
+    z_plane = 1.0 
     goal_offset = (7, 0, 0)
     use_mapping_util = True
     # use_mapping_util = False
 
     # set start and goal positions manually
-    start_positions = [(-3.56, 1.43, z_plane),
-                       (-3.55, 0.5, z_plane),
-                       (-3.55, -0.37, z_plane),
-                       (-3.55, -1.28, z_plane),
-                       (-2.8, 0.96, z_plane),
-                       (-2.8, 0.06, z_plane),
-                       (-2.8, -0.82, z_plane)]
+    start_positions = [(-3.09, 1.47, z_plane),
+                       (-3.107, 0.57, z_plane),
+                       (-3.13, -0.32, z_plane),
+                       (-3.14, -1.22, z_plane),
+                       (-2.66, 1.03, z_plane),
+                       (-2.68, 0.1, z_plane),
+                       (-2.68, -0.77, z_plane)]
 
     goal_positions = []
     for x, y, z in start_positions:
@@ -97,19 +97,19 @@ def generate_launch_description():
         ld.add_action(node_planner)
 
     # create bridge nodes
-    # for i in range(n_rob):
-    #     params_sub = [{'id': i}]
-    #     node_bridge = Node(
-    #         package='planner_crazyswarm_bridge',
-    #         executable='bridge_node',
-    #         name='bridge_node_{}'.format(i),
-    #         parameters=[config_bridge] + params_sub,
-    #         # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
-    #         # prefix=['xterm -fa default -fs 10 -hold -e'],
-    #         # prefix=prefix_tmp,
-    #         output='screen',
-    #         emulate_tty=True,
-    #     )
-    #     ld.add_action(node_bridge)
+    for i in range(n_rob):
+        params_sub = [{'id': i}]
+        node_bridge = Node(
+            package='planner_crazyswarm_bridge',
+            executable='bridge_node',
+            name='bridge_node_{}'.format(i),
+            parameters=[config_bridge] + params_sub,
+            # prefix=['xterm -fa default -fs 10 -xrm "XTerm*selectToClipboard: true" -e gdb -ex run --args'],
+            # prefix=['xterm -fa default -fs 10 -hold -e'],
+            # prefix=prefix_tmp,
+            output='screen',
+            emulate_tty=True,
+        )
+        ld.add_action(node_bridge)
 
     return ld
