@@ -14,7 +14,7 @@
     n_hor: 9 # number of mpc steps
     dt: 0.1 # step time of the mpc
     path_vel_min: 4.5 # minimum discretization velocity of the path
-    path_vel_max: 8.5 # maximum discretization velocity of the path
+    path_vel_max: 6.0 # maximum discretization velocity of the path
     sens_dist: 0.001 # sensitivity of the distance when computing the path_vel in GetVoxelVelocityLimit 1/exp(sens_dist*dist); the smaller this sensitivity, the slower we get
     sens_pot: 0.01 # sensitivity of the potential when computing the path_vel in GetVoxelVelocityLimit (1 - 1/exp(sens_pot*pot)); the smaller this sensitivity, the faster we get
     path_vel_dec: 0.0 # deceleration of discretization velocity of the path after every time step; stuff works better without it at 5.0 path_vel

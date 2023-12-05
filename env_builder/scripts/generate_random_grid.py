@@ -51,7 +51,7 @@ def write_config_file(filename, voxel_grid, seed):
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
     config_filename = "env_long_config"
-    seed = 1 
+    seed = 2 
 
     # Voxel Grid parameters
     dimension = [100.0, 30.0, 15.0]  # meters
@@ -80,10 +80,10 @@ if __name__ == "__main__":
     wall.add_square_gap(rel_origin=(12.5, 4), length=2, height=2)
     wall.add_square_gap(rel_origin=(15, 12.5), length=2, height=2)
     wall.add_square_gap(rel_origin=(17.5, 3), length=2, height=1.5)
-    wall.add_square_gap(rel_origin=(20, 8.5), length=3, height=1)
+    wall.add_square_gap(rel_origin=(20, 8.5), length=3, height=1.5)
     wall.add_square_gap(rel_origin=(22.5, 12), length=1.5, height=2)
     wall.add_square_gap(rel_origin=(25, 5.5), length=2, height=2)
-    wall.add_square_gap(rel_origin=(27, 4), length=1, height=2)
+    wall.add_square_gap(rel_origin=(27, 4), length=1.2, height=2)
     wall.add_square_gap(rel_origin=(30, 7), length=2, height=2)
     wall.add_square_gap(rel_origin=(32.5, 12), length=3, height=1.5)
     wall.add_square_gap(rel_origin=(35, 9), length=2, height=2)
@@ -98,7 +98,8 @@ if __name__ == "__main__":
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
                                              radius_range=[0.1, 0.1],
                                              height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
-    # rd_volume_cylinders.add_random_loops(50,
+    # rd_volume_cylinders = RandomVolume([[3, 0, -6], [90, 30, 15]], seed)
+    # rd_volume_cylinders.add_random_loops(75,
     #                                      angle_range=[0, np.pi/2],
     #                                      radius_range=[1.5, 2],
     #                                      thickness_range=[0.3, 0.3])
