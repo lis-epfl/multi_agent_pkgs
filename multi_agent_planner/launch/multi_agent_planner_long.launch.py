@@ -29,7 +29,7 @@ def generate_launch_description():
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
     free_grid = False
-    save_stats = False
+    save_stats = True
     # use_mapping_util = False
 
     # calculate equidistant start and goal positions on the same line

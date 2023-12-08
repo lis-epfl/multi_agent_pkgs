@@ -862,7 +862,7 @@ Visualization Manager:
     - Alpha: 0.20000000298023224
       BoundColor: 255; 0; 0
       Class: decomp_rviz_plugins/PolyhedronArray
-      Enabled: true
+      Enabled: false
       MeshColor: 0; 170; 255
       Name: PolyhedronArray
       Scale: 0.10000000149011612
@@ -874,7 +874,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_3/polyhedra
-      Value: true
+      Value: false
       VsColor: 0; 255; 0
       VsScale: 1
     - Alpha: 1
@@ -2367,16 +2367,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 55.870330810546875
+      Distance: 38.074066162109375
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 21.573060989379883
-        Y: 15.068868637084961
-        Z: 6.6846466064453125
+        X: 81.96150970458984
+        Y: 17.178089141845703
+        Z: 11.671259880065918
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -2385,7 +2385,7 @@ Visualization Manager:
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 4.713310241699219
+      Yaw: 4.67332124710083
     Saved: ~
 Window Geometry:
   Displays:

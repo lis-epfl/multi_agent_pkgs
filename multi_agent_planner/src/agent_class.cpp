@@ -932,7 +932,7 @@ void Agent::SolveOptimizationProblem() {
     }
 
     at_least_1_poly_constr_grb_.push_back(model_.addConstr(
-        sum_bin == 1, "at_least_1_pol_t_" + ::std::to_string(i)));
+        sum_bin == 1, "at_least_1_poly_" + ::std::to_string(i)));
   }
 
   // add the objective function to the model
@@ -1198,7 +1198,7 @@ void Agent::GenerateSafeCorridor() {
   // define vector for visualization of the polyhedra
   vec_E<Polyhedron3D> poly_vec_new;
 
-  // keep the polyhedra that where used in the previous optimization for the
+  // keep the polyhedra that were used in the previous optimization for the
   // trajectory generation for feasibility guarantees
   if (poly_const_vec_.size() > 0) {
     // insert poly and seed

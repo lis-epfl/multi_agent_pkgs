@@ -414,6 +414,7 @@ void MapBuilder::DisplayCompTime(::std::vector<double> &comp_time) {
   double max_t = 0;
   double min_t = 1e10;
   double sum_t = 0;
+  double std_dev_t = 0;
   for (int i = 0; i < int(comp_time.size()); i++) {
     if (comp_time[i] > max_t) {
       max_t = comp_time[i];
@@ -423,7 +424,16 @@ void MapBuilder::DisplayCompTime(::std::vector<double> &comp_time) {
     }
     sum_t = sum_t + comp_time[i];
   }
-  ::std::cout << ::std::endl << "mean: " << sum_t / comp_time.size();
+  double mean_t = sum_t / comp_time.size();
+
+  for (int i = 0; i < int(comp_time.size()); i++) {
+    std_dev_t += (comp_time[i] - mean_t) * (comp_time[i] - mean_t);
+  }
+  std_dev_t = std_dev_t / comp_time.size();
+  std_dev_t = sqrt(std_dev_t);
+
+  ::std::cout << ::std::endl << "mean: " << mean_t;
+  ::std::cout << ::std::endl << "std_dev: " << std_dev_t;
   ::std::cout << ::std::endl << "max: " << max_t;
   ::std::cout << ::std::endl << "min: " << min_t << ::std::endl;
 }

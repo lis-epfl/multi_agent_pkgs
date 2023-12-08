@@ -29,7 +29,7 @@ def generate_launch_description():
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
     # use_mapping_util = False
-    free_grid = False
+    free_grid = True
     save_stats = True
 
     # calculate equidistant start and goal positions on the circle
