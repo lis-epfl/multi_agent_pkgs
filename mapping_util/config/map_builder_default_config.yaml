@@ -6,5 +6,5 @@
     world_frame: "world" # frame for publishing the voxel grid in
     free_grid: True # if true set all non occupied voxels to free
     inflation_dist: 0.3 # all voxels within that distance to an occupied voxel are set as occupied
-    potential_dist: 0.6 # all voxels within that distance to an occupied voxel are set as a potential field
+    potential_dist: 1.5 # all voxels within that distance to an occupied voxel are set as a potential field
     potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max

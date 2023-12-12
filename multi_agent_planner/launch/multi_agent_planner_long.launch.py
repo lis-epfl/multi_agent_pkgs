@@ -28,7 +28,7 @@ def generate_launch_description():
     dist_start_goal = 96.01 
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
-    free_grid = False
+    free_grid = True
     save_stats = True
     # use_mapping_util = False
 
