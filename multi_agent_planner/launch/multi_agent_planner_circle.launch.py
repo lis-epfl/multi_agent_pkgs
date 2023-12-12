@@ -28,7 +28,6 @@ def generate_launch_description():
     n_rob = 10 
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
-    # use_mapping_util = False
     free_grid = True
     save_stats = True
 

@@ -32,7 +32,8 @@ def generate_launch_description():
     z_plane = 1.0 
     goal_offset = (7, 0, 0)
     use_mapping_util = True
-    # use_mapping_util = False
+    free_grid = True
+    save_stats = True
 
     # set start and goal positions manually
     start_positions = [(-3.09, 1.47, z_plane),
@@ -56,7 +57,8 @@ def generate_launch_description():
     if use_mapping_util:
         for i in range(n_rob):
             params_sub = [{'id': i},
-                          {'voxel_grid_range': voxel_grid_range}]
+                          {'voxel_grid_range': voxel_grid_range},
+                          {'free_grid': free_grid}]
             node_mapper = Node(
                 package='mapping_util',
                 executable='map_builder_node',
@@ -80,7 +82,8 @@ def generate_launch_description():
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
                       {'voxel_grid_update_period': 10.0},
-                      {'voxel_grid_range': voxel_grid_range}]
+                      {'voxel_grid_range': voxel_grid_range},
+                      {'save_stats': save_stats}]
         # if i == 8:
         #     params_sub = params_sub + [{'planner_verbose': True}]
         node_planner = Node(
