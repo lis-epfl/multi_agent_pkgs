@@ -62,13 +62,13 @@ if __name__ == "__main__":
     voxel_grid = VoxelGrid(dimension, voxel_size, origin)
 
     # Add shapes : Cylinder, Loop, Walls or Random volumes # # Create a cylinder 
-    cylinder = Cylinder((-1.3, 1.9, 0.75), (0.0, 0.0, 1.0), 0.225, 1.75) 
+    cylinder = Cylinder((-1.3, 1.9, 0.75), (0.0, 0.0, 1.0), 0.225, 1.65) 
     voxel_grid.add_shape(cylinder) 
-    cylinder = Cylinder((-1.3, -1.75, 0.75), (0.0, 0.0, 1.0), 0.225, 1.75) 
+    cylinder = Cylinder((-1.3, -1.75, 0.75), (0.0, 0.0, 1.0), 0.225, 1.65) 
     voxel_grid.add_shape(cylinder) 
-    cylinder = Cylinder((1.8, 1.9, 0.75), (0.0, 0.0, 1.0), 0.225, 1.75) 
+    cylinder = Cylinder((1.8, 1.9, 0.75), (0.0, 0.0, 1.0), 0.225, 1.65) 
     voxel_grid.add_shape(cylinder)
-    cylinder = Cylinder((1.8, -1.75, 0.75), (0.0, 0.0, 1.0), 0.225, 1.75)
+    cylinder = Cylinder((1.8, -1.75, 0.75), (0.0, 0.0, 1.0), 0.225, 1.65)
     voxel_grid.add_shape(cylinder)
 
     # # Create a loop
@@ -76,14 +76,14 @@ if __name__ == "__main__":
     # voxel_grid.add_shape(loop)
 
     # # Create a wall
-    wall = Wall(origin=(0.25, -0.75, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
-        0.0, 0.0, 1.0), length = 0.4, width=0.4, height=0.4)  # Two directions to define the plane
+    wall = Wall(origin=(0.3, -0.625, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
+        0.0, 0.0, 1.0), length = 0.4, width=0.2, height=0.4)  # Two directions to define the plane
     voxel_grid.add_shape(wall)
-    wall = Wall(origin=(0.25, -0.35, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
-        0.0, 0.0, 1.0), length = 0.7, width=0.4, height=1.3)  # Two directions to define the plane
+    wall = Wall(origin=(0.3, -0.075, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
+        0.0, 0.0, 1.0), length = 0.7, width=0.2, height=1.5)  # Two directions to define the plane
     voxel_grid.add_shape(wall) # height = 65, 115, 92 length = 40, 70, 47 width = 40
-    wall = Wall(origin=(0.25, 0.35, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
-        0.0, 0.0, 1.0), length = 0.47, width=0.4, height=0.2)  # Two directions to define the plane
+    wall = Wall(origin=(0.3, 0.67, 0.0), direction1=(0.0, 1.0, 0.0), direction2=(
+        0.0, 0.0, 1.0), length = 0.47, width=0.2, height=0.6)  # Two directions to define the plane
     voxel_grid.add_shape(wall) # height = 65, 115, 92 length = 40, 70, 47 width = 40
 
     # # Or with loops (can do both in same volume)

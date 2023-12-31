@@ -289,14 +289,14 @@ void Agent::UpdatePath() {
 
     // to be uncommented only when doing the going back and forth of the
     // crazyfly test
-    int period = int(int(state_hist_.size()) / 115);
-    /* if (period % 2 == 1 && period < 6) { */
+    int period = int(int(state_hist_.size()) / 135);
+    /* if (period % 2 == 1 && period < 4) { */
     /*   goal[0] = state_ini_[0]; */
     /*   goal[1] = state_ini_[1]; */
     /*   goal[2] = state_ini_[2]; */
     /* } */
 
-    /* if (period > 5){ */
+    /* if (period > 3){ */
     /*   goal[0] = state_ini_[0]; */
     /*   goal[1] = state_ini_[1]; */
     /*   goal[2] = 0; */
