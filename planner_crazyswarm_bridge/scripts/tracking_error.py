@@ -14,7 +14,9 @@ class TFDifferenceCalculator(Node):
         self.cf_frame = 'cf2'
 
         self.agent_2_ready = False
+        self.cf_ready = False
         self.last_agent_transform = None
+        self.last_cf_transform = None
         self.distances = []
 
         # Subscribe to the TF messages
@@ -30,13 +32,8 @@ class TFDifferenceCalculator(Node):
         for transform in tf_msg.transforms:
             # Check if the transform is between the desired frames
             if transform.child_frame_id == self.agent_frame:
-                # Save the transform for agent_2
-                self.last_agent_transform = transform
                 self.agent_2_ready = True
-
-            elif transform.child_frame_id == self.cf_frame:
-                # Check if the agent_2 transform is ready
-                if self.agent_2_ready:
+                if self.cf_ready:
                     # Calculate distance
                     x_diff = self.last_agent_transform.transform.translation.x - \
                         transform.transform.translation.x
@@ -55,8 +52,15 @@ class TFDifferenceCalculator(Node):
                     self.get_logger().info('Standard Deviation: %.3f meters' % np.std(self.distances))
                     self.get_logger().info('Maximum Distance: %.3f meters' % np.max(self.distances))
 
-                    # Reset the flag after processing the transform
+                    self.cf_read = False
+
+            elif transform.child_frame_id == self.cf_frame:
+                # Check if the agent_2 transform is ready
+                if self.agent_2_ready:
+                    # set cf_ready to true
+                    self.cf_ready = True
                     self.agent_2_ready = False
+                    self.last_agent_transform = transform
 
 
 def main(args=None):
