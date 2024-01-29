@@ -485,9 +485,6 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // free unknown voxels and rebuild the potential field free unknown voxels
   vg_util.FreeUnknown();
 
-  // create new potential field
-  vg_util.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_);
-
   // define start and goal
   Vec3f start(start_arg[0], start_arg[1], start_arg[2]);
   Vec3f goal(goal_arg[0], goal_arg[1], goal_arg[2]);
@@ -2115,8 +2112,6 @@ void Agent::DeclareRosParameters() {
   declare_parameter("goal", ::std::vector<double>(3, 0.0));
   declare_parameter("planner_verbose", false);
   declare_parameter("save_stats", false);
-  declare_parameter("dmp_pot_rad", 0.0);
-  declare_parameter("dmp_pot_pow", 4.0);
   declare_parameter("dmp_search_rad", 0.0);
   declare_parameter("dmp_n_it", 1);
   declare_parameter("path_planning_period", 0.1);
@@ -2172,8 +2167,6 @@ void Agent::InitializeRosParameters() {
   goal_curr_ = get_parameter("goal").as_double_array();
   planner_verbose_ = get_parameter("planner_verbose").as_bool();
   save_stats_ = get_parameter("save_stats").as_bool();
-  dmp_pot_rad_ = get_parameter("dmp_pot_rad").as_double();
-  dmp_pot_pow_ = get_parameter("dmp_pot_pow").as_double();
   dmp_search_rad_ = get_parameter("dmp_search_rad").as_double();
   dmp_n_it_ = get_parameter("dmp_n_it").as_int();
   path_planning_period_ = get_parameter("path_planning_period").as_double();
@@ -2191,12 +2184,6 @@ void Agent::VoxelGridResponseCallback(
     voxel_grid_ =
         ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
     voxel_grid_mtx_.unlock();
-
-    // inflate obstacles
-    /* voxel_grid_.InflateObstacles(path_infl_dist_); */
-
-    // create potential field
-    /* voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_); */
 
     voxel_grid_ready_ = true;
     if (planner_verbose_) {
@@ -2245,12 +2232,6 @@ void Agent::MappingUtilVoxelGridCallback(
   voxel_grid_ =
       ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
   voxel_grid_mtx_.unlock();
-
-  // inflate obstacles
-  /* voxel_grid_.InflateObstacles(path_infl_dist_); */
-
-  // create potential field
-  /* voxel_grid_.CreatePotentialField(dmp_pot_rad_, dmp_pot_pow_); */
 
   voxel_grid_ready_ = true;
   if (planner_verbose_) {

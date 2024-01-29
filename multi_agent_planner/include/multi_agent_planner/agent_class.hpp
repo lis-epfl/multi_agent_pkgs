@@ -364,10 +364,6 @@ private:
   bool save_stats_;
 
   /* path planner params */
-  // distance map planner potential radius
-  double dmp_pot_rad_;
-  // distance map planner potential power
-  double dmp_pot_pow_;
   // distance map planner search radius
   double dmp_search_rad_;
   // number of iteration for the dmp planner

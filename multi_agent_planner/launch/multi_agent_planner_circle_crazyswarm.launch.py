@@ -29,20 +29,20 @@ def generate_launch_description():
     # define params
     voxel_grid_range = [12.0, 12.0, 5.0]
     # height of the start and the goal
-    z_plane = 1.25 
-    goal_offset = (6, 0, 0)
+    z_plane = 1.0 
+    goal_offset = (5.7, 0, 0)
     use_mapping_util = True
     free_grid = True
     save_stats = True
 
     # set start and goal positions manually
-    start_positions = [(-3.39, 1.47, z_plane),
-                       (-3.407, 0.57, z_plane),
-                       (-3.43, -0.32, z_plane),
-                       (-3.44, -1.22, z_plane),
-                       (-2.66, 1.03, z_plane),
-                       (-2.68, 0.1, z_plane),
-                       (-2.68, -0.77, z_plane)]
+    start_positions = [(-3.09, 1.32, z_plane),
+                       (-3.107, 0.42, z_plane),
+                       (-3.13, -0.47, z_plane),
+                       (-3.14, -1.37, z_plane),
+                       (-2.36, 0.88, z_plane),
+                       (-2.38, -0.05, z_plane),
+                       (-2.38, -0.92, z_plane)]
 
     goal_positions = []
     for x, y, z in start_positions:

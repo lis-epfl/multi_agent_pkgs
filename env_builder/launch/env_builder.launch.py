@@ -11,8 +11,8 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('env_builder'),
         'config',
-        'env_default_config.yaml'
-        # 'env_long_config.yaml'
+        # 'env_default_config.yaml'
+        'env_long_config.yaml'
         # 'env_loop_config.yaml'
         # 'env_new_config.yaml'
         # 'env_crazyflie_config.yaml'

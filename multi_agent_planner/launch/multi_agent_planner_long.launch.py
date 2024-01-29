@@ -21,14 +21,14 @@ def generate_launch_description():
     )
 
     # define params
-    n_rob = 10 
+    n_rob = 5 
     dist_between_rob = 2.01
     x_pos = 0
     z_pos = 0 
     dist_start_goal = 96.01 
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
-    free_grid = True
+    free_grid = False
     save_stats = True
     # use_mapping_util = False
 

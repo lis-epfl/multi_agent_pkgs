@@ -156,12 +156,6 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       // save wall computation time
       raycast_comp_time_.push_back(raycast_time_wall_ms);
 
-      // then go through all the voxels that are free, and set those
-      // that have at least one unknown neighbours as also unknown because due
-      // to the inflation they can become occupied; if it has one occupied
-      // neighbour or all its neighbours are free; it is kept as free
-      SetUncertainToUnknown(vg);
-
       // then merge the voxel grid and set voxel_grid_curr_ to the new merged
       // grid
       t_start_wall = ::std::chrono::high_resolution_clock::now();
@@ -184,11 +178,18 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       voxel_grid_curr_ = vg;
     }
 
-    // inflate obstacles
+    // voxel grid to publish
     auto voxel_grid = voxel_grid_curr_;
+
+    // inflate the unknown voxels by the inflation distance to guarantee safety
+    // when computing the safe corridor;
+    SetUncertainToUnknown(voxel_grid);
+
+    // inflate obstacles
     voxel_grid.InflateObstacles(inflation_dist_);
 
-    // create potential field
+    // create potential field in only free voxels (unknown voxels are kept
+    // unknown)
     voxel_grid.CreatePotentialField(potential_dist_, potential_pow_);
 
     // create the final grid message and publish it
@@ -303,46 +304,28 @@ void MapBuilder::SetUncertainToUnknown(::voxel_grid_util::VoxelGrid &vg) {
   // create final grid
   ::voxel_grid_util::VoxelGrid vg_final = vg;
 
-  // first get the cube size around the free voxel to check if an unknown voxel
-  // exists
+  // first get the cube size around the unknonw voxel to set as unknown
   int cube_size = ceil(inflation_dist_ / vg.GetVoxSize());
 
   // get the params
   ::Eigen::Vector3i dim = vg.GetDim();
 
-  // go through every point in the voxel grid and if its free check its
-  // neighbourhood
+  // go through every point in the voxel grid and if its unknown, set all the
+  // voxels around it to unknown unless they are occupied
   for (int i = cube_size; i < dim[0] - cube_size; i++) {
     for (int j = cube_size; j < dim[1] - cube_size; j++) {
       for (int k = cube_size; k < dim[2] - cube_size; k++) {
         ::Eigen::Vector3i pt(i, j, k);
-        if (vg.IsFree(pt)) {
-          bool keep_free = true;
-          bool end_loops = false;
+        if (vg.IsUnknown(pt)) {
           for (int i_new = -cube_size; i_new <= cube_size; i_new++) {
             for (int j_new = -cube_size; j_new <= cube_size; j_new++) {
               for (int k_new = -cube_size; k_new <= cube_size; k_new++) {
                 ::Eigen::Vector3i neighbour(i + i_new, j + j_new, k + k_new);
-                if (vg.IsOccupied(neighbour)) {
-                  end_loops = true;
-                  break;
-                }
-                if (vg.IsUnknown(neighbour)) {
-                  keep_free = false;
-                  end_loops = true;
-                  break;
+                if (!vg.IsOccupied(neighbour)) {
+                  vg_final.SetVoxelInt(neighbour, ENV_BUILDER_UNK);
                 }
               }
-              if (end_loops) {
-                break;
-              }
             }
-            if (end_loops) {
-              break;
-            }
-          }
-          if (!keep_free) {
-            vg_final.SetVoxelInt(pt, ENV_BUILDER_UNK);
           }
         }
       }
