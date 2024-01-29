@@ -4,3 +4,4 @@ ros2 service call cf2/land crazyflie_interfaces/srv/Land "{height: 0.0, duration
 ros2 service call cf3/land crazyflie_interfaces/srv/Land "{height: 0.0, duration: {sec: 5}}"
 ros2 service call cf4/land crazyflie_interfaces/srv/Land "{height: 0.0, duration: {sec: 5}}"
 ros2 service call cf5/land crazyflie_interfaces/srv/Land "{height: 0.0, duration: {sec: 5}}"
+ros2 service call cf6/land crazyflie_interfaces/srv/Land "{height: 0.0, duration: {sec: 5}}"

@@ -9,10 +9,10 @@ env_builder_node:
     multi_obst_position: true # if false, generate positions randomly using normal distribution, if true use position_obst_multi to define the position of each obstacle
     range_obst: [40.0, 40.0, 0.0] # area on the map where to generate obstacles, always positive numbers to move it around, use the origin_obst variable
     origin_obst: [0.0, 0.0, 0.0] # origin of the area where we generate the obstacles
-    size_obst: [0.5, 0.5, 6.0] # height x width x length
+    size_obst: [0.3, 0.3, 6.0] # height x width x length
     n_obst: 450 # number of obstacles (only used if we want to use random generation, otherwise the number of obstacles is inferred from position_obst_vec)
     rand_seed: 1 # seed for the random generation of the obstacles
-    size_obst_vec: [8.0, 0.5, 15.0, 
+    size_obst_vec: [0.3, 0.3, 6.0, 
                     8.0, 0.5, 15.0, 
                     8.0, 0.5, 3.0, 
                     8.0, 0.5, 3.0] # x,y,z size of each obstacle concatenated

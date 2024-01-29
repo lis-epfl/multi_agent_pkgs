@@ -23,8 +23,8 @@
     n_it_decomp: 42 # number of decomposition iterations for polyhedra generation
     use_cvx: true # if true, use our method for polyhedra generation, otherwise use Liu's method
     use_cvx_new: false # if true, use our new method (not the original method); it's better if it's false
-    drone_radius: 0.5 # the drone radius
-    path_infl_size: 1 # amount of voxels to inflate the obstacles with for path finding; not yet implemented (in addition to the inflation for the drone radius) 
+    drone_radius: 0.3 # the drone radius
+    drone_z_offset: 0.6 # the drone radius
     com_latency: 0.0 # communication latency in seconds
     r_u: 0.01 # control weights
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
@@ -34,14 +34,16 @@
     min_acc_z: -3.0 # minimum acceleration in the z direction
     max_acc_xy: 3.0 # maximum acceleration in the x and y directions
     min_acc_xy: -3.0 # minimum acceleration in the x and y directions
-    max_jerk: 5.0 # maximum jerk
+    max_jerk: 4.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
     goal: [42.15, 42.15, 1.5] # goal of the agent
     planner_verbose: false # if true display planner diagnostics
-    save_stats: true # if true, save computation time statistics and state history
+    save_stats: false # if true, save computation time statistics and state history
     gurobi_verbose: false # if true, display gurobi optimization information  
-    dmp_pot_rad: 1.2 # potential radius of the distance map planner (dmp)
-    dmp_search_rad: 1.2 # search radius for the dmp
+    path_infl_dist: 0.3 # distance to inflate the obstacles with when doing path finding
+    dmp_search_rad: 0.6 # search radius for the dmp
+    dmp_pot_rad: 0.6 # search radius for the dmp
+    dmp_pot_pow: 4.0 # potential power
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.2 # path planning period

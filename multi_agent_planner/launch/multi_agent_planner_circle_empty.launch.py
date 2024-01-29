@@ -12,6 +12,7 @@ def generate_launch_description():
         get_package_share_directory('multi_agent_planner'),
         'config',
         'agent_default_config.yaml'
+        # 'agent_agile_config.yaml'
         # 'agent_crazyflie_config.yaml'
     )
 
@@ -28,6 +29,7 @@ def generate_launch_description():
     n_rob = 10 
     use_mapping_util = True
     # use_mapping_util = False
+    save_stats = True
 
     # calculate equidistant start and goal positions on the circle
     start_positions = []
@@ -64,7 +66,8 @@ def generate_launch_description():
                       {'id': i},
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
-                      {'voxel_grid_update_period': 10.0}]
+                      {'voxel_grid_update_period': 10.0},
+                      {'save_stats': save_stats}]
         node_planner = Node(
             package='multi_agent_planner',
             executable='agent_node',

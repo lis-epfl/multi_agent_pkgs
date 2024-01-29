@@ -22,13 +22,14 @@ def generate_launch_description():
     )
 
     # define params
-    radius = 20  
-    center_x = 21.11
-    center_y = 21.11
-    n_rob = 10 
-    voxel_grid_range = [18.0, 18.0, 6.0]
+    radius = 22  
+    center_x = 18 
+    center_y = 15
+    n_rob = 6 
+    voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
-    # use_mapping_util = False
+    free_grid = True
+    save_stats = True
 
     # calculate equidistant start and goal positions on the circle
     start_positions = []
@@ -46,7 +47,8 @@ def generate_launch_description():
     if use_mapping_util:
         for i in range(n_rob):
             params_sub = [{'id': i},
-                          {'voxel_grid_range': voxel_grid_range}]
+                          {'voxel_grid_range': voxel_grid_range},
+                          {'free_grid': free_grid}]
             node_mapper = Node(
                 package='mapping_util',
                 executable='map_builder_node',
@@ -70,7 +72,8 @@ def generate_launch_description():
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
                       {'voxel_grid_update_period': 10.0},
-                      {'voxel_grid_range': voxel_grid_range}]
+                      {'voxel_grid_range': voxel_grid_range},
+                      {'save_stats': save_stats}]
         # if i == 8:
         #     params_sub = params_sub + [{'planner_verbose': True}]
         node_planner = Node(

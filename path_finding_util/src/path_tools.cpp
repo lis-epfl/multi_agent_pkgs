@@ -121,9 +121,14 @@ bool IsLineClear(const Eigen::Vector3d &pt_start, const Eigen::Vector3d &pt_end,
   // first check if both the start and the end points are inside the grid
   Eigen::Vector3i pt_start_i(pt_start(0), pt_start(1), pt_start(2));
   Eigen::Vector3i pt_end_i(pt_end(0), pt_end(1), pt_end(2));
-  if (!vg.IsInsideGridInt(pt_start_i) || !vg.IsInsideGridInt(pt_end_i)) {
-    std::cout << "Warning: the start or end of the ray is outside the grid"
-              << std::endl;
+  if (!vg.IsInsideGridInt(pt_start_i)) {
+    std::cout << "Warning: start of the ray is outside the grid"
+              << pt_start_i.transpose() << std::endl;
+  }
+
+  if (!vg.IsInsideGridInt(pt_end_i)) {
+    std::cout << "Warning: end of the ray is outside the grid"
+              << pt_end_i.transpose() << std::endl;
   }
 
   // Raycast and check if the final position is the same as the collision_pt
@@ -149,9 +154,14 @@ bool IsLineClear(const Eigen::Vector3d &pt_start, const Eigen::Vector3d &pt_end,
   // first check if both the start and the end points are inside the grid
   Eigen::Vector3i pt_start_i(pt_start(0), pt_start(1), pt_start(2));
   Eigen::Vector3i pt_end_i(pt_end(0), pt_end(1), pt_end(2));
-  if (!vg.IsInsideGridInt(pt_start_i) || !vg.IsInsideGridInt(pt_end_i)) {
-    std::cout << "Warning: the start or end of the ray is outside the grid"
-              << std::endl;
+  if (!vg.IsInsideGridInt(pt_start_i)) {
+    std::cout << "Warning: start of the ray is outside the grid "
+              << pt_start_i.transpose() << std::endl;
+  }
+
+  if (!vg.IsInsideGridInt(pt_end_i)) {
+    std::cout << "Warning: end of the ray is outside the grid "
+              << pt_end_i.transpose() << std::endl;
   }
 
   // Raycast and check if the final position is the same as the collision_pt

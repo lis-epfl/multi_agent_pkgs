@@ -21,13 +21,15 @@ def generate_launch_description():
     )
 
     # define params
-    n_rob = 10
+    n_rob = 5 
     dist_between_rob = 2.01
     x_pos = 0
     z_pos = 0 
     dist_start_goal = 96.01 
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
+    free_grid = False
+    save_stats = True
     # use_mapping_util = False
 
     # calculate equidistant start and goal positions on the same line
@@ -44,7 +46,8 @@ def generate_launch_description():
     if use_mapping_util:
         for i in range(n_rob):
             params_sub = [{'id': i},
-                          {'voxel_grid_range': voxel_grid_range}]
+                          {'voxel_grid_range': voxel_grid_range},
+                          {'free_grid': free_grid}]
             node_mapper = Node(
                 package='mapping_util',
                 executable='map_builder_node',
@@ -62,7 +65,8 @@ def generate_launch_description():
                       {'n_rob': n_rob},
                       {'id': i},
                       {'goal': list(goal_positions[i])},
-                      {'use_mapping_util': use_mapping_util}]
+                      {'use_mapping_util': use_mapping_util},
+                      {'save_stats': save_stats}]
         node = Node(
             package='multi_agent_planner',
             executable='agent_node',

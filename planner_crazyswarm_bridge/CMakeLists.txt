@@ -33,6 +33,11 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  scripts/tracking_error.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION include/${PROJECT_NAME}
 )

@@ -109,6 +109,12 @@ Agent::Agent()
         ::std::bind(&Agent::GetVoxelGridAsync, this));
   }
 
+  // create a goal subscriber
+  ::std::string goal_sub_topic = "agent_" + ::std::to_string(id_) + "/goal";
+  goal_sub_ = create_subscription<::geometry_msgs::msg::PointStamped>(
+      goal_sub_topic, 10,
+      ::std::bind(&Agent::GoalCallback, this, ::std::placeholders::_1));
+
   // launch path planning thread
   path_planning_thread_ = ::std::thread(&Agent::UpdatePath, this);
 
@@ -273,16 +279,34 @@ void Agent::UpdatePath() {
 
     // copy voxel grid before modifications
     voxel_grid_mtx_.lock();
-    ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-        voxel_grid_stamped_.voxel_grid;
+    ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
     voxel_grid_mtx_.unlock();
-    ::voxel_grid_util::VoxelGrid vg_util =
-        ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
     // mutex for the goal variable
     goal_mtx_.lock();
     ::std::vector<double> goal = goal_curr_;
     goal_mtx_.unlock();
+
+    // to be uncommented only when doing the going back and forth of the
+    // crazyfly test
+    /* int period = int(int(state_hist_.size()) / 135); */
+    /* if (period % 2 == 1 && period < 4) { */
+    /*   goal[0] = state_ini_[0]; */
+    /*   goal[1] = state_ini_[1]; */
+    /*   goal[2] = state_ini_[2]; */
+    /* } */
+
+    /* if (period > 3){ */
+    /*   goal[0] = state_ini_[0]; */
+    /*   goal[1] = state_ini_[1]; */
+    /*   goal[2] = 0; */
+    /* } */
+
+    /* if (period >= 1){ */
+    /*   goal[0] = goal_curr_[0]; */
+    /*   goal[1] = goal_curr_[1]; */
+    /*   goal[2] = 0; */
+    /* } */
 
     // mutex for the reference trajectory to get the start variable
     traj_ref_mtx_.lock();
@@ -292,9 +316,11 @@ void Agent::UpdatePath() {
     // get the start from the current reference trajectory
     ::std::vector<double> start;
     if (reset_path_ && !traj_curr_.empty()) {
-      for (auto pt : traj_curr_) {
-        if (vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2])) <=
-            100) {
+      for (int i = 0; i < traj_curr_.size(); i++) {
+        auto pt = traj_curr_[i];
+        int8_t voxel_val =
+            vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2]));
+        if (voxel_val != ENV_BUILDER_OCC && voxel_val != ENV_BUILDER_UNK) {
           start = {pt[0], pt[1], pt[2]};
           break;
         }
@@ -309,7 +335,11 @@ void Agent::UpdatePath() {
       int i = 0;
       while (vg_util.GetVoxelGlobal(
                  ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
-                                   traj_ref_curr[i][2])) != ENV_BUILDER_OCC) {
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_OCC &&
+             vg_util.GetVoxelGlobal(
+                 ::Eigen::Vector3d(traj_ref_curr[i][0], traj_ref_curr[i][1],
+                                   traj_ref_curr[i][2])) != ENV_BUILDER_UNK &&
+             i < traj_ref_points_to_keep_) {
         traj_tmp.push_back(traj_ref_curr[i]);
         i = ::std::min(int(traj_ref_curr.size()) - 1, i + 1);
         if (i == int(traj_ref_curr.size()) - 1)
@@ -324,16 +354,16 @@ void Agent::UpdatePath() {
     }
 
     // find intermediate goal
-    ::std::vector<double> goal_inter = GetIntermediateGoal(goal, voxel_grid);
+    ::std::vector<double> goal_inter = GetIntermediateGoal(goal, vg_util);
 
     // clear boundary voxels
-    ClearBoundary(voxel_grid);
+    ClearBoundary(vg_util);
 
     // plan a path
     ::std::vector<::std::vector<double>> path_out;
     bool valid_path;
     // plan using original method
-    valid_path = GetPath(start, goal_inter, voxel_grid, path_out);
+    valid_path = GetPath(start, goal_inter, vg_util, path_out);
     // plan using new method
     /* valid_path = GetPathNew(start, goal_inter, vg_util, path_out); */
 
@@ -446,10 +476,14 @@ bool Agent::GetPathNew(::std::vector<double> &start_arg,
 
 bool Agent::GetPath(::std::vector<double> &start_arg,
                     ::std::vector<double> &goal_arg,
-                    ::env_builder_msgs::msg::VoxelGrid &voxel_grid,
+                    ::voxel_grid_util::VoxelGrid &vg_util,
                     ::std::vector<::std::vector<double>> &path_out) {
   // set the namespace
   using namespace JPS;
+
+  // TODO: make the voxel grid so it can also be used here without the need to
+  // free unknown voxels and rebuild the potential field free unknown voxels
+  vg_util.FreeUnknown();
 
   // define start and goal
   Vec3f start(start_arg[0], start_arg[1], start_arg[2]);
@@ -460,11 +494,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // store map in map_util
   ::std::shared_ptr<VoxelMapUtil> map_util = ::std::make_shared<VoxelMapUtil>();
-  Vec3f origin(voxel_grid.origin[0], voxel_grid.origin[1],
-               voxel_grid.origin[2]);
-  Vec3i dim(voxel_grid.dimension[0], voxel_grid.dimension[1],
-            voxel_grid.dimension[2]);
-  map_util->setMap(origin, dim, voxel_grid.data, voxel_grid.voxel_size);
+  map_util->setMap(vg_util.GetOrigin(), vg_util.GetDim(), vg_util.GetData(),
+                   vg_util.GetVoxSize());
 
   if (planner_verbose_) {
     RCLCPP_INFO(get_logger(), "map_util time: %.3fs",
@@ -488,8 +519,8 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // set up dmp planner
   t_start = clock();
   IterativeDMPlanner3D dmp(planner_verbose_);
-  dmp.setPotentialRadius(Vec3f(dmp_pot_rad_, dmp_pot_rad_, dmp_pot_rad_));
   dmp.setSearchRadius(Vec3f(dmp_search_rad_, dmp_search_rad_, dmp_search_rad_));
+  dmp.setCweight(1);
   dmp.setMap(map_util, start);
 
   // run dmp planner
@@ -518,15 +549,13 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // first check if the path isn't empty or the planning didn't fail
   if (!(valid_jps && valid_dist && path_dmp_final.size() >= 1)) {
-    ::std::cout << int(valid_jps) << " " << int(valid_dist) << " "
-                << path_dmp_final.size() << ::std::endl;
+    ::std::cout << "valid_jps: " << int(valid_jps)
+                << " valid_dmp: " << int(valid_dist)
+                << " path dmp size: " << path_dmp_final.size() << ::std::endl;
     return false;
   }
 
   // shorten the path
-  ::voxel_grid_util::VoxelGrid vg_util(origin, dim, voxel_grid.voxel_size,
-                                       dmp.getMap());
-
   ::std::vector<::std::vector<double>> path_out_final =
       ::path_finding_util::ShortenDMPPath(path_dmp_final, vg_util);
   path_out = path_out_final;
@@ -558,15 +587,9 @@ void Agent::CheckReferenceTrajIncrement() {
    the first point of the reference trajectory */
   // first get voxel grid
   voxel_grid_mtx_.lock();
-  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-      voxel_grid_stamped_.voxel_grid;
+  ::voxel_grid_util::VoxelGrid vg = voxel_grid_;
   voxel_grid_mtx_.unlock();
-  ::Eigen::Vector3d origin(voxel_grid.origin[0], voxel_grid.origin[1],
-                           voxel_grid.origin[2]);
-  ::Eigen::Vector3i dimension(voxel_grid.dimension[0], voxel_grid.dimension[1],
-                              voxel_grid.dimension[2]);
-  ::voxel_grid_util::VoxelGrid vg(origin, dimension, voxel_grid.voxel_size,
-                                  voxel_grid.data);
+
   // transform point to voxel coordinates
   ::Eigen::Vector3d traj_1(traj_curr_[1][0], traj_curr_[1][1],
                            traj_curr_[1][2]);
@@ -786,7 +809,7 @@ void Agent::PublishCurrentPosition() {
   marker_msg.pose.orientation.w = 1.0;
   marker_msg.scale.x = 2 * drone_radius_;
   marker_msg.scale.y = 2 * drone_radius_;
-  marker_msg.scale.z = 2 * drone_radius_;
+  marker_msg.scale.z = 2 * drone_z_offset_;
   marker_msg.color.a = 1;
   marker_msg.color.r = 0.0;
   marker_msg.color.g = 1.0;
@@ -906,7 +929,7 @@ void Agent::SolveOptimizationProblem() {
     }
 
     at_least_1_poly_constr_grb_.push_back(model_.addConstr(
-        sum_bin >= 1, "at_least_1_pol_t_" + ::std::to_string(i)));
+        sum_bin == 1, "at_least_1_poly_" + ::std::to_string(i)));
   }
 
   // add the objective function to the model
@@ -1080,9 +1103,21 @@ void Agent::GenerateTimeAwareSafeCorridor() {
 
         // get the midpoint between the positions
         Vec3f pos_mid = (pos_curr + pos_other) / 2;
+
+        // compute the distance using the the ellipsoid function
+        double angle_x_axis =
+            M_PI_2 - ::std::fabs(::std::acos(plane_normal_normalized(2)));
+        double t_val = ::std::atan(drone_radius_ / drone_z_offset_ *
+                                   ::std::tan(angle_x_axis));
+        double x_val = drone_radius_ * ::std::cos(t_val);
+        double y_val = drone_z_offset_ * ::std::sin(t_val);
+        double safety_dist = ::std::hypot(x_val, y_val);
+
+        // compute the plane point
         Vec3f plane_point =
-            pos_mid - ::std::min(2 * drone_radius_, plane_normal.norm()) / 2 *
+            pos_mid - ::std::min(2 * safety_dist, plane_normal.norm()) / 2 *
                           plane_normal_normalized;
+
         /* get the final normal vector after adding the perturbations */
         // first set up the perturbation vectors
         Vec3f up(0, 0, 1);
@@ -1160,7 +1195,7 @@ void Agent::GenerateSafeCorridor() {
   // define vector for visualization of the polyhedra
   vec_E<Polyhedron3D> poly_vec_new;
 
-  // keep the polyhedra that where used in the previous optimization for the
+  // keep the polyhedra that were used in the previous optimization for the
   // trajectory generation for feasibility guarantees
   if (poly_const_vec_.size() > 0) {
     // insert poly and seed
@@ -1176,14 +1211,14 @@ void Agent::GenerateSafeCorridor() {
   // generate new polyhedra using the global path until poly_hor_
   // first copy the global path and add the current state to it
   path_mtx_.lock();
-  ::std::vector<::std::vector<double>> path_curr = path_curr_;
+  ::std::deque<::std::vector<double>> path_curr(path_curr_.begin(),
+                                                path_curr_.end());
   path_mtx_.unlock();
-  path_curr.push_back({state_curr_[0], state_curr_[1], state_curr_[2]});
+  path_curr.push_front({state_curr_[0], state_curr_[1], state_curr_[2]});
 
   // then copy the voxel grid used for the generation
   voxel_grid_mtx_.lock();
-  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-      voxel_grid_stamped_.voxel_grid;
+  ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
   voxel_grid_mtx_.unlock();
 
   // then find segment outside the polyhedra in our poly_const_vec_new by
@@ -1195,12 +1230,17 @@ void Agent::GenerateSafeCorridor() {
   // these polyhedra
   int path_idx = 1;
   ::Eigen::Vector3d curr_pt(path_curr[0][0], path_curr[0][1], path_curr[0][2]);
+  // set the unknown voxels to occupied before generating the Safe Corridor
+  vg_util.OccupyUnknown();
+  double voxel_size = vg_util.GetVoxSize();
+  ::Eigen::Vector3d origin = vg_util.GetOrigin();
+  ::Eigen::Vector3i dim = vg_util.GetDim();
   while (n_poly < poly_hor_) {
     ::Eigen::Vector3d next_pt(path_curr[path_idx][0], path_curr[path_idx][1],
                               path_curr[path_idx][2]);
     ::Eigen::Vector3d diff = (next_pt - curr_pt);
     double dist_next = diff.norm();
-    double samp_dist = voxel_grid.voxel_size / 10;
+    double samp_dist = voxel_size / 10;
     if (dist_next > samp_dist) {
       // sample the next point along the line between the current point
       // and the next point
@@ -1235,20 +1275,16 @@ void Agent::GenerateSafeCorridor() {
     }
 
     // check if current point is not a previous seed
-    Vec3i seed(
-        int((curr_pt[0] - voxel_grid.origin[0]) / voxel_grid.voxel_size),
-        int((curr_pt[1] - voxel_grid.origin[1]) / voxel_grid.voxel_size),
-        int((curr_pt[2] - voxel_grid.origin[2]) / voxel_grid.voxel_size));
+    Vec3i seed(int((curr_pt[0] - origin[0]) / voxel_size),
+               int((curr_pt[1] - origin[1]) / voxel_size),
+               int((curr_pt[2] - origin[2]) / voxel_size));
 
     bool is_previous_seed = false;
     for (int i = 0; i < int(poly_seeds_new.size()); i++) {
       Vec3f seed_world;
-      seed_world[0] = seed[0] * voxel_grid.voxel_size +
-                      voxel_grid.voxel_size / 2 + voxel_grid.origin[0];
-      seed_world[1] = seed[1] * voxel_grid.voxel_size +
-                      voxel_grid.voxel_size / 2 + voxel_grid.origin[1];
-      seed_world[2] = seed[2] * voxel_grid.voxel_size +
-                      voxel_grid.voxel_size / 2 + voxel_grid.origin[2];
+      seed_world[0] = seed[0] * voxel_size + voxel_size / 2 + origin[0];
+      seed_world[1] = seed[1] * voxel_size + voxel_size / 2 + origin[1];
+      seed_world[2] = seed[2] * voxel_size + voxel_size / 2 + origin[2];
       if (seed_world(0) == poly_seeds_new[i][0] &&
           seed_world(1) == poly_seeds_new[i][1] &&
           seed_world(2) == poly_seeds_new[i][2]) {
@@ -1264,34 +1300,41 @@ void Agent::GenerateSafeCorridor() {
     }
 
     /* generate polyhedron */
+    bool use_cvx = use_cvx_;
+    bool use_cvx_new = use_cvx_new_;
+    // first check if the seed is constrained from a given direction
+    if ((vg_util.IsOccupied(::Eigen::Vector3i(seed[0] - 1, seed[1], seed[2])) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0] + 1, seed[1], seed[2]))) ||
+        (vg_util.IsOccupied(::Eigen::Vector3i(seed[0], seed[1] - 1, seed[2])) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0], seed[1] + 1, seed[2]))) ||
+        (vg_util.IsOccupied(::Eigen::Vector3i(seed[0], seed[1], seed[2] - 1)) &&
+         vg_util.IsOccupied(
+             ::Eigen::Vector3i(seed[0], seed[1], seed[2] + 1)))) {
+      use_cvx_new = true;
+    }
     // first push seed into the new poly_seeds list
     Vec3f seed_world;
-    seed_world[0] = seed[0] * voxel_grid.voxel_size +
-                    voxel_grid.voxel_size / 2 + voxel_grid.origin[0];
-    seed_world[1] = seed[1] * voxel_grid.voxel_size +
-                    voxel_grid.voxel_size / 2 + voxel_grid.origin[1];
-    seed_world[2] = seed[2] * voxel_grid.voxel_size +
-                    voxel_grid.voxel_size / 2 + voxel_grid.origin[2];
+    seed_world[0] = seed[0] * voxel_size + voxel_size / 2 + origin[0];
+    seed_world[1] = seed[1] * voxel_size + voxel_size / 2 + origin[1];
+    seed_world[2] = seed[2] * voxel_size + voxel_size / 2 + origin[2];
     poly_seeds_new.push_back({seed_world(0), seed_world(1), seed_world(2)});
     // use point as seed for polyhedra
     // check if use voxel grid based method or liu's method
     Polyhedron3D poly_new;
-    ::std::vector<int8_t> &grid_data = voxel_grid.data;
-    if (use_cvx_) {
-      Vec3i dim(voxel_grid.dimension[0], voxel_grid.dimension[1],
-                voxel_grid.dimension[2]);
-      Vec3f origin(voxel_grid.origin[0], voxel_grid.origin[1],
-                   voxel_grid.origin[2]);
-      if (use_cvx_new_) {
+    ::std::vector<int8_t> grid_data = vg_util.GetData();
+    if (use_cvx) {
+      if (use_cvx_new) {
         // if use new method
         poly_new = ::convex_decomp_lib::GetPolyOcta3DNew(
-            seed, grid_data, dim, n_it_decomp_, voxel_grid.voxel_size, -n_poly,
+            seed, grid_data, dim, n_it_decomp_, voxel_size, -(n_poly + 1),
             origin);
       } else {
         // use original method
-        poly_new = ::convex_decomp_lib::GetPolyOcta3D(
-            seed, grid_data, dim, n_it_decomp_, voxel_grid.voxel_size, -n_poly,
-            origin);
+        poly_new = ::convex_decomp_lib::GetPolyOcta3D(seed, grid_data, dim,
+                                                      n_it_decomp_, voxel_size,
+                                                      -(n_poly + 1), origin);
       }
     } else {
       // TODO (but not essential) : use liu's method
@@ -1397,6 +1440,10 @@ void Agent::GenerateReferenceTrajectory() {
   // sample from the path the reference trajectory
   ::std::vector<::std::vector<double>> traj_ref_curr = SamplePath(path_samp);
 
+  // keep only the points that are in the free voxels
+  // TODO: test performance with and without
+  traj_ref_curr = KeepOnlyFreeReference(traj_ref_curr);
+
   // generate velocity reference from the reference path
   if (traj_ref_curr.size() > 1) {
     double v_x, v_y, v_z;
@@ -1430,11 +1477,8 @@ void Agent::GenerateReferenceTrajectory() {
 Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
   // get voxel grid to check if line is clear when removing zigzags
   voxel_grid_mtx_.lock();
-  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-      voxel_grid_stamped_.voxel_grid;
+  ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
   voxel_grid_mtx_.unlock();
-  ::voxel_grid_util::VoxelGrid vg_util =
-      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
   // remove unnecessary points that are in the middle of 2 segments forming an
   // acute angle
@@ -1538,6 +1582,36 @@ Agent::SamplePath(::std::vector<::std::vector<double>> &path) {
   return traj_ref;
 }
 
+::std::vector<::std::vector<double>>
+Agent::KeepOnlyFreeReference(::std::vector<::std::vector<double>> &traj_ref) {
+  // get the latest version of the voxel grid
+  voxel_grid_mtx_.lock();
+  ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
+  voxel_grid_mtx_.unlock();
+
+  // declare the final reference trajectory
+  ::std::vector<::std::vector<double>> traj_ref_final;
+  traj_ref_final.push_back(traj_ref.front());
+
+  // go through each point of the trajectory and check if it is free; once we
+  // encounter an unknown voxel then take the last free point and duplicate it
+  // until the end
+  for (int i = 1; i < traj_ref.size(); i++) {
+    ::std::vector<double> pt = traj_ref[i];
+    int8_t vox_value =
+        vg_util.GetVoxelGlobal(::Eigen::Vector3d(pt[0], pt[1], pt[2]));
+    if (vox_value == ENV_BUILDER_UNK || vox_value == ENV_BUILDER_OCC) {
+      // we fill the rest of traj_ref_final with the last point
+      for (int j = i; j < traj_ref.size(); j++) {
+        traj_ref_final.push_back(traj_ref_final.back());
+      }
+      return traj_ref_final;
+    }
+    traj_ref_final.push_back(pt);
+  }
+  return traj_ref_final;
+}
+
 double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
   // define path velocity
   double path_vel = path_vel_max_;
@@ -1547,11 +1621,8 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
 
   // get the latest version of the voxel grid
   voxel_grid_mtx_.lock();
-  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-      voxel_grid_stamped_.voxel_grid;
+  ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
   voxel_grid_mtx_.unlock();
-  ::voxel_grid_util::VoxelGrid vg_util =
-      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid);
 
   // go through each segment of the path and compute its limit on the path
   for (int i = 0; i < int(path.size()) - 1; i++) {
@@ -1577,6 +1648,10 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
         // voxel to the start point
         /* ::std::cout << "visited pt: " << pt.transpose() << ::std::endl; */
         double voxel_val = double(vg_util.GetVoxelInt(pt));
+        if (voxel_val == -1) {
+          voxel_val = 100;
+        }
+
         double dist_start = (path_start - pt).norm() * vg_util.GetVoxSize();
 
         // use the heuristic to compute the path velocity limit
@@ -1616,17 +1691,18 @@ double Agent::GetVelocityLimit(double occ_val, double dist_start) {
   return path_vel;
 }
 
-void Agent::ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
-  int x_max = voxel_grid.dimension[0] - 1;
-  int y_max = voxel_grid.dimension[1] - 1;
-  int z_max = voxel_grid.dimension[2] - 1;
+void Agent::ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid) {
+  ::Eigen::Vector3i dim = voxel_grid.GetDim();
+  int x_max = dim[0] - 1;
+  int y_max = dim[1] - 1;
+  int z_max = dim[2] - 1;
 
   for (int j = 0; j <= y_max; j++) {
     for (int k = 0; k <= z_max; k++) {
       ::Eigen::Vector3i pt_1(0, j, k);
       ::Eigen::Vector3i pt_2(x_max, j, k);
-      voxel_grid.data[GetPointIdx(pt_1, voxel_grid.dimension)] = 0;
-      voxel_grid.data[GetPointIdx(pt_2, voxel_grid.dimension)] = 0;
+      voxel_grid.SetVoxelInt(pt_1, 0);
+      voxel_grid.SetVoxelInt(pt_2, 0);
     }
   }
 
@@ -1634,8 +1710,8 @@ void Agent::ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
     for (int k = 0; k <= z_max; k++) {
       ::Eigen::Vector3i pt_1(i, 0, k);
       ::Eigen::Vector3i pt_2(i, y_max, k);
-      voxel_grid.data[GetPointIdx(pt_1, voxel_grid.dimension)] = 0;
-      voxel_grid.data[GetPointIdx(pt_2, voxel_grid.dimension)] = 0;
+      voxel_grid.SetVoxelInt(pt_1, 0);
+      voxel_grid.SetVoxelInt(pt_2, 0);
     }
   }
 
@@ -1646,22 +1722,10 @@ void Agent::ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
   /*   for (int j = 0; j < y_max; j++) { */
   /*     ::Eigen::Vector3i pt_1(i, j, 0); */
   /*     ::Eigen::Vector3i pt_2(i, j, z_max); */
-  /*     voxel_grid.data[GetPointIdx(pt_1, voxel_grid.dimension)] = 0; */
-  /*     voxel_grid.data[GetPointIdx(pt_2, voxel_grid.dimension)] = 0; */
+  /*     voxel_grid.SetVoxelInt(pt_1, 0); */
+  /*     voxel_grid.SetVoxelInt(pt_2, 0); */
   /*   } */
   /* } */
-}
-
-int Agent::GetPointIdx(::Eigen::Vector3i &pt,
-                       ::std::array<uint32_t, 3> &dim_u) {
-  ::Eigen::Vector3i dim(dim_u[0], dim_u[1], dim_u[2]);
-  if (pt(0) < dim[0] && pt(1) < dim[1] && pt(2) < dim[2] && pt(0) >= 0 &&
-      pt(1) >= 0 && pt(2) >= 0) {
-    int idx_pt = pt(0) + pt(1) * dim[0] + pt(2) * dim[0] * dim[1];
-    return idx_pt;
-  } else {
-    return -1;
-  }
 }
 
 double Agent::GetDistanceSquared(::std::vector<double> &p1,
@@ -1701,17 +1765,19 @@ double Agent::DotProduct(::std::vector<double> &v_1,
 
 ::std::vector<double>
 Agent::GetIntermediateGoal(::std::vector<double> &goal,
-                           ::env_builder_msgs::msg::VoxelGrid &voxel_grid) {
+                           ::voxel_grid_util::VoxelGrid &voxel_grid) {
   // get goal position in grid frame
   ::Eigen::Vector3d goal_grid_frame;
-  goal_grid_frame[0] = goal[0] - voxel_grid.origin[0];
-  goal_grid_frame[1] = goal[1] - voxel_grid.origin[1];
-  goal_grid_frame[2] = goal[2] - voxel_grid.origin[2];
+  ::Eigen::Vector3d origin = voxel_grid.GetOrigin();
+  goal_grid_frame[0] = goal[0] - origin[0];
+  goal_grid_frame[1] = goal[1] - origin[1];
+  goal_grid_frame[2] = goal[2] - origin[2];
 
   // get real dimension of the grid
-  ::Eigen::Vector3d dim_real(voxel_grid.dimension[0] * voxel_grid.voxel_size,
-                             voxel_grid.dimension[1] * voxel_grid.voxel_size,
-                             voxel_grid.dimension[2] * voxel_grid.voxel_size);
+  ::Eigen::Vector3i dim = voxel_grid.GetDim();
+  double voxel_size = voxel_grid.GetVoxSize();
+  ::Eigen::Vector3d dim_real(dim[0] * voxel_size, dim[1] * voxel_size,
+                             dim[2] * voxel_size);
 
   // first test if goal is inside the grid
   if (goal_grid_frame(0) < dim_real(0) && goal_grid_frame(0) > 0 &&
@@ -1721,34 +1787,30 @@ Agent::GetIntermediateGoal(::std::vector<double> &goal,
   } else {
     // if the goal is outside the grid find the intersection with the grid
     // first find the center of the grid
-    ::Eigen::Vector3d center_pos(
-        (voxel_grid.dimension[0] / 2 + 0.5) * voxel_grid.voxel_size,
-        (voxel_grid.dimension[1] / 2 + 0.5) * voxel_grid.voxel_size,
-        (voxel_grid.dimension[2] / 2 + 0.5) * voxel_grid.voxel_size);
+    ::Eigen::Vector3d center_pos((dim[0] / 2 + 0.5) * voxel_size,
+                                 (dim[1] / 2 + 0.5) * voxel_size,
+                                 (dim[2] / 2 + 0.5) * voxel_size);
 
     // then find the direction between the center of the grid and the goal
     ::Eigen::Vector3d ray_dir = goal_grid_frame - center_pos;
     ray_dir.normalize();
 
     // get intersection with the edge of the grid
-    double min_dim =
-        voxel_grid.voxel_size *
-        ::std::min(std::min(voxel_grid.dimension[0], voxel_grid.dimension[1]),
-                   voxel_grid.dimension[2]);
+    double min_dim = voxel_size * ::std::min(std::min(dim[0], dim[1]), dim[2]);
     ::Eigen::Vector3d sampled_point = center_pos + (min_dim / 2) * ray_dir;
     int n_it = 0;
     while (n_it < 100) {
       if (sampled_point(0) > dim_real(0) || sampled_point(1) > dim_real(1) ||
           sampled_point(2) > dim_real(2) || sampled_point(0) < 0 ||
           sampled_point(1) < 0 || sampled_point(2) < 0) {
-        sampled_point = sampled_point - 0.5 * voxel_grid.voxel_size * ray_dir;
+        sampled_point = sampled_point - 0.5 * voxel_size * ray_dir;
         break;
       }
-      sampled_point = sampled_point + 0.5 * voxel_grid.voxel_size * ray_dir;
+      sampled_point = sampled_point + 0.5 * voxel_size * ray_dir;
     }
-    ::std::vector<double> goal_fin = {sampled_point[0] + voxel_grid.origin[0],
-                                      sampled_point[1] + voxel_grid.origin[1],
-                                      sampled_point[2] + voxel_grid.origin[2]};
+    ::std::vector<double> goal_fin = {sampled_point[0] + origin[0],
+                                      sampled_point[1] + origin[1],
+                                      sampled_point[2] + origin[2]};
     return goal_fin;
   }
 }
@@ -2024,6 +2086,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("sens_dist", 1.0);
   declare_parameter("sens_pot", 1.0);
   declare_parameter("path_vel_dec", 0.1);
+  declare_parameter("traj_ref_points_to_keep", 10);
   declare_parameter("rk4", false);
   declare_parameter("step_plan", 1);
   declare_parameter("thresh_dist", 0.2);
@@ -2031,8 +2094,9 @@ void Agent::DeclareRosParameters() {
   declare_parameter("n_it_decomp", 42);
   declare_parameter("use_cvx", true);
   declare_parameter("use_cvx_new", false);
-  declare_parameter("drone_radius", 0.2);
-  declare_parameter("path_infl_size", 1);
+  declare_parameter("drone_radius", 0.3);
+  declare_parameter("drone_z_offset", 0.3);
+  declare_parameter("path_infl_dist", 0.3);
   declare_parameter("com_latency", 0.0);
   declare_parameter("r_u", 0.01);
   declare_parameter("r_x", ::std::vector<double>(9, 0.0));
@@ -2077,6 +2141,7 @@ void Agent::InitializeRosParameters() {
   sens_dist_ = get_parameter("sens_dist").as_double();
   sens_pot_ = get_parameter("sens_pot").as_double();
   path_vel_dec_ = get_parameter("path_vel_dec").as_double();
+  traj_ref_points_to_keep_ = get_parameter("traj_ref_points_to_keep").as_int();
   rk4_ = get_parameter("rk4").as_bool();
   step_plan_ = get_parameter("step_plan").as_int();
   thresh_dist_ = get_parameter("thresh_dist").as_double();
@@ -2085,7 +2150,8 @@ void Agent::InitializeRosParameters() {
   use_cvx_ = get_parameter("use_cvx").as_bool();
   use_cvx_new_ = get_parameter("use_cvx_new").as_bool();
   drone_radius_ = get_parameter("drone_radius").as_double();
-  path_infl_size_ = get_parameter("path_infl_size").as_int();
+  drone_z_offset_ = get_parameter("drone_z_offset").as_double();
+  path_infl_dist_ = get_parameter("path_infl_dist").as_double();
   com_latency_ = get_parameter("com_latency").as_double();
   r_u_ = get_parameter("r_u").as_double();
   r_x_ = get_parameter("r_x").as_double_array();
@@ -2112,10 +2178,13 @@ void Agent::VoxelGridResponseCallback(
   auto status = future.wait_for(::std::chrono::seconds(1));
   if (status == ::std::future_status::ready) {
     // store the data descriptions
+    ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped =
+        future.get()->voxel_grid_stamped;
     voxel_grid_mtx_.lock();
-    voxel_grid_stamped_ = future.get()->voxel_grid_stamped;
-    dmp_pot_rad_ = voxel_grid_stamped_.voxel_grid.potential_dist;
+    voxel_grid_ =
+        ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
     voxel_grid_mtx_.unlock();
+
     voxel_grid_ready_ = true;
     if (planner_verbose_) {
       RCLCPP_INFO(get_logger(), "Received the voxel grid");
@@ -2158,9 +2227,12 @@ void Agent::GetVoxelGridAsync() {
 
 void Agent::MappingUtilVoxelGridCallback(
     const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg) {
+  ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped = *vg_msg;
   voxel_grid_mtx_.lock();
-  voxel_grid_stamped_ = *vg_msg;
+  voxel_grid_ =
+      ::mapping_util::ConvertVGMsgToVGUtil(voxel_grid_stamped.voxel_grid);
   voxel_grid_mtx_.unlock();
+
   voxel_grid_ready_ = true;
   if (planner_verbose_) {
     RCLCPP_INFO(get_logger(), "Received the voxel grid");
@@ -2170,19 +2242,26 @@ void Agent::MappingUtilVoxelGridCallback(
   }
 }
 
+void Agent::GoalCallback(
+    const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg) {
+  goal_mtx_.lock();
+  goal_curr_.resize(3);
+  goal_curr_[0] = goal_msg->point.x;
+  goal_curr_[1] = goal_msg->point.y;
+  goal_curr_[2] = goal_msg->point.z;
+  goal_mtx_.unlock();
+}
+
 void Agent::PublishVoxelGrid() {
   // copy voxel grid before reading and publishing it
   voxel_grid_mtx_.lock();
-  ::env_builder_msgs::msg::VoxelGrid voxel_grid =
-      voxel_grid_stamped_.voxel_grid;
+  ::voxel_grid_util::VoxelGrid vg_util = voxel_grid_;
   voxel_grid_mtx_.unlock();
 
-  ::Eigen::Vector3d origin_vg(voxel_grid.origin[0], voxel_grid.origin[1],
-                              voxel_grid.origin[2]);
-  ::std::array<uint32_t, 3> dim_vg = {voxel_grid.dimension[0],
-                                      voxel_grid.dimension[1],
-                                      voxel_grid.dimension[2]};
-  double vox_size = voxel_grid.voxel_size;
+  ::Eigen::Vector3d origin_vg = vg_util.GetOrigin();
+  ::Eigen::Vector3i dim_vg = vg_util.GetDim();
+  double vox_size = vg_util.GetVoxSize();
+
   ::pcl::PointCloud<::pcl::PointXYZ> cloud_occ;
   ::pcl::PointCloud<::pcl::PointXYZ> cloud_unk;
   ::pcl::PointCloud<::pcl::PointXYZ> cloud_free;
@@ -2192,16 +2271,15 @@ void Agent::PublishVoxelGrid() {
     for (int j = 0; j < int(dim_vg[1]); j++) {
       for (int k = 0; k < int(dim_vg[2]); k++) {
         ::Eigen::Vector3i pt_i(i, j, k);
-        int idx = GetPointIdx(pt_i, dim_vg);
         ::pcl::PointXYZ pt;
         pt.x = i * vox_size + vox_size / 2 + origin_vg[0];
         pt.y = j * vox_size + vox_size / 2 + origin_vg[1];
         pt.z = k * vox_size + vox_size / 2 + origin_vg[2];
-        if (int(voxel_grid.data[idx]) > 0) {
+        if (vg_util.GetVoxelInt(pt_i) == ENV_BUILDER_OCC) {
           cloud_occ.points.push_back(pt);
-        } else if (int(voxel_grid.data[idx]) == 0) {
+        } else if (vg_util.GetVoxelInt(pt_i) >= ENV_BUILDER_FREE) {
           cloud_free.points.push_back(pt);
-        } else {
+        } else if (vg_util.GetVoxelInt(pt_i) == ENV_BUILDER_UNK) {
           cloud_unk.points.push_back(pt);
         }
       }

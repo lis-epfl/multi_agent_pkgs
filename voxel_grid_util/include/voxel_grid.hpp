@@ -28,6 +28,11 @@ public:
   typedef std::shared_ptr<const VoxelGrid> ConstPtr;
 
   /**
+   * @ brief empty constructor
+   */
+  VoxelGrid();
+
+  /**
    * @brief constructor of the voxel grid
    * @param origin: origin of the voxel grid
    * @param dim: dimension of the voxel grid in number of voxels
@@ -148,6 +153,12 @@ public:
   // test if voxel is free in the grid frame
   bool IsFree(const Eigen::Vector3d coord_int) const;
 
+  // test if voxel is free in the grid frame
+  bool IsUnknown(const Eigen::Vector3i coord_int) const;
+
+  // test if voxel is free in the grid frame
+  bool IsUnknown(const Eigen::Vector3d coord_int) const;
+
   // inflate the obstacle of the grid by a certain distance
   void InflateObstacles(double inflation_dist);
 
@@ -157,6 +168,15 @@ public:
   // create mask to get the voxels whithin a certain distance of a center voxel
   ::std::vector<::std::pair<::Eigen::Vector3i, int8_t>>
   CreateMask(double mask_dist, double pow);
+
+  // set unknonw voxels to free
+  void FreeUnknown();
+
+  // set unknonw voxels to free
+  void OccupyUnknown();
+
+  // set unknonw voxels to custom value
+  void SetUnknown(int8_t val);
 
   // get origin
   Eigen::Vector3d GetOrigin() const;
@@ -194,7 +214,8 @@ private:
 };
 
 /**
- * @brief add a cuboid obstacle to the grid where the center is in the local grid frame
+ * @brief add a cuboid obstacle to the grid where the center is in the local
+ * grid frame
  * @param center_obs: obstacle center
  *        dim_obs: obstacle dimensions
  */
@@ -208,6 +229,15 @@ void AddObstacle(VoxelGrid::Ptr vg, const Eigen::Vector3d &center_obs,
  */
 void WriteGridToFile(VoxelGrid::Ptr vg, std::string file_name);
 
+/**
+ * @brief merge 2 voxel grids
+ * @detail take an old and a new voxel grid an merge them
+ * @param vg_old old voxel grid
+ * @param vg_new new voxel grid
+ * @return vg_final final voxel grid that has the same origin as the new voxel
+ * grid
+ */
+VoxelGrid MergeVoxelGrids(const VoxelGrid &vg_old, const VoxelGrid &vg_new);
 } // namespace voxel_grid_util
 
 #endif // VOXEL_GRID_UTIL_VOXEL_GRID_H_

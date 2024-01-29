@@ -4,6 +4,8 @@
 #include <vector>
 
 namespace voxel_grid_util {
+VoxelGrid::VoxelGrid() {}
+
 VoxelGrid::VoxelGrid(Eigen::Vector3d &origin, Eigen::Vector3i &dim,
                      double vox_size, bool free)
     : origin_(origin), dim_(dim), vox_size_(vox_size) {
@@ -173,6 +175,20 @@ bool VoxelGrid::IsFree(const Eigen::Vector3d coord_int) const {
     return false;
 }
 
+bool VoxelGrid::IsUnknown(const Eigen::Vector3i coord_int) const {
+  if (GetVoxelInt(coord_int) == ENV_BUILDER_UNK)
+    return true;
+  else
+    return false;
+}
+
+bool VoxelGrid::IsUnknown(const Eigen::Vector3d coord_int) const {
+  if (GetVoxelInt(coord_int) == ENV_BUILDER_UNK)
+    return true;
+  else
+    return false;
+}
+
 ::std::vector<::std::pair<::Eigen::Vector3i, int8_t>>
 VoxelGrid::CreateMask(double mask_dist, double pow) {
   // create mask variable
@@ -205,6 +221,29 @@ VoxelGrid::CreateMask(double mask_dist, double pow) {
   }
 
   return mask;
+}
+
+void VoxelGrid::FreeUnknown() {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = ENV_BUILDER_FREE;
+    }
+  }
+}
+
+void VoxelGrid::OccupyUnknown() {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = ENV_BUILDER_OCC;
+    }
+  }
+}
+void VoxelGrid::SetUnknown(int8_t val) {
+  for (int i = 0; i < data_.size(); i++) {
+    if (data_[i] == ENV_BUILDER_UNK) {
+      data_[i] = val;
+    }
+  }
 }
 
 void VoxelGrid::InflateObstacles(double inflation_dist) {
@@ -247,7 +286,9 @@ void VoxelGrid::CreatePotentialField(double potential_dist, int pow) {
         if (IsOccupied(n)) {
           for (const auto &it : mask) {
             const ::Eigen::Vector3i new_n = n + it.first;
-            SetVoxelInt(new_n, ::std::max(GetVoxelInt(new_n), it.second));
+            if (GetVoxelInt(new_n) != ENV_BUILDER_UNK) {
+              SetVoxelInt(new_n, ::std::max(GetVoxelInt(new_n), it.second));
+            }
           }
         }
       }
@@ -310,4 +351,5 @@ void WriteGridToFile(VoxelGrid::Ptr vg, std::string file_name) {
   }
   my_file.close();
 }
+
 } // namespace voxel_grid_util

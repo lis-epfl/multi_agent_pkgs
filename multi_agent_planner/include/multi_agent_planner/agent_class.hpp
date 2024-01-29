@@ -20,6 +20,7 @@
 
 #include <decomp_geometry/polyhedron.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 #include <jps_planner/distance_map_planner/distance_map_planner.h>
 #include <jps_planner/jps_planner/jps_planner.h>
 #include <nav_msgs/msg/path.hpp>
@@ -29,6 +30,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <deque>
 #include <fstream>
 #include <mutex>
 #include <pthread.h>
@@ -72,7 +74,7 @@ private:
   // if no path has been found
   bool GetPath(::std::vector<double> &start_arg,
                ::std::vector<double> &goal_arg,
-               ::env_builder_msgs::msg::VoxelGrid &voxel_grid,
+               ::voxel_grid_util::VoxelGrid &voxel_grid,
                ::std::vector<::std::vector<double>> &path_out);
 
   // get path using our path finding library
@@ -114,6 +116,11 @@ private:
   ::std::vector<std::vector<double>>
   SamplePath(::std::vector<::std::vector<double>> &path);
 
+  // keep only the points that are in the free voxels for the reference
+  // trajectory
+  ::std::vector<::std::vector<double>>
+  KeepOnlyFreeReference(::std::vector<::std::vector<double>> &traj_ref);
+
   // compute the path sampling velocity based on path and the voxel
   // grid/potential field; if the path is close to the obstacles, we wanna
   // sample it at slower speeds
@@ -135,13 +142,10 @@ private:
   // get intermediate goal
   ::std::vector<double>
   GetIntermediateGoal(::std::vector<double> &goal,
-                      ::env_builder_msgs::msg::VoxelGrid &voxel_grid);
+                      ::voxel_grid_util::VoxelGrid &voxel_grid);
 
   // clear the borders of the voxel grid
-  void ClearBoundary(::env_builder_msgs::msg::VoxelGrid &voxel_grid);
-
-  // get index of voxel grid from its dimensions
-  int GetPointIdx(::Eigen::Vector3i &pt, ::std::array<uint32_t, 3> &dim);
+  void ClearBoundary(::voxel_grid_util::VoxelGrid &voxel_grid);
 
   // get distance squared between vectors
   double GetDistanceSquared(::std::vector<double> &p1,
@@ -203,6 +207,10 @@ private:
   void MappingUtilVoxelGridCallback(
       const ::env_builder_msgs::msg::VoxelGridStamped::SharedPtr vg_msg);
 
+  // current goal subscriber callback
+  void
+  GoalCallback(const ::geometry_msgs::msg::PointStamped::SharedPtr goal_msg);
+
   // function to execute on the shutdown of the node to save computation time
   // statistics
   void OnShutdown();
@@ -220,8 +228,8 @@ private:
   // voxel grid client
   ::rclcpp::Client<::env_builder_msgs::srv::GetVoxelGrid>::SharedPtr
       voxel_grid_client_;
-  // voxel grid message
-  ::env_builder_msgs::msg::VoxelGridStamped voxel_grid_stamped_;
+  // voxel grid
+  ::voxel_grid_util::VoxelGrid voxel_grid_;
   // timers for voxel service delay
   ::rclcpp::TimerBase::SharedPtr voxel_service_timer_;
   // whether to use the mapping_util or env_builder
@@ -264,6 +272,9 @@ private:
       voxel_grid_sub_;
   // transform broadcaster to broadcast the position
   ::std::shared_ptr<::tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  // subscriber to get the most recent goal
+  ::rclcpp::Subscription<::geometry_msgs::msg::PointStamped>::SharedPtr
+      goal_sub_;
 
   /* planner parameters */
   // topic prefix name that we add the id to it before publishing
@@ -294,6 +305,8 @@ private:
   double sens_pot_;
   // sampling path velocity deceleration
   double path_vel_dec_;
+  // number of reference trajectory points to keep at the next iteration
+  int traj_ref_points_to_keep_;
   // whether to use rk4 or euler for integration
   bool rk4_;
   // how many time steps (MPC) between planning iterations
@@ -314,13 +327,15 @@ private:
   // (only if use_cvx_ is true) use the original polyhedron decomposition
   // method or the new shape aware one (the new one may not be as good)
   bool use_cvx_new_;
-  // drone safety radius
+  // drone safety radius (a value in the ellipse function)
   double drone_radius_;
+  // drone z offset for downwash (b value in the ellipse function)
+  double drone_z_offset_;
   // obstacles inflation (in number of voxels) for path finding (this is in
   // addition to the inflation to account for the drone radius); used to allow
   // for better polyhedron generation in tight corridors in case there is no
   // adaptation for the grid resolution in tight spaces
-  int path_infl_size_;
+  double path_infl_dist_;
   // communication latency in seconds (added artificially)
   double com_latency_;
   // MPC control weight
@@ -349,8 +364,6 @@ private:
   bool save_stats_;
 
   /* path planner params */
-  // distance map planner potential radius
-  double dmp_pot_rad_;
   // distance map planner search radius
   double dmp_search_rad_;
   // number of iteration for the dmp planner

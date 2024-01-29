@@ -27,37 +27,29 @@ def generate_launch_description():
     )
 
     # define params
-    voxel_grid_range = [18.0, 18.0, 6.0]
+    voxel_grid_range = [12.0, 12.0, 5.0]
     # height of the start and the goal
-    z_plane = 1.01
+    z_plane = 1.0 
+    goal_offset = (5.7, 0, 0)
     use_mapping_util = True
-    # use_mapping_util = False
+    free_grid = True
+    save_stats = True
 
     # set start and goal positions manually
-    # start_positions = [(-2.22, -0.15, z_plane),
-    #                    (1.81, -0.18, z_plane),
-    #                    (0.81, 1.73, z_plane),
-    #                    (-1.21, -1.73, z_plane),
-    #                    (-1.21, 1.73, z_plane),
-    #                    (0.81, -1.73, z_plane)]
-    # goal_positions = [start_positions[1], start_positions[0], start_positions[3],
-    #                   start_positions[2], start_positions[5], start_positions[4]]
-    # start_positions = [(2, 0, z_plane),
-    #                    (0.62, 1.9, z_plane),
-    #                    (-1.62, 1.17, z_plane),
-    #                    (-1.17, -1.62, z_plane),
-    #                    (0.62, -1.9, z_plane)]
-    # goal_positions = [(-2.0, 0.0, z_plane),
-    #                   (-0.62, -1.9, z_plane),
-    #                   (1.62, -1.17, z_plane),
-    #                   (1.17, 1.62, z_plane),
-    #                   (-0.62, 1.9, z_plane)]
-    start_positions = [(2.0, 0.0, z_plane),
-                       (0.0, 2.0, z_plane),
-                       (-2.0, 0.0, z_plane),
-                       (0.0, -2.0, z_plane)]
-    goal_positions = [start_positions[2], start_positions[3],
-                      start_positions[0], start_positions[1]]
+    start_positions = [(-3.09, 1.32, z_plane),
+                       (-3.107, 0.42, z_plane),
+                       (-3.13, -0.47, z_plane),
+                       (-3.14, -1.37, z_plane),
+                       (-2.36, 0.88, z_plane),
+                       (-2.38, -0.05, z_plane),
+                       (-2.38, -0.92, z_plane)]
+
+    goal_positions = []
+    for x, y, z in start_positions:
+        goal_x = x + goal_offset[0]
+        goal_y = y + goal_offset[1]
+        goal_z = z + goal_offset[2]
+        goal_positions.append((goal_x, goal_y, goal_z))
 
     n_rob = len(start_positions)
 
@@ -65,7 +57,8 @@ def generate_launch_description():
     if use_mapping_util:
         for i in range(n_rob):
             params_sub = [{'id': i},
-                          {'voxel_grid_range': voxel_grid_range}]
+                          {'voxel_grid_range': voxel_grid_range},
+                          {'free_grid': free_grid}]
             node_mapper = Node(
                 package='mapping_util',
                 executable='map_builder_node',
@@ -89,7 +82,8 @@ def generate_launch_description():
                       {'goal': list(goal_positions[i])},
                       {'use_mapping_util': use_mapping_util},
                       {'voxel_grid_update_period': 10.0},
-                      {'voxel_grid_range': voxel_grid_range}]
+                      {'voxel_grid_range': voxel_grid_range},
+                      {'save_stats': save_stats}]
         # if i == 8:
         #     params_sub = params_sub + [{'planner_verbose': True}]
         node_planner = Node(

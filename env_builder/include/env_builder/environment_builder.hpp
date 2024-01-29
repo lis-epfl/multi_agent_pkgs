@@ -54,8 +54,8 @@ private:
   // generate the sub-voxel grid from the main one using the robot position and
   // its sensing range
   ::env_builder_msgs::msg::VoxelGridStamped
-  GenerateVoxelGridMSG(::std::array<float, 3> &position,
-                       ::std::array<float, 3> &range);
+  GenerateVoxelGridMSG(::std::array<double, 3> &position,
+                       ::std::array<double, 3> &range);
 
   // voxel grid get service
   void GetVoxelGridService(
@@ -70,11 +70,10 @@ private:
   double vox_size_;
   // if true, initialize grid to be free instead of unknown
   double free_grid_;
-  double inflation_dist_;
-  double potential_dist_;
-  double potential_pow_;
   // if true wirte obstacle positions and pointcloud to csv file
   bool save_obstacles_;
+  // voxel grid publishing period
+  double publish_period_;
 
   // obstacles parameters
   bool multi_obst_size_;
