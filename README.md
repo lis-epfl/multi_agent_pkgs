@@ -136,7 +136,9 @@ TODO
 TODO
 
 ## Improvements
-TODO
+These are the potential structural improvements:
+* The `jps3d` should be integrated in the `path_finding_util` package. 
+Other stuff left TODO
 
 ## References
 <a id="1">[1]</a>
