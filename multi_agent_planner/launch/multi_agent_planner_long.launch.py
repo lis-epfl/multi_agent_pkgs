@@ -30,7 +30,6 @@ def generate_launch_description():
     use_mapping_util = True
     free_grid = False
     save_stats = True
-    # use_mapping_util = False
 
     # calculate equidistant start and goal positions on the same line
     start_positions = []

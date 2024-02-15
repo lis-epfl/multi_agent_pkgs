@@ -25,7 +25,7 @@ def generate_launch_description():
     radius = 22  
     center_x = 18 
     center_y = 15
-    n_rob = 6 
+    n_rob = 10 
     voxel_grid_range = [20.0, 20.0, 6.0]
     use_mapping_util = True
     free_grid = True

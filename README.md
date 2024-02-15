@@ -1,6 +1,4 @@
 # Multi-Agent Planning Packages
-**IMPORTANT: this code base is not to be shared with anyone outside the lab.**
-
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
 * `convex_decomp_util`: package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
@@ -40,13 +38,6 @@ colcon build --symlink-install --packages-select env_builder_msgs env_builder ma
 ```
 
 ## Running the simulation
-### Change the config parameters
-You can change the following config files or use them as a basis to create other config files according to your application:
-* `env_default_config.yaml`: default config file for obstacles generation in the environment in `env_builder/config`.
-* `agent_default_config.yaml`: default config file for the planner parameters in `multi_agent_planner/config`.
-
-When you launch `env_builder.launch` it uses `env_default_config.yaml` and when you launch any launch file from the package `multi_agent_planner` it uses `agent_default_config.yaml`. Some parameters are then changed in each launch file according to its purpose.
-
 ### Multiple agents in a circular configuration
 Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
 ``` shell script
@@ -84,7 +75,7 @@ Launch the agents in another window. If you want each agent to run in a differen
 ``` shell script
 cd ~/ros2_ws
 . install/setup.bash
-ros2 launch multi_agent_planner multi_agent_planner_window.launch.py
+ros2 launch multi_agent_planner multi_agent_planner_long.launch.py
 ```
 
 ## Improvements
