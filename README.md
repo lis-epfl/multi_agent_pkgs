@@ -3,7 +3,7 @@ The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 
 |10 agent circular exchange (forest)|10 agents traversing forest / wall / forest |
 | ------------------------- | ------------------------- |
- <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/circular.gif" width="285" height="250" alt="circular exchange"></a> |<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/linear.gif" width="400" height="250" alt="linear navigation"></a> |
+<span style="display: inline-block; width: 20px;"></span> <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/circular.gif" width="285" height="250" alt="circular exchange"></a> <span style="display: inline-block; width: 20px;"></span> |<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/linear.gif" width="400" height="250" alt="linear navigation"></a> |
 
 |10 agents traversing loops | Hardware experiments on nano-drones (Crazyflie)|
 | ------------------------- | ------------------------- |
