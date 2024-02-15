@@ -3,17 +3,16 @@
 
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
-* [convex_decomp_util](#convex_decomp_util): package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
-* [decomp_ros](#decomp_ros): package for Safe Corridor generation and visualization based on [[3]](#3).
-* [env_builder](#env_builder): ROS2 package that allows to build an evironment in the form of voxel grid and publishes it in the form of a pointcloud for visualization in rviz2.
-* [jps3d](#jps3d): a modified version of [jps3d](https://github.com/KumarRobotics/jps3d) that checks for traversibilty when generating a path to make sure we can generate a Safe Corridor around it.
-* [mapping_util](#mapping_util): ROS2 package for voxel grid generation (clearing out voxels that are in the field of view of the drone) - TODO.
-* [path_finding_util](#path_finding_util): package for path finding and path tools such as path shortening.
-* [voxel_grid_util](#voxel_grid_util): package for voxel grid class and raycasting function.
-* [multi_agent_planner](#multi_agent_planner): ROS2 package for multi-agent planning (uses all the other packages).
+* `convex_decomp_util`: package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
+* `decomp_ros`: package for Safe Corridor generation and visualization based on [[3]](#3).
+* `env_builder`: ROS2 package that allows to build an evironment in the form of voxel grid and publishes it in the form of a pointcloud for visualization in rviz2.
+* `jps3d`: a modified version of [jps3d](https://github.com/KumarRobotics/jps3d) that checks for traversibilty when generating a path to make sure we can generate a Safe Corridor around it.
+* `mapping_util`: ROS2 package for voxel grid generation (clearing out voxels that are in the field of view of the drone) - TODO.
+* `path_finding_util`: package for path finding and path tools such as path shortening.
+* `voxel_grid_util`: package for voxel grid class and raycasting function.
+* `multi_agent_planner`: ROS2 package for multi-agent planning (uses all the other packages).
 
 At the end of this documentation you can find:
-* [General Comments](#General-Comments): general comments about using the packages.
 * [Improvements](#Improvements): improvements to the packages that are yet to be implemented.
 * [References](#References): references used throughout this text.
 
@@ -48,26 +47,6 @@ You can change the following config files or use them as a basis to create other
 
 When you launch `env_builder.launch` it uses `env_default_config.yaml` and when you launch any launch file from the package `multi_agent_planner` it uses `agent_default_config.yaml`. Some parameters are then changed in each launch file according to its purpose.
 
-### Single agent
-Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
-``` shell script
-cd ~/ros2_ws
-. install/setup.bash
-rviz2 -d ~/ros2_ws/src/multi_agent_pkgs/multi_agent_planner/rviz/rviz_config_multi.rviz
-```
-Launch the environment in another window:
-``` shell script
-cd ~/ros2_ws
-. install/setup.bash
-ros2 launch env_builder env_builder.launch.py
-```
-Launch the planner in another window:
-``` shell script
-cd ~/ros2_ws
-. install/setup.bash
-ros2 launch multi_agent_planner agent_planner.launch.py
-```
-
 ### Multiple agents in a circular configuration
 Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
 ``` shell script
@@ -88,7 +67,7 @@ cd ~/ros2_ws
 ros2 launch multi_agent_planner multi_agent_planner_circle.launch.py
 ```
 
-### Multiple agents going through a small window
+### Multiple agents going through forest + wall + forest 
 Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
 ``` shell script
 cd ~/ros2_ws
@@ -108,38 +87,9 @@ cd ~/ros2_ws
 ros2 launch multi_agent_planner multi_agent_planner_window.launch.py
 ```
 
-## convex_decomp_util
-TODO
-
-## decomp_ros
-TODO
-
-## env_builder
-TODO
-
-## jps3d
-TODO
-
-## mapping_util
-TODO
-
-## path_finding_util
-TODO
-
-## voxel_grid_util
-TODO
-
-## multi_agent_planner
-TODO
-
-## General Comments
-TODO
-
 ## Improvements
 These are the potential structural improvements:
 * The `jps3d` package should be integrated in the `path_finding_util` package. 
-
-Other stuff left TODO
 
 ## References
 <a id="1">[1]</a>
