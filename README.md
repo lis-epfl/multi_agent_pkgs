@@ -3,7 +3,7 @@ The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown 
 
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 
-|10 agent circular exchange (forest) | 10 agents traversing forest / wall / forest |
+|10 agents circular exchange (forest) | 10 agents traversing forest / wall / forest |
 | ------------------------- | ------------------------- |
 <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/circular.gif" width="313" height="275" alt="circular exchange"></a> |<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/linear.gif" width="440" height="275" alt="linear navigation"></a> |
 
