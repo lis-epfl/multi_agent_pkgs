@@ -1,5 +1,14 @@
 # Multi-Agent Planning Packages
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
+
+|10 agents traversing forest/wall/forest | 10 agent circular exchange (forest)|
+| ------------------------- | ------------------------- |
+<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/linear.gif" width="400" height="221" alt="linear navigation"></a> | <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/circular.gif" width="400" height="221" alt="circular exchange"></a> |
+
+|10 agents traversing loops | Hardware experiments on nano-drones (Crazyflie)|
+| ------------------------- | ------------------------- |
+|<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/loops.gif" width="400" height="221" alt="loops"></a> | <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/hardware.gif" width="400" height="221" style="margin:20px 20px" alt="hardware"></a>|
+
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
 * `convex_decomp_util`: package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
 * `decomp_ros`: package for Safe Corridor generation and visualization based on [[3]](#3).
