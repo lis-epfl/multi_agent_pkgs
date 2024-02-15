@@ -7,7 +7,7 @@ The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 
 |10 agents traversing loops | Hardware experiments on nano-drones (Crazyflie)|
 | ------------------------- | ------------------------- |
-|<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/loops.gif" width="333" height="250" alt="loops"></a> | <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/hardware.gif" width="400" height="250" style="margin:20px 20px" alt="hardware"></a>|
+|<a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/loops.gif" width="285" height="250" alt="loops"></a> | <a target="_blank" href="https://youtu.be/Af8mODuES4s"><img src="./imgs/hardware.gif" width="400" height="250" style="margin:20px 20px" alt="hardware"></a>|
 
 To get started you can skip to [Getting Started](#Getting-Started). This repo contains the following packages:
 * `convex_decomp_util`: package for Safe Corridor generation based on [[1]](#1) and [[2]](#2).
