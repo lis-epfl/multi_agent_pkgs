@@ -1,5 +1,6 @@
 # Multi-Agent Planning Packages
-The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", Charbel Toumieh and Dario Floreano.
+The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", by Charbel Toumieh and Dario Floreano.
+
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 
 |10 agent circular exchange (forest) | 10 agents traversing forest / wall / forest |
