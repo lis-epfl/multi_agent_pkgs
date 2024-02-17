@@ -16,7 +16,7 @@ To get started you can skip to [Getting Started](#Getting-Started). This repo co
 * `decomp_ros`: package for Safe Corridor generation and visualization based on [[3]](#3).
 * `env_builder`: ROS2 package that allows to build an evironment in the form of voxel grid and publishes it in the form of a pointcloud for visualization in rviz2.
 * `jps3d`: a modified version of [jps3d](https://github.com/KumarRobotics/jps3d) that checks for traversibilty when generating a path to make sure we can generate a Safe Corridor around it.
-* `mapping_util`: ROS2 package for voxel grid generation (clearing out voxels that are in the field of view of the drone) - TODO.
+* `mapping_util`: ROS2 package for voxel grid generation (clearing out voxels that are in the field of view of the drone).
 * `path_finding_util`: package for path finding and path tools such as path shortening.
 * `voxel_grid_util`: package for voxel grid class and raycasting function.
 * `multi_agent_planner`: ROS2 package for multi-agent planning (uses all the other packages).
