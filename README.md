@@ -93,6 +93,9 @@ ros2 launch multi_agent_planner multi_agent_planner_long.launch.py
 These are the potential structural improvements:
 * The `jps3d` package should be integrated in the `path_finding_util` package. 
 
+These are the potential parametric improvements:
+* Tuning the parameters for speed modulation to go faster in free environments.
+
 ## References
 <a id="1">[1]</a>
 Toumieh, C. and Lambert, A., 2022. Voxel-grid based convex decomposition of 3d space for safe corridor generation. Journal of Intelligent & Robotic Systems, 105(4), p.87.
