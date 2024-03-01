@@ -24,6 +24,7 @@ To get started you can skip to [Getting Started](#Getting-Started). This repo co
 At the end of this documentation you can find:
 * [Improvements](#Improvements): improvements to the packages that are yet to be implemented.
 * [References](#References): references used throughout this text.
+* [Citation](#Citation): bibtex citation for latex.
 
 
 ## Getting Started
