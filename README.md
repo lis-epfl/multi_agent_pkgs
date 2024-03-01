@@ -1,5 +1,5 @@
 # Multi-Agent Planning Packages
-The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", by Charbel Toumieh and Dario Floreano.
+The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", by Charbel Toumieh and Dario Floreano: ([pdf](https://arxiv.org/abs/2402.19033), [video](https://youtu.be/Af8mODuES4s)).
 
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**.
 
@@ -24,6 +24,7 @@ To get started you can skip to [Getting Started](#Getting-Started). This repo co
 At the end of this documentation you can find:
 * [Improvements](#Improvements): improvements to the packages that are yet to be implemented.
 * [References](#References): references used throughout this text.
+
 
 ## Getting Started
 ### Install gurobi
@@ -105,3 +106,15 @@ Toumieh, C. and Lambert, A., 2022. Shape-aware Safe Corridors Generation using V
 
 <a id="3">[3]</a>
 Liu, S., Watterson, M., Mohta, K., Sun, K., Bhattacharya, S., Taylor, C.J. and Kumar, V., 2017. Planning dynamically feasible trajectories for quadrotors using safe flight corridors in 3-d complex environments. IEEE Robotics and Automation Letters, 2(3), pp.1688-1695.
+
+## Citation
+```bibtex
+@misc{toumieh2024highspeed,
+      title={High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments},
+      author={Charbel Toumieh and Dario Floreano},
+      year={2024},
+      eprint={2402.19033},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
+```
