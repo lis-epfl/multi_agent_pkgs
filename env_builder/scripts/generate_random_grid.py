@@ -51,7 +51,7 @@ def write_config_file(filename, voxel_grid, seed):
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
     config_filename = "env_long_config"
-    seed = 0 
+    seed = 3 
 
     # Voxel Grid parameters
     dimension = [100.0, 30.0, 15.0]  # meters
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     #                                      angle_range=[0, np.pi/2],
     #                                      radius_range=[1.5, 2],
     #                                      thickness_range=[0.3, 0.3])
-    # voxel_grid.add_shape(rd_volume_cylinders)
+    voxel_grid.add_shape(rd_volume_cylinders)
 
     rd_volume_cylinders = RandomVolume([[63, 0, -6], [30, 30, 15]], seed)
     rd_volume_cylinders.add_random_cylinders(180,
@@ -115,9 +115,9 @@ if __name__ == "__main__":
     voxel_grid.add_shape(rd_volume_cylinders)
 
     # Or with loops (can do both in same volume)
-    rd_volume_loops = RandomVolume([[33, 0, 0], [40,10,10]], seed)
-    rd_volume_loops.add_random_loops(5)
-    voxel_grid.add_shape(rd_volume_loops)
+    # rd_volume_loops = RandomVolume([[33, 0, 0], [40,10,10]], seed)
+    # rd_volume_loops.add_random_loops(5)
+    # voxel_grid.add_shape(rd_volume_loops)
 
     ########################### END OF PARAMETRIZING ##################################
     # Write the YAML config file
