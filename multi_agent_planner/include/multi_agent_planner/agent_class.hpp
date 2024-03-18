@@ -19,8 +19,8 @@
 #include "voxel_grid.hpp"
 
 #include <decomp_geometry/polyhedron.h>
-#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <jps_planner/distance_map_planner/distance_map_planner.h>
 #include <jps_planner/jps_planner/jps_planner.h>
 #include <nav_msgs/msg/path.hpp>
@@ -102,6 +102,15 @@ private:
   // build the objective function/constraints and solve the MIQP/MPC and save
   // the result to member variables
   void SolveOptimizationProblem();
+
+  // compute the yaw angle at this iteration using the reference that the drone
+  // should be looking at the last reference point of the reference path for a P
+  // yawing velocity controller.
+  void ComputeYawAngle();
+
+  // compute the attitude in the form of a quaternion from the acceleration
+  // vector and the yawing angle
+  ::Eigen::Quaterniond ComputeAttitude();
 
   // check if the trajectory points are close from the reference points so that
   // we can move along the trajectory
@@ -356,12 +365,20 @@ private:
   double min_acc_xy_;
   // MPC maximum jerk
   double max_jerk_;
+  // mass of the drone
+  double mass_;
   // drag coefficients
   ::std::vector<double> drag_coeff_;
   // print info about the planner (comp time ...)
   bool planner_verbose_;
   // save statistics about computation time and state history
   bool save_stats_;
+
+  /* yaw control variables */
+  // current yaw angle
+  double yaw_;
+  // P velocity control of the yaw angle
+  double k_p_yaw_;
 
   /* path planner params */
   // distance map planner search radius
@@ -413,19 +430,20 @@ private:
   // initial state of drone; for now fixed as a config but it should be taken
   // from external simulator or real drone
   ::std::vector<double> state_ini_;
-  // current considered state for optimization which includes position and
-  // velocity concatenated; for now it will be the second point in the generated
-  // trajectory i.e. the expected point that the agent will be at at the next
-  // iteration because at each iteration, we plan starting from where the agent
-  // is gonna be at at the next iteration; we should also have the option to get
-  // it from an external simulator/real drone, by taking the current value of
-  // the simulator/real drone and projecting it to the next iteration
+  // current considered state for optimization which includes position,
+  // velocity, and acceleration concatenated; for now it will be the second
+  // point in the generated trajectory i.e. the expected point that the agent
+  // will be at at the next iteration because at each iteration, we plan
+  // starting from where the agent is gonna be at at the next iteration; we
+  // should also have the option to get it from an external simulator/real
+  // drone, by taking the current value of the simulator/real drone and
+  // projecting it to the next iteration
   ::std::vector<double> state_curr_;
   // current goal
   ::std::vector<double> goal_curr_;
   // current generated path
   ::std::vector<::std::vector<double>> path_curr_;
-  // current reference trajectory for N discrete points (the first point does
+  // current reference trajectory for N discrete points (the first point
   // is fixed and does not have a reference)
   ::std::vector<::std::vector<double>> traj_ref_curr_;
   // starting point for the sampling of the reference trajectory; it can be

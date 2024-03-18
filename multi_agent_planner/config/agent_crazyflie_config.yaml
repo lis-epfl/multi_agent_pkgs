@@ -45,3 +45,5 @@
     dmp_search_rad: 0.6 # search radius for the dmp
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.2 # path planning period
+    mass: 1.0 # drone mass
+    k_p_yaw: 1.0 # yawing dynamics

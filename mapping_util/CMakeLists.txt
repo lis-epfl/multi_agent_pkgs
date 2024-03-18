@@ -14,6 +14,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(env_builder_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(path_finding_util REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 set(DEPENDENCIES
   rclcpp
@@ -21,6 +22,7 @@ set(DEPENDENCIES
   sensor_msgs
   env_builder_msgs
   tf2_ros
+  visualization_msgs
 )
 
 include_directories(include/mapping_util ${VOXEL_GRID_UTIL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${PATH_FINDING_UTIL_INCLUDE_DIRS})

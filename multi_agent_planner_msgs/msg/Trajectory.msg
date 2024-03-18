@@ -6,3 +6,6 @@ float64 dt
 
 # state vector
 State[] states
+
+# yaw angle (radians)
+float64 yaw

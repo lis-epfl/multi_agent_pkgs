@@ -8,3 +8,8 @@
     inflation_dist: 0.3 # all voxels within that distance to an occupied voxel are set as occupied
     potential_dist: 1.5 # all voxels within that distance to an occupied voxel are set as a potential field
     potential_pow: 4.0 # power of the potential field distance formula for setting the voxel values in the potential field (1-d/potential_dist)^potential_pow_ * h_max
+    fov_x: 1.57 # camera width fov in radians
+    fov_y: 1.0 # camera length fov in radians
+    fov_y_offset: 0.0 # camera tilt up in radians 
+    frustum_length: 2.0 # frustum length for visualiztion in rviz
+    limited_fov: false # if true use limited_fov, if false use 360 degree vision

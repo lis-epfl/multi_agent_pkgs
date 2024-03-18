@@ -1,11 +1,13 @@
 #ifndef MAPPING_UTIL_MAP_BUILDER_CLASS_H_
 #define MAPPING_UTIL_MAP_BUILDER_CLASS_H_
 
+#include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "path_tools.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
+#include "visualization_msgs/msg/marker_array.hpp"
 #include "voxel_grid.hpp"
 #include <env_builder_msgs/msg/voxel_grid_stamped.hpp>
 #include <env_builder_msgs/srv/get_voxel_grid.hpp>
@@ -53,14 +55,21 @@ private:
                  ::voxel_grid_util::VoxelGrid &vg_final,
                  const ::Eigen::Vector3d &start, const ::Eigen::Vector3d &end);
 
+  // set the voxels around the center to free in the first voxel grid at the
+  // startup in order to be able to generate safe corridors
+  void ClearVoxelsCenter();
+
   // callback for when we receive the new agent position
   void TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg);
 
   // display computation time
   void DisplayCompTime(::std::vector<double> &comp_time);
 
-  // function to execute on the shutdown of the node to save computation time
-  // statistics
+  // publish camera frustum
+  void PublishFrustum(const ::geometry_msgs::msg::TransformStamped &tf_stamped);
+
+  // function to execute on the shutdown of the node to save computation
+  // time statistics
   void OnShutdown();
 
   /*-------------- member variables ---------------*/
@@ -83,6 +92,14 @@ private:
   // potential distance and power
   double potential_dist_;
   double potential_pow_;
+  // variables for camera fov angles (in radians)
+  double fov_x_, fov_y_;
+  // offset for fov_y so that it is tilted up
+  double fov_y_offset_;
+  // frustum length/size
+  double frustum_length_;
+  // variable to limit fov
+  bool limited_fov_;
 
   /* publishers/subscribers */
   // environment voxel grid subscriber
@@ -97,9 +114,18 @@ private:
   // voxel grid publisher
   ::rclcpp::Publisher<::env_builder_msgs::msg::VoxelGridStamped>::SharedPtr
       voxel_grid_pub_;
+  // camera frustum publisher
+  ::rclcpp::Publisher<::visualization_msgs::msg::MarkerArray>::SharedPtr
+      frustum_pub_;
 
   // current position of the agent
   ::std::vector<double> pos_curr_;
+
+  // current attitude of the camera of the agent
+  ::Eigen::Matrix3d rot_mat_cam_;
+
+  // variable to indicate that the first transform was recieved
+  bool first_transform_received_;
 
   // current voxel grid
   ::voxel_grid_util::VoxelGrid voxel_grid_curr_;

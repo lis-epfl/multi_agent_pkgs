@@ -12,6 +12,9 @@ Agent::Agent()
   // initialize MPC/MIQP parameters
   InitializePlannerParameters();
 
+  // set initial yaw angle to 0
+  yaw_ = 0;
+
   // set up a callback to execute code on shutdown
   on_shutdown(::std::bind(&Agent::OnShutdown, this));
 
@@ -175,6 +178,9 @@ void Agent::TrajPlanningIteration() {
 
     // solve optimization problem and save the result to member variables
     SolveOptimizationProblem();
+
+    // compute yaw angle to look in the direction of travel
+    ComputeYawAngle();
 
     // if the optimization didnt fail on the first iteration
     if (traj_curr_.size() > 0) {
@@ -647,6 +653,9 @@ void Agent::PublishTrajectoryFull() {
   // set the time stamp
   traj_msg.stamp = now();
 
+  // set the yaw angle
+  traj_msg.yaw = yaw_;
+
   // create the trajectory message
   for (int i = 0; i <= n_hor_; i++) {
     ::multi_agent_planner_msgs::msg::State state;
@@ -788,24 +797,27 @@ void Agent::PublishCurrentPosition() {
   transform.transform.translation.y = state_curr[1];
   transform.transform.translation.z = state_curr[2];
 
+  // compute attitude
+  ::Eigen::Quaterniond quat = ComputeAttitude();
+
   // Set the rotation (orientation) of the transform
-  transform.transform.rotation.x = 0.0;
-  transform.transform.rotation.y = 0.0;
-  transform.transform.rotation.z = 0.0;
-  transform.transform.rotation.w = 1.0; // No rotation (identity quaternion)
+  transform.transform.rotation.x = quat.x();
+  transform.transform.rotation.y = quat.y();
+  transform.transform.rotation.z = quat.z();
+  transform.transform.rotation.w = quat.w(); 
 
   // Publish the transform
   tf_broadcaster_->sendTransform(transform);
 
   // create marker
   ::visualization_msgs::msg::Marker marker_msg;
-  marker_msg.header.frame_id = tf_name;
+  marker_msg.header.frame_id = world_frame_;
   marker_msg.header.stamp = now();
   marker_msg.type = visualization_msgs::msg::Marker::SPHERE;
   marker_msg.action = visualization_msgs::msg::Marker::ADD;
-  marker_msg.pose.position.x = 0;
-  marker_msg.pose.position.y = 0;
-  marker_msg.pose.position.z = 0;
+  marker_msg.pose.position.x = state_curr[0];
+  marker_msg.pose.position.y = state_curr[1];
+  marker_msg.pose.position.z = state_curr[2];
   marker_msg.pose.orientation.w = 1.0;
   marker_msg.scale.x = 2 * drone_radius_;
   marker_msg.scale.y = 2 * drone_radius_;
@@ -1012,6 +1024,52 @@ void Agent::SolveOptimizationProblem() {
 
   // save computation time
   comp_time_opt_.push_back((double)(clock() - t_start) / CLOCKS_PER_SEC * 1e3);
+}
+
+void Agent::ComputeYawAngle() {
+  // first get the direction as the difference between the current position and
+  // the last reference point
+  ::Eigen::Vector3d yaw_vec(traj_ref_curr_.back()[0] - state_curr_[0],
+                            traj_ref_curr_.back()[1] - state_curr_[1],
+                            traj_ref_curr_.back()[2] - state_curr_[2]);
+
+  // continue only if the vector is not close to the 0 vector
+  if (yaw_vec.squaredNorm() > 0.1) {
+    // project on the x-y plane
+    ::Eigen::Vector3d z_vec(0, 0, 1);
+    yaw_vec = yaw_vec - yaw_vec.dot(z_vec) * z_vec;
+
+    // get ref angle
+    double yaw_ref = ::std::atan2(yaw_vec(1), yaw_vec(0));
+
+    // update current angle using a P controller and the yaw velocity
+    double error_ang = yaw_ref - yaw_;
+    if (error_ang > M_PI) {
+      error_ang = error_ang - 2 * M_PI;
+    } else if (error_ang < -M_PI) {
+      error_ang = error_ang + 2 * M_PI;
+    }
+    yaw_ = yaw_ + k_p_yaw_ * error_ang * dt_;
+  }
+}
+
+::Eigen::Quaterniond Agent::ComputeAttitude() {
+  // get the thrust vector from the current acceleration + gravity (we can
+  // include drag forces)
+  ::Eigen::Vector3d acc(state_curr_[6], state_curr_[7], state_curr_[8]);
+  ::Eigen::Vector3d g(0, 0, -9.81);
+  ::Eigen::Vector3d thrust = mass_ * acc - mass_ * g;
+  ::Eigen::Vector3d z_b = thrust.normalized();
+
+  // compute x_b_inter, y_b and x_b from yaw
+  ::Eigen::Vector3d x_b_inter(cos(yaw_), sin(yaw_), 0);
+  ::Eigen::Vector3d y_b = z_b.cross(x_b_inter);
+  ::Eigen::Vector3d x_b = y_b.cross(z_b);
+
+  // compute the rotation matrix and return the quaternion
+  ::Eigen::Matrix3d rotation_matrix;
+  rotation_matrix << x_b, y_b, z_b;
+  return ::Eigen::Quaterniond(rotation_matrix);
 }
 
 ::std::vector<GRBLinExpr>
@@ -1490,9 +1548,9 @@ Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
                                   path[i + 1][1] - path[i + 2][1],
                                   path[i + 1][2] - path[i + 2][2]};
     if (DotProduct(sg_1, sg_2) <= 0) {
-      // if acute angle, check if the line is clear between the points that will
-      // remain after removing the midpoint of the 2 segments; first transform
-      // point to voxel coordinates
+      // if acute angle, check if the line is clear between the points that
+      // will remain after removing the midpoint of the 2 segments; first
+      // transform point to voxel coordinates
       ::Eigen::Vector3d pt_1(path[i][0], path[i][1], path[i][2]);
       ::Eigen::Vector3d pt_2(path[i + 2][0], path[i + 2][1], path[i + 2][2]);
       ::Eigen::Vector3d pt_1_local = vg_util.GetCoordLocal(pt_1);
@@ -2107,6 +2165,8 @@ void Agent::DeclareRosParameters() {
   declare_parameter("max_acc_xy", 30.0);
   declare_parameter("min_acc_xy", -30.0);
   declare_parameter("max_jerk", 60.0);
+  declare_parameter("mass", 1.0);
+  declare_parameter("k_p_yaw", 1.0);
   declare_parameter("drag_coeff", ::std::vector<double>(3, 0.0));
   declare_parameter("state_ini", ::std::vector<double>(6, 0.0));
   declare_parameter("goal", ::std::vector<double>(3, 0.0));
@@ -2163,6 +2223,8 @@ void Agent::InitializeRosParameters() {
   min_acc_xy_ = get_parameter("min_acc_xy").as_double();
   max_jerk_ = get_parameter("max_jerk").as_double();
   drag_coeff_ = get_parameter("drag_coeff").as_double_array();
+  mass_ = get_parameter("mass").as_double();
+  k_p_yaw_ = get_parameter("k_p_yaw").as_double();
   state_ini_ = get_parameter("state_ini").as_double_array();
   goal_curr_ = get_parameter("goal").as_double_array();
   planner_verbose_ = get_parameter("planner_verbose").as_bool();
