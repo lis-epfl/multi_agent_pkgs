@@ -403,18 +403,18 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
                                        last_point[2]);
       // check around last_point_int to see the voxels that are occupied; TODO:
       // need to remove this
-      vg_final.SetVoxelInt(last_point_int, ENV_BUILDER_OCC);
-      /* for (int i = -1; i <= 1; i++) { */
-      /*   for (int j = -1; j <= 1; j++) { */
-      /*     for (int k = -1; k <= 1; k++) { */
-      /*       ::Eigen::Vector3i new_pt = */
-      /*           last_point_int + ::Eigen::Vector3i(i, j, k); */
-      /*       if (vg.IsOccupied(new_pt)) { */
-      /*         vg_final.SetVoxelInt(new_pt, ENV_BUILDER_OCC); */
-      /*       } */
-      /*     } */
-      /*   } */
-      /* } */
+      /* vg_final.SetVoxelInt(last_point_int, ENV_BUILDER_OCC); */
+      for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+          for (int k = -1; k <= 1; k++) {
+            ::Eigen::Vector3i new_pt =
+                last_point_int + ::Eigen::Vector3i(i, j, k);
+            if (vg.IsOccupied(new_pt)) {
+              vg_final.SetVoxelInt(new_pt, ENV_BUILDER_OCC);
+            }
+          }
+        }
+      }
     }
 
     int vec_size = visited_points.size();
