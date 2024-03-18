@@ -158,7 +158,10 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       // if this is the first iteration, set the current voxel grid to the voxel
       // grid we just received but clear the voxels around the agent
       if (voxel_grid_curr_.GetData().size() == 0) {
-        voxel_grid_curr_ = vg;
+        ::Eigen::Vector3d origin = vg.GetOrigin();
+        ::Eigen::Vector3i dim = vg.GetDim();
+        voxel_grid_curr_ =
+            ::voxel_grid_util::VoxelGrid(origin, dim, vg.GetVoxSize(), false);
         // clear voxels around the center
         ClearVoxelsCenter();
       }
@@ -401,20 +404,19 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
       ::Eigen::Vector3d last_point = (end - start) * 1e-7 + collision_pt;
       ::Eigen::Vector3i last_point_int(last_point[0], last_point[1],
                                        last_point[2]);
-      // check around last_point_int to see the voxels that are occupied; TODO:
-      // need to remove this
-      /* vg_final.SetVoxelInt(last_point_int, ENV_BUILDER_OCC); */
-      for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-          for (int k = -1; k <= 1; k++) {
-            ::Eigen::Vector3i new_pt =
-                last_point_int + ::Eigen::Vector3i(i, j, k);
-            if (vg.IsOccupied(new_pt)) {
-              vg_final.SetVoxelInt(new_pt, ENV_BUILDER_OCC);
-            }
-          }
-        }
-      }
+      // check around last_point_int to see the voxels that are occupied;
+      vg_final.SetVoxelInt(last_point_int, ENV_BUILDER_OCC);
+      /* for (int i = -1; i <= 1; i++) { */
+      /*   for (int j = -1; j <= 1; j++) { */
+      /*     for (int k = -1; k <= 1; k++) { */
+      /*       ::Eigen::Vector3i new_pt = */
+      /*           last_point_int + ::Eigen::Vector3i(i, j, k); */
+      /*       if (vg.IsOccupied(new_pt)) { */
+      /*         vg_final.SetVoxelInt(new_pt, ENV_BUILDER_OCC); */
+      /*       } */
+      /*     } */
+      /*   } */
+      /* } */
     }
 
     int vec_size = visited_points.size();
@@ -487,7 +489,8 @@ void MapBuilder::TfCallback(const ::tf2_msgs::msg::TFMessage::SharedPtr msg) {
   }
 }
 
-void MapBuilder::PublishFrustum(const ::geometry_msgs::msg::TransformStamped &tf_stamped) {
+void MapBuilder::PublishFrustum(
+    const ::geometry_msgs::msg::TransformStamped &tf_stamped) {
   // build marker array from lines of the frustum
   ::visualization_msgs::msg::MarkerArray marker_array;
 

@@ -26,10 +26,10 @@ def generate_launch_description():
     x_pos = 0
     z_pos = 0 
     dist_start_goal = 96.01 
-    voxel_grid_range = [20.0, 20.0, 6.0]
+    voxel_grid_range = [20.0, 20.0, 12.0]
     use_mapping_util = True
     free_grid = False
-    save_stats = True
+    save_stats = False
 
     # calculate equidistant start and goal positions on the same line
     start_positions = []
