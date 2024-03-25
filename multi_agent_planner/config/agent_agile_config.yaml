@@ -33,11 +33,11 @@
     r_x: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # state variables error weight (except for the last state)
     r_n: [100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0] # last state variable error weight
     max_vel: 15.0 # maximum variable set in the optimization
-    max_acc_z: 40.0 # maximum acceleration in the z direction
-    min_acc_z: -40.0 # minimum acceleration in the z direction
-    max_acc_xy: 40.0 # maximum acceleration in the x and y directions
-    min_acc_xy: -40.0 # minimum acceleration in the x and y directions
-    max_jerk: 80.0 # maximum jerk
+    max_acc_z: 30.0 # maximum acceleration in the z direction
+    min_acc_z: -30.0 # minimum acceleration in the z direction
+    max_acc_xy: 30.0 # maximum acceleration in the x and y directions
+    min_acc_xy: -30.0 # minimum acceleration in the x and y directions
+    max_jerk: 40.0 # maximum jerk
     drag_coeff: [0.0, 0.0, 0.0] # drag coefficients
     state_ini: [0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # initial state of the agent
     goal: [42.15, 42.15, 1.5] # goal of the agent
