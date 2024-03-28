@@ -47,6 +47,6 @@
     path_infl_dist: 0.3 # distance to inflate the obstacles with when doing path finding
     dmp_search_rad: 1.5 # search radius for the dmp
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
-    path_planning_period: 0.15 # path planning period
+    path_planning_period: 0.12 # path planning period
     mass: 1.0 # drone mass
     k_p_yaw: 1.0 # yawing dynamics

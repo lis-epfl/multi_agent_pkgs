@@ -183,7 +183,7 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       // grid
       t_start_wall = ::std::chrono::high_resolution_clock::now();
 
-      voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg);
+      voxel_grid_curr_ = vg; // MergeVoxelGrids(voxel_grid_curr_, vg);
 
       t_end_wall = ::std::chrono::high_resolution_clock::now();
       double merging_time_wall_ms =
@@ -250,10 +250,13 @@ MapBuilder::MergeVoxelGrids(const ::voxel_grid_util::VoxelGrid &vg_old,
   double voxel_size = vg_final.GetVoxSize();
   ::Eigen::Vector3i dim = vg_final.GetDim();
   ::Eigen::Vector3d offset_double = (vg_final.GetOrigin() - vg_old.GetOrigin());
+  ::std::cout << "vg_final origin:" << vg_final.GetOrigin().transpose() << ::std::endl;
+  ::std::cout << "vg_old origin:" << vg_old.GetOrigin().transpose() << ::std::endl;
   ::Eigen::Vector3i offset_int;
   offset_int[0] = round(offset_double[0] / voxel_size);
   offset_int[1] = round(offset_double[1] / voxel_size);
   offset_int[2] = round(offset_double[2] / voxel_size);
+  ::std::cout << "offset_int: " << offset_int.transpose() << ::std::endl;
   for (int i = 0; i < dim[0]; i++) {
     for (int j = 0; j < dim[1]; j++) {
       for (int k = 0; k < dim[2]; k++) {
