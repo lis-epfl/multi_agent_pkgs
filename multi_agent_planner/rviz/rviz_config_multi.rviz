@@ -123,7 +123,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /agent_1/voxel_grid_occ
+        Value: /agent_0/voxel_grid_occ
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -139,7 +139,7 @@ Visualization Manager:
       Color: 154; 153; 150
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -157,10 +157,10 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /agent_1/voxel_grid_unk
+        Value: /agent_0/voxel_grid_unk
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -295,7 +295,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Topic:
         Depth: 5
         Durability Policy: Volatile

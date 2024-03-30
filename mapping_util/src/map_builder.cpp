@@ -183,7 +183,7 @@ void MapBuilder::EnvironmentVoxelGridCallback(
       // grid
       t_start_wall = ::std::chrono::high_resolution_clock::now();
 
-      voxel_grid_curr_ = vg; // MergeVoxelGrids(voxel_grid_curr_, vg);
+      voxel_grid_curr_ = MergeVoxelGrids(voxel_grid_curr_, vg);
 
       t_end_wall = ::std::chrono::high_resolution_clock::now();
       double merging_time_wall_ms =
@@ -202,7 +202,7 @@ void MapBuilder::EnvironmentVoxelGridCallback(
     }
 
     // voxel grid to publish
-    auto voxel_grid = voxel_grid_curr_;
+    ::voxel_grid_util::VoxelGrid voxel_grid = voxel_grid_curr_;
 
     // inflate the unknown voxels by the inflation distance to guarantee safety
     // when computing the safe corridor;
@@ -250,8 +250,10 @@ MapBuilder::MergeVoxelGrids(const ::voxel_grid_util::VoxelGrid &vg_old,
   double voxel_size = vg_final.GetVoxSize();
   ::Eigen::Vector3i dim = vg_final.GetDim();
   ::Eigen::Vector3d offset_double = (vg_final.GetOrigin() - vg_old.GetOrigin());
-  /* ::std::cout << "vg_final origin:" << vg_final.GetOrigin().transpose() << ::std::endl; */
-  /* ::std::cout << "vg_old origin:" << vg_old.GetOrigin().transpose() << ::std::endl; */
+  /* ::std::cout << "vg_final origin:" << vg_final.GetOrigin().transpose() */
+              /* << ::std::endl; */
+  /* ::std::cout << "vg_old origin:" << vg_old.GetOrigin().transpose() */
+              /* << ::std::endl; */
   ::Eigen::Vector3i offset_int;
   offset_int[0] = round(offset_double[0] / voxel_size);
   offset_int[1] = round(offset_double[1] / voxel_size);
@@ -264,7 +266,7 @@ MapBuilder::MergeVoxelGrids(const ::voxel_grid_util::VoxelGrid &vg_old,
         // unknown; in that cast we replace them with the values seen in the old
         // voxel grid
         ::Eigen::Vector3i coord(i, j, k);
-        if (vg_final.GetVoxelInt(coord) == -1) {
+        if (vg_final.IsUnknown(coord)) {
           ::Eigen::Vector3i coord_final = coord + offset_int;
           int8_t vox_value = vg_old.GetVoxelInt(coord_final);
           vg_final.SetVoxelInt(coord, vox_value);
@@ -398,7 +400,6 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
     double max_dist_raycast = (start - end).norm();
     bool line_clear = ::path_finding_util::IsLineClear(
         start, end, vg, max_dist_raycast, collision_pt, visited_points);
-    visited_points.push_back(end);
     // if line is not clear than the last point is a collision point and we
     // don't need to clear it in the voxel grid
     if (line_clear) {
@@ -407,7 +408,7 @@ void MapBuilder::ClearLine(::voxel_grid_util::VoxelGrid &vg,
       ::Eigen::Vector3d last_point = (end - start) * 1e-7 + collision_pt;
       ::Eigen::Vector3i last_point_int(last_point[0], last_point[1],
                                        last_point[2]);
-      // check around last_point_int to see the voxels that are occupied; 
+      // check around last_point_int to see the voxels that are occupied;
       vg_final.SetVoxelInt(last_point_int, ENV_BUILDER_OCC);
       /* for (int i = -1; i <= 1; i++) { */
       /*   for (int j = -1; j <= 1; j++) { */
