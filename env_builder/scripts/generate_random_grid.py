@@ -51,7 +51,7 @@ def write_config_file(filename, voxel_grid, seed):
 if __name__ == "__main__":
     ##################### PARAMETERS FOR YOUR RANDOM ENVIRONMENT HERE ##################
     config_filename = "env_long_config"
-    seed = 0 
+    seed = 9 
 
     # Voxel Grid parameters
     dimension = [100.0, 30.0, 15.0]  # meters
