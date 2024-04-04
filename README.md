@@ -66,7 +66,7 @@ cd ~/ros2_ws
 . install/setup.bash
 ros2 launch env_builder env_builder.launch.py
 ```
-Launch the agents in another window. If you want each agent to run in a different termnial, uncomment the `prefix=['xterm -fa default -fs 10 -hold -e']` line in the launch file:
+Launch the agents in another window. If you want each agent to run in a different terminal, uncomment the `prefix=['xterm -fa default -fs 10 -hold -e']` line in the launch file:
 ``` shell script
 cd ~/ros2_ws
 . install/setup.bash
@@ -86,7 +86,7 @@ cd ~/ros2_ws
 . install/setup.bash
 ros2 launch env_builder env_builder.launch.py
 ```
-Launch the agents in another window. If you want each agent to run in a different termnial, uncomment the `prefix=['xterm -fa default -fs 10 -hold -e']` line in the launch file:
+Launch the agents in another window. If you want each agent to run in a different terminal, uncomment the `prefix=['xterm -fa default -fs 10 -hold -e']` line in the launch file:
 ``` shell script
 cd ~/ros2_ws
 . install/setup.bash
