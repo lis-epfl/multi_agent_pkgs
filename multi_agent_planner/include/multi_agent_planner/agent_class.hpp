@@ -450,7 +450,7 @@ private:
   // updated using the path progress concept
   ::std::vector<double> starting_point_;
   // current generated trajectory (concatenation of the following: position,
-  // velocity, acceleration
+  // velocity, acceleration)
   ::std::vector<::std::vector<double>> traj_curr_;
   // current generated control/command (jerk)
   ::std::vector<::std::vector<double>> control_curr_;

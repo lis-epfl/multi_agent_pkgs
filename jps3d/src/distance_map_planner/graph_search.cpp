@@ -314,7 +314,7 @@ inline bool GraphSearch::isTraversable(int x, int y, int z, int dx, int dy,
         y_2 = y + dy;
         z_2 = z;
       }
-      if (isFree(x_1, y_1, z_1) || isFree(x_2, y_2, z_2)) {
+      if (isFree(x_1, y_1, z_1) && isFree(x_2, y_2, z_2)) {
         return true;
       } else {
         return false;
@@ -339,10 +339,6 @@ inline bool GraphSearch::isTraversable(int x, int y, int z, int dx, int dy,
       y_3 = y + dy;
       z_3 = z;
 
-      if (isFree(x_2, y_2, z_2) &&
-          (isFree(x_1, y_1, z_1) || isFree(x_3, y_3, z_3)))
-        return true;
-
       x_4 = x;
       y_4 = y;
       z_4 = z + dz;
@@ -355,15 +351,13 @@ inline bool GraphSearch::isTraversable(int x, int y, int z, int dx, int dy,
       y_6 = y;
       z_6 = z + dz;
 
-      if (isFree(x_4, y_4, z_4) &&
-          (isFree(x_5, y_5, z_5) || isFree(x_6, y_6, z_6)))
+      if (isFree(x_1, y_1, z_1) && isFree(x_2, y_2, z_2) &&
+          isFree(x_3, y_3, z_3) && isFree(x_4, y_4, z_4) &&
+          isFree(x_5, y_5, z_5) && isFree(x_6, y_6, z_6)) {
         return true;
-
-      if ((isFree(x_1, y_1, z_1) && isFree(x_6, y_6, z_6)) ||
-          (isFree(x_3, y_3, z_3) && isFree(x_5, y_5, z_5)))
-        return true;
-
-      return false;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }

@@ -490,7 +490,7 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // TODO: make the voxel grid so it can also be used here without the need to
   // free unknown voxels and rebuild the potential field free unknown voxels
   /* vg_util.FreeUnknown(); */
-  vg_util.SetUnknown(20);
+  vg_util.SetUnknown(99);
 
   // define start and goal
   Vec3f start(start_arg[0], start_arg[1], start_arg[2]);
@@ -805,7 +805,7 @@ void Agent::PublishCurrentPosition() {
   transform.transform.rotation.x = quat.x();
   transform.transform.rotation.y = quat.y();
   transform.transform.rotation.z = quat.z();
-  transform.transform.rotation.w = quat.w(); 
+  transform.transform.rotation.w = quat.w();
 
   // Publish the transform
   tf_broadcaster_->sendTransform(transform);
@@ -1254,9 +1254,31 @@ void Agent::GenerateSafeCorridor() {
   // define vector for visualization of the polyhedra
   vec_E<Polyhedron3D> poly_vec_new;
 
-  // keep the polyhedra that were used in the previous optimization for the
-  // trajectory generation for feasibility guarantees
+  // if the trajectory fits inside the last polyhedron, keep that
+  // polyhedron; this is to avoid some bugs where the optimizer uses all
+  // polyhedra when its not necessary and no additional polyhedra are generated
+  // because the polyhedra horizon has been reached
   if (poly_const_vec_.size() > 0) {
+    bool poly_used = true;
+    for (int j = 0; j < traj_curr_.size(); j++) {
+      Vec3f pt(traj_curr_[j][0], traj_curr_[j][1], traj_curr_[j][2]);
+      if (!poly_const_vec_.back().inside(pt)) {
+        poly_used = false;
+        break;
+      }
+    }
+    if (poly_used == true) {
+      poly_vec_new.push_back(poly_vec_.back());
+      poly_const_vec_new.push_back(poly_const_vec_.back());
+      poly_seeds_new.push_back(poly_seeds_.back());
+    }
+  }
+
+  // keep the polyhedra that were used in the previous optimization for the
+  // trajectory generation for feasibility guarantees if this was not the first
+  // optimization or the trajectory is not fully contained in the last
+  // polyhedron
+  if (poly_const_vec_.size() > 0 && poly_vec_new.size() == 0) {
     // insert poly and seed
     for (int i = 0; i < int(poly_used_idx_.size()); i++) {
       if (poly_used_idx_[i]) {
@@ -1333,10 +1355,13 @@ void Agent::GenerateSafeCorridor() {
       continue;
     }
 
+    // set curr_pt to the previous point
+    ::Eigen::Vector3d seed_pt = curr_pt - ::std::min(samp_dist, dist_next) * diff / dist_next;
+
     // check if current point is not a previous seed
-    Vec3i seed(int((curr_pt[0] - origin[0]) / voxel_size),
-               int((curr_pt[1] - origin[1]) / voxel_size),
-               int((curr_pt[2] - origin[2]) / voxel_size));
+    Vec3i seed(int((seed_pt[0] - origin[0]) / voxel_size),
+               int((seed_pt[1] - origin[1]) / voxel_size),
+               int((seed_pt[2] - origin[2]) / voxel_size));
 
     bool is_previous_seed = false;
     for (int i = 0; i < int(poly_seeds_new.size()); i++) {
