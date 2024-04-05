@@ -123,7 +123,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /agent_4/voxel_grid_occ
+        Value: /agent_5/voxel_grid_occ
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -157,7 +157,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /agent_4/voxel_grid_unk
+        Value: /agent_5/voxel_grid_unk
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
@@ -1096,7 +1096,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 25; 255; 0
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -1119,7 +1119,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_5/path
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
@@ -1152,7 +1152,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 192; 97; 203
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -1175,7 +1175,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_5/traj_ref
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
       Name: Marker
@@ -1226,7 +1226,7 @@ Visualization Manager:
     - Alpha: 0.20000000298023224
       BoundColor: 255; 0; 0
       Class: decomp_rviz_plugins/PolyhedronArray
-      Enabled: false
+      Enabled: true
       MeshColor: 0; 170; 255
       Name: PolyhedronArray
       Scale: 0.10000000149011612
@@ -1238,7 +1238,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_5/polyhedra
-      Value: false
+      Value: true
       VsColor: 0; 255; 0
       VsScale: 1
     - Alpha: 1
@@ -2377,25 +2377,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 47.6351432800293
+      Distance: 29.347944259643555
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 11.272679328918457
-        Y: 16.07231330871582
-        Z: -2.4331042766571045
+        X: 21.69406509399414
+        Y: 16.852432250976562
+        Z: -2.395770311355591
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.5647963285446167
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 4.76960563659668
+      Yaw: 4.7196044921875
     Saved: ~
 Window Geometry:
   Displays:

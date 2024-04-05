@@ -490,7 +490,7 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
   // TODO: make the voxel grid so it can also be used here without the need to
   // free unknown voxels and rebuild the potential field free unknown voxels
   /* vg_util.FreeUnknown(); */
-  vg_util.SetUnknown(0);
+  vg_util.SetUnknown(99);
 
   // define start and goal
   Vec3f start(start_arg[0], start_arg[1], start_arg[2]);
