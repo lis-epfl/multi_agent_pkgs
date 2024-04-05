@@ -1356,7 +1356,10 @@ void Agent::GenerateSafeCorridor() {
     }
 
     // set curr_pt to the previous point
-    ::Eigen::Vector3d seed_pt = curr_pt - ::std::min(samp_dist, dist_next) * diff / dist_next;
+    ::Eigen::Vector3d seed_pt = curr_pt;
+    if (dist_next > 0) {
+      seed_pt = curr_pt - ::std::min(samp_dist, dist_next) * diff / dist_next;
+    }
 
     // check if current point is not a previous seed
     Vec3i seed(int((seed_pt[0] - origin[0]) / voxel_size),
