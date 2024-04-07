@@ -1307,8 +1307,8 @@ void Agent::GenerateSafeCorridor() {
   int n_poly = poly_const_vec_new.size();
   // generate new poly
   // start by sampling the path until we reach a point that is outside the
-  // polyhedra that already exist and that is different that the seeds of
-  // these polyhedra
+  // polyhedra. Then take the sampled point at the previous iteration if it is
+  // different than the seeds of the previously generated polyhedra
   int path_idx = 1;
   ::Eigen::Vector3d curr_pt(path_curr[0][0], path_curr[0][1], path_curr[0][2]);
   // set the unknown voxels to occupied before generating the Safe Corridor
@@ -1355,7 +1355,7 @@ void Agent::GenerateSafeCorridor() {
       continue;
     }
 
-    // set curr_pt to the previous point
+    // set seed_pt to the previous point
     ::Eigen::Vector3d seed_pt = curr_pt;
     if (dist_next > 0) {
       seed_pt = curr_pt - ::std::min(samp_dist, dist_next) * diff / dist_next;
