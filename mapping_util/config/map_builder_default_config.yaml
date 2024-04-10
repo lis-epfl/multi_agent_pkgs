@@ -12,4 +12,4 @@
     fov_y: 1.57 # camera length fov in radians
     fov_y_offset: 0.0 # camera tilt up in radians 
     frustum_length: 2.0 # frustum length for visualiztion in rviz
-    limited_fov: false # if true use limited_fov, if false use 360 degree vision
+    limited_fov: true # if true use limited_fov, if false use 360 degree vision

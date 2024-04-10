@@ -1030,9 +1030,9 @@ void Agent::SolveOptimizationProblem() {
 void Agent::ComputeYawAngle() {
   // first get the direction as the difference between the current position and
   // the last reference point
-  ::Eigen::Vector3d yaw_vec(traj_ref_curr_.back()[0] - state_curr_[0],
-                            traj_ref_curr_.back()[1] - state_curr_[1],
-                            traj_ref_curr_.back()[2] - state_curr_[2]);
+  ::Eigen::Vector3d yaw_vec(traj_ref_curr_[yaw_idx_][0] - state_curr_[0],
+                            traj_ref_curr_[yaw_idx_][1] - state_curr_[1],
+                            traj_ref_curr_[yaw_idx_][2] - state_curr_[2]);
 
   // continue only if the vector is not close to the 0 vector
   if (yaw_vec.squaredNorm() > 0.1) {
@@ -1307,8 +1307,8 @@ void Agent::GenerateSafeCorridor() {
   int n_poly = poly_const_vec_new.size();
   // generate new poly
   // start by sampling the path until we reach a point that is outside the
-  // polyhedra. Then take the sampled point at the previous iteration if it is
-  // different than the seeds of the previously generated polyhedra
+  // polyhedra that already exist and that is different that the seeds of
+  // these polyhedra
   int path_idx = 1;
   ::Eigen::Vector3d curr_pt(path_curr[0][0], path_curr[0][1], path_curr[0][2]);
   // set the unknown voxels to occupied before generating the Safe Corridor
@@ -1355,7 +1355,7 @@ void Agent::GenerateSafeCorridor() {
       continue;
     }
 
-    // set seed_pt to the previous point
+    // set curr_pt to the previous point
     ::Eigen::Vector3d seed_pt = curr_pt;
     if (dist_next > 0) {
       seed_pt = curr_pt - ::std::min(samp_dist, dist_next) * diff / dist_next;
@@ -2195,6 +2195,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("min_acc_xy", -30.0);
   declare_parameter("max_jerk", 60.0);
   declare_parameter("mass", 1.0);
+  declare_parameter("yaw_idx", 3);
   declare_parameter("k_p_yaw", 1.0);
   declare_parameter("drag_coeff", ::std::vector<double>(3, 0.0));
   declare_parameter("state_ini", ::std::vector<double>(6, 0.0));
@@ -2253,6 +2254,7 @@ void Agent::InitializeRosParameters() {
   max_jerk_ = get_parameter("max_jerk").as_double();
   drag_coeff_ = get_parameter("drag_coeff").as_double_array();
   mass_ = get_parameter("mass").as_double();
+  yaw_idx_ = get_parameter("yaw_idx").as_int();
   k_p_yaw_ = get_parameter("k_p_yaw").as_double();
   state_ini_ = get_parameter("state_ini").as_double_array();
   goal_curr_ = get_parameter("goal").as_double_array();

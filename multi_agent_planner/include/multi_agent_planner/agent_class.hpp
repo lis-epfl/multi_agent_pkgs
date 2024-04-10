@@ -377,6 +377,9 @@ private:
   /* yaw control variables */
   // current yaw angle
   double yaw_;
+  // index of the point of the reference trajectory that we want to look at with
+  // the yaw
+  int yaw_idx_;
   // P velocity control of the yaw angle
   double k_p_yaw_;
 

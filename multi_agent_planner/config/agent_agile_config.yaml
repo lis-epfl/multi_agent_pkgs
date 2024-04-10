@@ -49,4 +49,5 @@
     dmp_n_it: 1 # number of iterations for the iterative dmp planner
     path_planning_period: 0.12 # path planning period
     mass: 1.0 # drone mass
+    yaw_idx: 3 # index of the reference point that we want to look at with yaw 
     k_p_yaw: 1.0 # yawing dynamics
