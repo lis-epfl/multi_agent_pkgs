@@ -96,7 +96,7 @@ if __name__ == "__main__":
     rd_volume_cylinders.add_random_cylinders(90,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.1, 0.1],
+                                             radius_range=[0.05, 0.05],
                                              height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
     # rd_volume_cylinders = RandomVolume([[3, 0, -6], [90, 30, 15]], seed)
     # rd_volume_cylinders.add_random_loops(75,
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     rd_volume_cylinders.add_random_cylinders(180,
                                              direction_range=[
                                                  [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
-                                             radius_range=[0.1, 0.1],
+                                             radius_range=[0.05, 0.05],
                                              height_range=[20.0, 20.0])  # Choose to add 10 cylinders with parameters as default
 
     voxel_grid.add_shape(rd_volume_cylinders)
