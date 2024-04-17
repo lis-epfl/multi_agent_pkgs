@@ -53,6 +53,7 @@ colcon build --symlink-install --packages-select env_builder_msgs env_builder ma
 ```
 
 ## Running the simulation
+To switch between a known and unknown envrionment, you can set the variable `free_grid` to `true` and `false` respectively.
 ### Multiple agents in a circular configuration
 Launch rviz2 in a terminal (if you didn't build `decomp_ros_util` due to OGRE conflicts, the polyhedra will not appear).
 ``` shell script
