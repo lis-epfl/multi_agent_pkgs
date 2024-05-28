@@ -1092,9 +1092,6 @@ void Agent::GenerateTimeAwareSafeCorridor() {
   // start clock
   clock_t t_start = clock();
 
-  /* for now assume there is no delay and do naive adding of hyperplanes
-   * using other trajectories but this should be modified to account for
-   * communication delay and packet/trajectory loss (a new paper) */
   // first clear and resize the previous time aware safe corridor
   poly_const_final_vec_.clear();
   poly_const_final_vec_.resize(n_hor_);
