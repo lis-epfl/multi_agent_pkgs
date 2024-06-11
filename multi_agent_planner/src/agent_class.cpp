@@ -1252,7 +1252,7 @@ void Agent::GenerateSafeCorridor() {
   vec_E<Polyhedron3D> poly_vec_new;
 
   // if the trajectory fits inside the last polyhedron, keep that
-  // polyhedron; this is to avoid some bugs where the optimizer uses all
+  // polyhedron; this is to avoid some edge cases where the optimizer uses all
   // polyhedra when its not necessary and no additional polyhedra are generated
   // because the polyhedra horizon has been reached
   if (poly_const_vec_.size() > 0) {
