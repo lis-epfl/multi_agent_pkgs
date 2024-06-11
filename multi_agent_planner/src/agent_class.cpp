@@ -1242,7 +1242,7 @@ void Agent::GenerateSafeCorridor() {
   // start clock
   clock_t t_start = clock();
 
-  // define new polyhedra for visualization
+  // define new polyhedra seeds for visualization
   ::std::vector<::std::vector<double>> poly_seeds_new;
 
   // define new contraints
