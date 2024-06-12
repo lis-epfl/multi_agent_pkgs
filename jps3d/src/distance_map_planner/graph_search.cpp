@@ -27,15 +27,23 @@ GraphSearch::GraphSearch(const int8_t *cMap, int xDim, int yDim, int zDim,
   seen_.resize(xDim_ * yDim_ * zDim_, false);
 
   // Set 3D neighbors
-  for (int x = -1; x <= 1; x++) {
-    for (int y = -1; y <= 1; y++) {
-      for (int z = -1; z <= 1; z++) {
-        if (x == 0 && y == 0 && z == 0)
-          continue;
-        ns_.push_back(std::vector<int>{x, y, z});
-      }
-    }
-  }
+  /* for (int x = -1; x <= 1; x++) { */
+  /*   for (int y = -1; y <= 1; y++) { */
+  /*     for (int z = -1; z <= 1; z++) { */
+  /*       if (x == 0 && y == 0 && z == 0) */
+  /*         continue; */
+  /*       ns_.push_back(std::vector<int>{x, y, z}); */
+  /*     } */
+  /*   } */
+  /* } */
+
+  // Set 3D neighbors
+  ns_.push_back(std::vector<int>{1, 0, 0});
+  ns_.push_back(std::vector<int>{-1, 0, 0});
+  ns_.push_back(std::vector<int>{0, 1, 0});
+  ns_.push_back(std::vector<int>{0, -1, 0});
+  ns_.push_back(std::vector<int>{0, 0, 1});
+  ns_.push_back(std::vector<int>{0, 0, -1});
 }
 
 inline int GraphSearch::coordToId(int x, int y) const { return x + y * xDim_; }

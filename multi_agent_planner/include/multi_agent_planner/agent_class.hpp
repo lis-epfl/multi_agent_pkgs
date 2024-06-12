@@ -479,6 +479,10 @@ private:
   // to size poly_hor_ and if ith idx is true, it means we are using the ith
   // poly
   ::std::vector<bool> poly_used_idx_;
+  // if true remove corners when doing the RemoveZigZagSegments function:  When
+  // close to the obstacles, we will cut corners and allow digonal motion which
+  // is not ideal for Safe Corridor generation in edge cases
+  bool remove_corners_;
 
   /* mutex variables for memory management */
   // mutex for voxel grid

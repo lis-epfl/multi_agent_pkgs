@@ -456,10 +456,10 @@ bool DMPlanner<Dim>::plan(const Vecf<Dim> &start, const Vecf<Dim> &goal,
 
   // Simplify the raw path
   path_ = removeLinePts(raw_path_);
-  path_ = removeCornerPts(path_);
-  std::reverse(std::begin(path_), std::end(path_));
-  path_ = removeCornerPts(path_);
-  std::reverse(std::begin(path_), std::end(path_));
+  /* path_ = removeCornerPts(path_); */
+  /* std::reverse(std::begin(path_), std::end(path_)); */
+  /* path_ = removeCornerPts(path_); */
+  /* std::reverse(std::begin(path_), std::end(path_)); */
 
   return true;
 }

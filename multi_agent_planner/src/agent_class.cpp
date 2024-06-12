@@ -539,6 +539,7 @@ bool Agent::GetPath(::std::vector<double> &start_arg,
 
   // save dmp planner output
   auto path_dmp = dmp.getRawPath();
+
   ::std::vector<::std::vector<double>> path_dmp_final;
   // add the start_arg because jps and dmp plan from the centers of the voxels
   // and not from the actual starting point; path shortening takes care of the
@@ -1573,7 +1574,8 @@ Agent::RemoveZigZagSegments(::std::vector<::std::vector<double>> path) {
     ::std::vector<double> sg_2 = {path[i + 1][0] - path[i + 2][0],
                                   path[i + 1][1] - path[i + 2][1],
                                   path[i + 1][2] - path[i + 2][2]};
-    if (DotProduct(sg_1, sg_2) <= 0) {
+    if (DotProduct(sg_1, sg_2) < 0 ||
+        (remove_corners_ && DotProduct(sg_1, sg_2) == 0)) {
       // if acute angle, check if the line is clear between the points that
       // will remain after removing the midpoint of the 2 segments; first
       // transform point to voxel coordinates
@@ -2202,6 +2204,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("dmp_search_rad", 0.0);
   declare_parameter("dmp_n_it", 1);
   declare_parameter("path_planning_period", 0.1);
+  declare_parameter("remove_corners", false);
 }
 
 void Agent::InitializeRosParameters() {
@@ -2260,6 +2263,7 @@ void Agent::InitializeRosParameters() {
   dmp_search_rad_ = get_parameter("dmp_search_rad").as_double();
   dmp_n_it_ = get_parameter("dmp_n_it").as_int();
   path_planning_period_ = get_parameter("path_planning_period").as_double();
+  remove_corners_ = get_parameter("remove_corners").as_bool();
 }
 
 void Agent::VoxelGridResponseCallback(

@@ -51,3 +51,4 @@
     mass: 1.0 # drone mass
     yaw_idx: 3 # index of the reference point that we want to look at with yaw 
     k_p_yaw: 1.0 # yawing dynamics
+    remove_corners: false # if true, allow diagonal motion close to obstacles
