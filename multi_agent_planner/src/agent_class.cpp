@@ -1765,24 +1765,20 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
       break; //
     }
   }
-  // for i < n_hor_
+
   //  go through each other robot and calculate the min_vel
-  for (int i = 0; i < traj_curr_.size(); i++) { // traj_curr_.size()
-    // ::std::cout << " i :" << i <<::std::endl;
+  for (int i = 0; i < traj_curr_.size(); i++) { 
     ::Eigen::Vector3d start(traj_curr_[i][0], traj_curr_[i][1],
                             traj_curr_[i][2]);
     ::Eigen::Vector3d start_vel(traj_curr_[i][3], traj_curr_[i][4],
                                 traj_curr_[i][5]);
-    // ::std::cout << "start :" << start <<::std::endl;
     for (int j = 0; j < n_rob_; j++) {
       if (j == id_)
         continue;
       // get the last trajectory of the agent
-      // ::std::cout << " j :" << j <<::std::endl;
       traj_other_mtx_[j].lock();
       ::multi_agent_planner_msgs::msg::Trajectory traj = traj_other_agents_[j];
       traj_other_mtx_[j].unlock();
-      // ::std::cout<<"traj.states.size()"<<traj.states.size()<<::std::endl;
       if (traj.states.size() != 0) {
         Vec3f pos_other(traj.states[i].position[0], traj.states[i].position[1],
                         traj.states[i].position[2]);
