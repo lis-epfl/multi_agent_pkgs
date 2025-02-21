@@ -117,12 +117,11 @@ Liu, S., Watterson, M., Mohta, K., Sun, K., Bhattacharya, S., Taylor, C.J. and K
 
 ## Citation
 ```bibtex
-@misc{toumieh2024highspeed,
-      title={High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments},
-      author={Charbel Toumieh and Dario Floreano},
-      year={2024},
-      eprint={2402.19033},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO}
+@article{toumieh2024high,
+  title={High-speed motion planning for aerial swarms in unknown and cluttered environments},
+  author={Toumieh, Charbel and Floreano, Dario},
+  journal={IEEE Transactions on Robotics},
+  year={2024},
+  publisher={IEEE}
 }
 ```
