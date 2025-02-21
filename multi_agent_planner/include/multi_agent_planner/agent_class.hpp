@@ -312,6 +312,8 @@ private:
   double sens_dist_;
   // potential sensitivity when computing the path_vel in GetVoxelVelocityLimit
   double sens_pot_;
+  // weight of multiple horizons
+  double sens_other_agents_;
   // sampling path velocity deceleration
   double path_vel_dec_;
   // number of reference trajectory points to keep at the next iteration

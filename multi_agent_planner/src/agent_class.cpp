@@ -39,12 +39,6 @@ Agent::Agent()
   // time before using it
   // TODO: later
 
-  // create a subscriber to a topic to receive goals:
-  // not necessary for now since we are using one goal (taken from ros
-  // parameters); we can also generate random goals locally to test reciprocal
-  // obstacle avoidance extensively
-  // TODO: later
-
   // create prefix for publishers topic name
   ::std::string topic_name = topic_name_ + "_" + ::std::to_string(id_);
 
@@ -1743,13 +1737,16 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
         // use the heuristic to compute the path velocity limit
         double path_vel_tmp = GetVelocityLimit(voxel_val, dist_start);
 
-        /* ::std::cout << "voxel_val: " << voxel_val << ::std::endl; */
-        /* ::std::cout << "dist_start: " << dist_start << ::std::endl; */
+        // ::std::cout << "voxel_val: " << voxel_val << ::std::endl;
+        // ::std::cout << "dist_start(no obstacles): " << dist_start <<
+        // ::std::endl;
         /* ::std::cout << "path_vel_tmp: " << path_vel_tmp << ::std::endl; */
 
         // update the path_vel
         if (path_vel_tmp < path_vel) {
           path_vel = path_vel_tmp;
+          // ::std::cout << "path_vel_tmp: no obstacles" << path_vel_tmp <<
+          // ::std::endl;
         }
       }
     } else {
@@ -1757,22 +1754,68 @@ double Agent::ComputePathVelocity(::std::vector<::std::vector<double>> &path) {
       int8_t voxel_val = vg_util.GetVoxelInt(collision_pt);
       double dist_start = (start - collision_pt).norm();
       double path_vel_tmp = GetVelocityLimit(voxel_val, dist_start);
+      // ::std::cout << "dist_start(obstacles): " << dist_start << ::std::endl;
       if (path_vel_tmp < path_vel) {
         path_vel = path_vel_tmp;
+        // ::std::cout << "path_vel_tmp: obstacles" << path_vel_tmp <<
+        // ::std::endl;
       }
 
       // stop the loop after the collision
-      break;
+      break; //
     }
   }
-
+  // for i < n_hor_
+  //  go through each other robot and calculate the min_vel
+  for (int i = 0; i < traj_curr_.size(); i++) { // traj_curr_.size()
+    // ::std::cout << " i :" << i <<::std::endl;
+    ::Eigen::Vector3d start(traj_curr_[i][0], traj_curr_[i][1],
+                            traj_curr_[i][2]);
+    ::Eigen::Vector3d start_vel(traj_curr_[i][3], traj_curr_[i][4],
+                                traj_curr_[i][5]);
+    // ::std::cout << "start :" << start <<::std::endl;
+    for (int j = 0; j < n_rob_; j++) {
+      if (j == id_)
+        continue;
+      // get the last trajectory of the agent
+      // ::std::cout << " j :" << j <<::std::endl;
+      traj_other_mtx_[j].lock();
+      ::multi_agent_planner_msgs::msg::Trajectory traj = traj_other_agents_[j];
+      traj_other_mtx_[j].unlock();
+      // ::std::cout<<"traj.states.size()"<<traj.states.size()<<::std::endl;
+      if (traj.states.size() != 0) {
+        Vec3f pos_other(traj.states[i].position[0], traj.states[i].position[1],
+                        traj.states[i].position[2]);
+        double dist_between = (start - pos_other).norm();
+        Vec3f vel_other(traj.states[i].velocity[0], traj.states[i].velocity[1],
+                        traj.states[i].velocity[2]);
+        double relative_direction =
+            (start - pos_other).dot(start_vel - vel_other);
+        double thres_passby = 0;
+        double voxel_val_between =
+            100 *
+            pow(sens_other_agents_, i); // regard other robots as obstacles
+        // the further the horizon, the fewer the voxel val
+        double path_vel_tmp = GetVelocityLimit(voxel_val_between, dist_between);
+        if (path_vel_tmp < path_vel) {
+          path_vel = path_vel_tmp;
+        }
+      }
+    }
+  }
   return path_vel;
 }
 
 double Agent::GetVelocityLimit(double occ_val, double dist_start) {
   // compute linear factor
-  double alpha = 1 - (1 - 1 / exp(sens_pot_ * occ_val)) *
-                         (1 / exp(sens_dist_ * dist_start));
+  if (occ_val < 0)
+    occ_val = 0;
+  if (occ_val > 100)
+    occ_val = 100;
+  // double alpha = 1 - (1 - 1 / exp(sens_pot_ * occ_val)) *
+  //                        (1 / exp(sens_dist_ * dist_start));
+  double alpha =
+      (1 - pow(occ_val / 100, sens_pot_) * (1 / exp(sens_dist_ * dist_start)));
   double path_vel = path_vel_min_ + (path_vel_max_ - path_vel_min_) * alpha;
   return path_vel;
 }
@@ -2171,6 +2214,7 @@ void Agent::DeclareRosParameters() {
   declare_parameter("path_vel_max", 4.5);
   declare_parameter("sens_dist", 1.0);
   declare_parameter("sens_pot", 1.0);
+  declare_parameter("sens_other_agents", 1.0);
   declare_parameter("path_vel_dec", 0.1);
   declare_parameter("traj_ref_points_to_keep", 10);
   declare_parameter("rk4", false);
@@ -2230,6 +2274,7 @@ void Agent::InitializeRosParameters() {
   path_vel_max_ = get_parameter("path_vel_max").as_double();
   sens_dist_ = get_parameter("sens_dist").as_double();
   sens_pot_ = get_parameter("sens_pot").as_double();
+  sens_other_agents_ = get_parameter("sens_other_agents").as_double();
   path_vel_dec_ = get_parameter("path_vel_dec").as_double();
   traj_ref_points_to_keep_ = get_parameter("traj_ref_points_to_keep").as_int();
   rk4_ = get_parameter("rk4").as_bool();
