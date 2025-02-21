@@ -1,5 +1,5 @@
 # Multi-Agent Planning Packages
-The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", by Charbel Toumieh and Dario Floreano: ([pdf](https://arxiv.org/abs/2402.19033), [video](https://youtu.be/Af8mODuES4s)).
+The code for the paper "High-Speed Motion Planning for Aerial Swarms in Unknown and Cluttered Environments", by Charbel Toumieh and Dario Floreano, published in [IEEE Transactions on Robotics](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10599811) - ([pdf](https://arxiv.org/abs/2402.19033), [video](https://youtu.be/Af8mODuES4s)).
 
 The packages have been tested on **Ubuntu 22.04**, **ROS2 Humble**. The simulations have been run on **Intel i9-13900K** CPU and **NVidia RTX 4090** GPU.
 
