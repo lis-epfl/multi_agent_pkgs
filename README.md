@@ -41,6 +41,10 @@ sudo cp libgurobi_c++.a ../../lib/
 ```
 
 ### Create and build workspace
+First install `setup_tools`:
+``` shell script
+pip install setuptools==65.5.1
+```
 Create a ROS2 workspace and clone the repo inside the `src` folder of the workspace (or simply clone it inside an existing workspace), then build it: 
 ``` shell script
 mkdir -p ~/ros2_ws/src

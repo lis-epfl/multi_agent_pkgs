@@ -90,6 +90,9 @@ private:
   // plan trajectory by solving MPC/MIQP; run as a separate thread
   void TrajPlanningIteration();
 
+  // check if we recieved the others trajectories on time
+  void CheckOthersTrajectories();
+
   // generate reference trajectory for the MPC/MIQP
   void GenerateReferenceTrajectory();
 
@@ -111,6 +114,10 @@ private:
   // compute the attitude in the form of a quaternion from the acceleration
   // vector and the yawing angle
   ::Eigen::Quaterniond ComputeAttitude();
+
+  // if the computation time exceeds the planning period keep the trajectory
+  // generated at the previous iteration
+  void UpdateCurrentTrajectory();
 
   // check if the trajectory points are close from the reference points so that
   // we can move along the trajectory
@@ -347,8 +354,6 @@ private:
   // for better polyhedron generation in tight corridors in case there is no
   // adaptation for the grid resolution in tight spaces
   double path_infl_dist_;
-  // communication latency in seconds (added artificially)
-  double com_latency_;
   // MPC control weight
   double r_u_;
   // MPC trajectory error weight (except last point)
@@ -375,6 +380,15 @@ private:
   bool planner_verbose_;
   // save statistics about computation time and state history
   bool save_stats_;
+  // percentage of times an agent doesn't send its trajectory to simulating
+  // communication loss
+  double packet_loss_percentage_;
+  // communication delay added to the planning time to simulation communication
+  // delay in seconds
+  double communication_delay_;
+  // create distribution to sample for packet loss
+  ::std::unique_ptr<std::mt19937> gen_;
+  ::std::uniform_real_distribution<> dis_;
 
   /* yaw control variables */
   // current yaw angle
@@ -457,10 +471,15 @@ private:
   // current generated trajectory (concatenation of the following: position,
   // velocity, acceleration)
   ::std::vector<::std::vector<double>> traj_curr_;
+  // trajectory generated at the previous iteration; used if the computation of
+  // current generated trajectory exceeds the planning period
+  ::std::vector<::std::vector<double>> traj_prev_;
   // current generated control/command (jerk)
   ::std::vector<::std::vector<double>> control_curr_;
   // received trajectories of other drones
   ::std::vector<::multi_agent_planner_msgs::msg::Trajectory> traj_other_agents_;
+  // received trajectories of other drones in a queue
+  ::std::vector<::multi_agent_planner_msgs::msg::Trajectory> traj_other_agents_queue_;
   // seeds used for the generation of the polyhedra
   ::std::vector<::std::vector<double>> poly_seeds_;
   // polyhedra for visualization without other agents
@@ -485,6 +504,9 @@ private:
   // close to the obstacles, we will cut corners and allow digonal motion which
   // is not ideal for Safe Corridor generation in edge cases
   bool remove_corners_;
+  // if true, skip planning this iteration and use the trajectory from the last
+  // iteration but starting from the second point and duplicate the last point
+  bool skip_planning_;
 
   /* mutex variables for memory management */
   // mutex for voxel grid
@@ -519,6 +541,8 @@ private:
   ::std::vector<::std::vector<double>> state_hist_;
   // state history stamp variable (the wall time of each state of state_hist_)
   ::std::vector<double> state_hist_stamp_;
+  // history of the planning start time
+  ::std::vector<double> planning_start_time_hist_;
 
   // communication latency history for the full trajectory communication in
   // milliseconds
